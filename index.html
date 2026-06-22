@@ -1271,7 +1271,7 @@
       meta: ['🏋️ ~55 min', '🎯 RPE 7-8', '🥋 BJJ 20h'],
       sections: [
         { title: 'Principal', dot: 'red', items: [
-          { n: 'Supino reto Smith', icon: '💪', color: 'red', scheme: '4 séries × 5-7 reps (pesado)', log: true },
+          { n: 'Supino reto Smith', icon: '💪', color: 'red', scheme: '4 séries × 5-7 reps (pesado)', log: true, smith: true },
           { n: 'Desenv. Shoulder', icon: '💪', color: 'red', scheme: '4 séries × 6-8 reps', log: true },
           { n: 'Supino inclinado halter', icon: '💪', color: 'red', scheme: '3 séries × 8-10 reps', log: true },
           { n: 'Crossover alto', icon: '💪', color: 'red', scheme: '3 séries × 12-15 reps', log: true },
@@ -1294,11 +1294,11 @@
       sections: [
         { title: 'Principal', dot: 'green', items: [
           { n: 'Deadlift Barra Hex', icon: '🏋️', color: 'green', scheme: '5 séries × 3-5 reps (pesado)', log: true },
-          { n: 'Agacho Smith', icon: '🏋️', color: 'green', scheme: '4 séries × 6-8 reps', log: true },
+          { n: 'Agacho Smith', icon: '🏋️', color: 'green', scheme: '4 séries × 6-8 reps', log: true, smith: true },
           { n: 'Leg press', icon: '🏋️', color: 'green', scheme: '3 séries × 8-10 reps', log: true },
           { n: 'Cadeira flexora', icon: '🏋️', color: 'green', scheme: '3 séries × 10-12 reps', log: true },
           { n: 'Búlgaro halter', icon: '🏋️', color: 'green', scheme: '3 séries × 8 reps cada perna', log: true },
-          { n: 'Panturrilha Smith', icon: '🏋️', color: 'green', scheme: '4 séries × 10-12 reps', log: true }
+          { n: 'Panturrilha Smith', icon: '🏋️', color: 'green', scheme: '4 séries × 10-12 reps', log: true, smith: true }
         ]},
         { title: 'Abdômen', dot: 'teal', items: [
           { n: 'Prancha frontal', icon: '🧘', color: 'teal', scheme: '3 séries × 45-60 segundos', log: true }
@@ -1340,7 +1340,7 @@
       meta: ['🏋️ ~65 min', '🎯 RPE 8', '😴 Sem BJJ'],
       sections: [
         { title: 'Principal', dot: 'red', items: [
-          { n: 'Supino inclinado Smith', icon: '💪', color: 'red', scheme: '4 séries × 8-12 reps', log: true },
+          { n: 'Supino inclinado Smith', icon: '💪', color: 'red', scheme: '4 séries × 8-12 reps', log: true, smith: true },
           { n: 'Máquina Supino', icon: '💪', color: 'red', scheme: '3 séries × 10-12 reps', log: true },
           { n: 'Desenv. halter sentado', icon: '💪', color: 'red', scheme: '4 séries × 10-12 reps', log: true },
           { n: 'Elev. lateral KB', icon: '💪', color: 'red', scheme: '4 séries × 12-15 reps cada', log: true },
@@ -1434,10 +1434,14 @@
       .replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
   }
 
-  // índice id -> nome (exercícios registráveis)
+  // índice id -> nome (exercícios registráveis) + set dos que usam Smith
   const EX_NAMES = {};
+  const EX_SMITH = {};
   Object.values(DAYS).forEach(d => d.sections.forEach(s => s.items.forEach(it => {
-    if (it.log) EX_NAMES[slug(it.n)] = it.n;
+    if (it.log) {
+      EX_NAMES[slug(it.n)] = it.n;
+      if (it.smith) EX_SMITH[slug(it.n)] = true;
+    }
   })));
 
   // ====== HELPERS DE DATA ======
@@ -1556,6 +1560,9 @@
     } else {
       addSetRow('', '', '');
     }
+
+    // calculadora Smith só pra exercícios da Smith Machine
+    document.getElementById('calc-wrap').style.display = EX_SMITH[id] ? 'block' : 'none';
 
     document.getElementById('log-note').value = '';
     document.getElementById('calc-side').value = '';
