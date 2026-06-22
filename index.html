@@ -1220,7 +1220,7 @@
   <div class="sheet-block-label">Séries</div>
   <div class="set-row">
     <div class="set-n"></div>
-    <div class="set-head">Carga</div>
+    <div class="set-head" id="set-head-w">Carga</div>
     <div class="set-head">Reps</div>
     <div class="set-head">RPE</div>
     <div></div>
@@ -1313,7 +1313,7 @@
           { n: 'Panturrilha Smith', icon: '🏋️', color: 'green', scheme: '4 séries × 10-12 reps', log: true, smith: true }
         ]},
         { title: 'Abdômen', dot: 'teal', items: [
-          { n: 'Prancha frontal', icon: '🧘', color: 'teal', scheme: '3 séries × 45-60 segundos', log: true }
+          { n: 'Prancha frontal', icon: '🧘', color: 'teal', scheme: '3 séries × 45-60 segundos', log: true, unit: 'seg' }
         ]},
         { title: 'Cardio', dot: 'pink', items: [
           { n: 'Bike leve', icon: '🚴', color: 'pink', scheme: '5-10 min (desfadiga pernas)', log: false }
@@ -1336,7 +1336,7 @@
           { n: 'Rosca alternada halter', icon: '💪', color: 'blue', scheme: '3 séries × 10-12 reps', log: true }
         ]},
         { title: 'Pegada', dot: 'orange', items: [
-          { n: 'Dead Hang', icon: '🤚', color: 'orange', scheme: '3 séries até falhar (meta 30s)', log: true }
+          { n: 'Dead Hang', icon: '🤚', color: 'orange', scheme: '3 séries até falhar (meta 30s)', log: true, unit: 'seg' }
         ]},
         { title: 'Cardio', dot: 'pink', items: [
           { n: 'Esteira Zona 2', icon: '🏃', color: 'pink', scheme: '15 min · FC 108-126 bpm', log: false }
@@ -1449,10 +1449,12 @@
   // índice id -> nome (exercícios registráveis) + set dos que usam Smith
   const EX_NAMES = {};
   const EX_SMITH = {};
+  const EX_UNIT = {};
   Object.values(DAYS).forEach(d => d.sections.forEach(s => s.items.forEach(it => {
     if (it.log) {
       EX_NAMES[slug(it.n)] = it.n;
       if (it.smith) EX_SMITH[slug(it.n)] = true;
+      EX_UNIT[slug(it.n)] = it.unit || 'kg';
     }
   })));
 
@@ -1522,7 +1524,7 @@
           const ls = lastSession(id);
           if (ls) {
             const ts = topSet(ls);
-            last = '<div class="last-line">último: ' + fmtSet(ts) + ' · ' + agoText(ls.date) + '</div>';
+            last = '<div class="last-line">último: ' + fmtSet(ts, EX_UNIT[id]) + ' · ' + agoText(ls.date) + '</div>';
             if (ls.date === todayISO()) badge = '<div class="done-badge">✓</div>';
           }
         }
@@ -1545,8 +1547,9 @@
     });
   }
 
-  function fmtSet(s) {
-    const w = (s.w || s.w === 0) ? s.w + 'kg' : '';
+  function fmtSet(s, unit) {
+    const suffix = unit === 'seg' ? 's' : 'kg';
+    const w = (s.w || s.w === 0) ? s.w + suffix : '';
     const r = s.r ? ' × ' + s.r : '';
     const rpe = s.rpe ? ' @' + s.rpe : '';
     return (w + r + rpe).trim() || '—';
@@ -1554,14 +1557,17 @@
 
   // ====== SHEET DE LOG ======
   let sheetId = null;
+  let currentUnit = 'kg';
 
   function openLog(id, name) {
     sheetId = id;
+    currentUnit = EX_UNIT[id] || 'kg';
     document.getElementById('sheet-title').textContent = name;
+    document.getElementById('set-head-w').textContent = currentUnit === 'seg' ? 'Seg' : 'Carga';
 
     const ls = lastSession(id);
     document.getElementById('sheet-sub').textContent = ls
-      ? 'Último (' + agoText(ls.date) + '): ' + ls.sets.map(fmtSet).join('  ·  ')
+      ? 'Último (' + agoText(ls.date) + '): ' + ls.sets.map(s => fmtSet(s, currentUnit)).join('  ·  ')
       : 'Primeira vez registrando este exercício.';
 
     // pré-popula com séries do último treino (carga sugerida), reps/rpe limpos
@@ -1598,7 +1604,7 @@
     div.className = 'set-row';
     div.innerHTML =
       '<div class="set-n">' + idx + '</div>' +
-      '<input class="fld set-w" inputmode="decimal" placeholder="kg" value="' + (w !== '' && w != null ? w : '') + '">' +
+      '<input class="fld set-w" inputmode="decimal" placeholder="' + (currentUnit === 'seg' ? 'seg' : 'kg') + '" value="' + (w !== '' && w != null ? w : '') + '">' +
       '<input class="fld set-r" inputmode="numeric" placeholder="reps" value="' + (r !== '' && r != null ? r : '') + '">' +
       '<input class="fld set-rpe" inputmode="decimal" placeholder="rpe" value="' + (rpe !== '' && rpe != null ? rpe : '') + '">' +
       '<button class="set-del" type="button">×</button>';
@@ -1695,6 +1701,8 @@
     let h = '';
     logged.forEach(it => {
       const id = slug(it.n);
+      const unit = EX_UNIT[id];
+      const sfx = unit === 'seg' ? 's' : 'kg';
       const arr = LOGS[id];
       let pr = 0, prReps = 0;
       arr.forEach(s => s.sets.forEach(set => { if (set.w > pr) { pr = set.w; prReps = set.r; } }));
@@ -1704,7 +1712,7 @@
       h += '<div class="chart-card">' +
         '<div class="prog-head">' +
           '<div class="prog-name">' + it.n + (isPR && arr.length > 1 ? '<span class="pr-flag">PR</span>' : '') + '</div>' +
-          '<div class="prog-meta">PR ' + pr + 'kg' + (prReps ? '×' + prReps : '') + ' · último ' + fmtSet(lastTop) + ' · ' + agoText(last.date) + '</div>' +
+          '<div class="prog-meta">PR ' + pr + sfx + (prReps ? '×' + prReps : '') + ' · último ' + fmtSet(lastTop, unit) + ' · ' + agoText(last.date) + '</div>' +
         '</div>' +
         '<canvas class="prog-canvas" data-id="' + id + '"></canvas>' +
       '</div>';
@@ -1714,11 +1722,12 @@
 
     body.querySelectorAll('.prog-canvas').forEach(cv => {
       const arr = LOGS[cv.dataset.id];
-      drawChart(cv, arr.map(s => ({ date: s.date, v: topSet(s).w })));
+      drawChart(cv, arr.map(s => ({ date: s.date, v: topSet(s).w })), EX_UNIT[cv.dataset.id]);
     });
   }
 
-  function drawChart(cv, pts) {
+  function drawChart(cv, pts, unit) {
+    const sfx = unit === 'seg' ? 's' : 'kg';
     const dpr = window.devicePixelRatio || 1;
     const cssW = cv.clientWidth, cssH = cv.clientHeight;
     cv.width = cssW * dpr; cv.height = cssH * dpr;
@@ -1741,8 +1750,8 @@
     // grid min/max labels
     ctx.fillStyle = 'rgba(235,235,245,0.35)';
     ctx.font = '11px -apple-system, sans-serif';
-    ctx.fillText(max + 'kg', 4, y(max) + 4);
-    ctx.fillText(min + 'kg', 4, y(min) + 4);
+    ctx.fillText(max + sfx, 4, y(max) + 4);
+    ctx.fillText(min + sfx, 4, y(min) + 4);
 
     // linha
     ctx.strokeStyle = '#0A84FF';
