@@ -44,13 +44,13 @@
     color: var(--label);
     font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", sans-serif;
     -webkit-font-smoothing: antialiased;
-    overscroll-behavior: none;
-    height: 100%;
+    min-height: 100%;
+    -webkit-overflow-scrolling: touch;
   }
   
   body {
     padding-top: var(--safe-top);
-    padding-bottom: calc(80px + var(--safe-bottom));
+    padding-bottom: calc(120px + var(--safe-bottom));
   }
   
   /* Header */
@@ -378,6 +378,11 @@
   }
   .view.active {
     display: block;
+  }
+  .view .container::after {
+    content: '';
+    display: block;
+    height: 60px;
   }
   
   /* Exercise specific styles */
