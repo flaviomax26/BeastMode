@@ -1690,8 +1690,11 @@
   }
 
   // ====== BACKUP ======
+  function backupPayload(pretty) {
+    return JSON.stringify({ v: 1, logs: LOGS, done: DONE }, null, pretty ? 2 : 0);
+  }
   function exportData() {
-    const data = JSON.stringify(LOGS, null, 2);
+    const data = backupPayload(true);
     try {
       if (!window.URL || !URL.createObjectURL) throw new Error('no blob');
       const blob = new Blob([data], { type: 'application/json' });
@@ -1710,7 +1713,7 @@
   }
 
   function copyData() {
-    const data = JSON.stringify(LOGS);
+    const data = backupPayload(false);
     if (navigator.clipboard && navigator.clipboard.writeText) {
       navigator.clipboard.writeText(data).then(
         () => alert('Copiado. Cola num bloco de notas pra guardar.'),
@@ -1737,15 +1740,29 @@
     return added;
   }
 
+  // une datas concluídas (sem duplicar)
+  function mergeDone(arr) {
+    let added = 0;
+    (arr || []).forEach(d => { if (d && DONE.indexOf(d) < 0) { DONE.push(d); added++; } });
+    DONE.sort();
+    return added;
+  }
+
   function importData(file) {
     const reader = new FileReader();
     reader.onload = e => {
       try {
         const obj = JSON.parse(e.target.result);
         if (typeof obj !== 'object' || Array.isArray(obj)) throw new Error('formato');
-        const added = mergeLogs(obj);
+        // novo formato { logs, done } vs legado (LOGS cru)
+        const isNew = obj.logs && typeof obj.logs === 'object';
+        const logsPart = isNew ? obj.logs : obj;
+        const donePart = isNew ? obj.done : null;
+        const added = mergeLogs(logsPart);
+        const addedDone = mergeDone(donePart);
         saveLogs(LOGS);
-        alert(added + ' sessão(ões) nova(s) importada(s).');
+        saveDone();
+        alert(added + ' sessão(ões) e ' + addedDone + ' dia(s) concluído(s) importado(s).');
         if (activeGroup) renderProgressGroup(activeGroup);
         renderDay(activeDay);
       } catch (err) {
