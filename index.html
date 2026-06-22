@@ -670,6 +670,31 @@
   }
   .btn-primary { background: var(--blue); color: #fff; }
   .btn-ghost { background: var(--bg-tertiary); color: var(--label); }
+  .btn-done { background: rgba(48,209,88,0.2); color: var(--green); }
+
+  /* animação troca de dia */
+  .day-anim { animation: dayIn 0.18s ease; }
+  @keyframes dayIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* heatmap consistência */
+  .hm { margin: 4px 0 8px; }
+  .hm-row { display: grid; grid-template-columns: 28px repeat(7, 1fr); gap: 5px; margin-bottom: 5px; align-items: center; }
+  .hm-label { font-size: 11px; color: var(--label-secondary); font-weight: 600; }
+  .hm-dow { font-size: 10px; color: var(--label-tertiary); text-align: center; }
+  .hm-cell {
+    aspect-ratio: 1 / 1;
+    border-radius: 5px;
+    background: var(--bg-tertiary);
+    cursor: pointer;
+  }
+  .hm-cell.done { background: var(--green); }
+  .hm-cell.miss { background: rgba(255,69,58,0.35); }
+  .hm-cell.rest { background: rgba(235,235,245,0.08); }
+  .hm-cell.future { background: rgba(235,235,245,0.05); }
+  .hm-cell.today { background: var(--bg-tertiary); box-shadow: inset 0 0 0 2px var(--blue); }
+  .hm-legend { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--label-secondary); flex-wrap: wrap; }
+  .hm-legend .hm-cell { width: 12px; height: 12px; aspect-ratio: auto; cursor: default; margin-left: 8px; }
+  .hm-legend .hm-cell:first-child { margin-left: 0; }
   .btn-add {
     background: var(--bg-tertiary);
     color: var(--blue);
@@ -1138,6 +1163,12 @@
 <!-- VIEW: PROGRESSO -->
 <div class="view" id="view-progress">
   <div class="container">
+
+    <div class="section">
+      <div class="section-header"><p class="section-title">Consistência</p></div>
+      <div id="consistency"></div>
+    </div>
+
     <div class="section">
       <div class="section-header">
         <p class="section-title">Evolução por Treino</p>
@@ -1633,6 +1664,31 @@
   }
   let LOGS = loadLogs();
 
+  // datas marcadas "concluído" manualmente (treino sem registro de carga)
+  const DONE_KEY = 'beastmode.done.v1';
+  function loadDone() {
+    try { return JSON.parse(localStorage.getItem(DONE_KEY)) || []; }
+    catch (e) { return []; }
+  }
+  let DONE = loadDone();
+  function saveDone() { localStorage.setItem(DONE_KEY, JSON.stringify(DONE)); }
+
+  // conjunto de datas em que treinou = logou algum exercício OU marcou manual
+  function trainedSet() {
+    const set = {};
+    Object.values(LOGS).forEach(arr => (arr || []).forEach(s => { if (s.date) set[s.date] = true; }));
+    DONE.forEach(d => { set[d] = true; });
+    return set;
+  }
+  function isTrained(iso, set) { return !!(set || trainedSet())[iso]; }
+  function toggleDoneToday() {
+    const t = todayISO();
+    const i = DONE.indexOf(t);
+    if (i >= 0) DONE.splice(i, 1); else DONE.push(t);
+    saveDone();
+    renderDay(activeDay);
+  }
+
   // ====== BACKUP ======
   function exportData() {
     const data = JSON.stringify(LOGS, null, 2);
@@ -1775,6 +1831,13 @@
     h += '<div class="day-hero-meta">' + meta.map(m => '<div class="day-hero-meta-item">' + m + '</div>').join('') + '</div>';
     h += '</div>';
 
+    // botão de concluir treino — só no dia de hoje
+    if (key === getDayKey()) {
+      const doneToday = isTrained(todayISO());
+      h += '<button class="btn ' + (doneToday ? 'btn-done' : 'btn-ghost') + '" id="done-btn">' +
+        (doneToday ? '✓ Treino concluído hoje' : 'Marcar treino concluído') + '</button>';
+    }
+
     if (d.info) h += '<div class="info-box ' + d.info.cls + '">' + d.info.html + '</div>';
 
     // Seções
@@ -1807,10 +1870,14 @@
     });
 
     root.innerHTML = h;
+    // animação de troca de dia
+    root.classList.remove('day-anim'); void root.offsetWidth; root.classList.add('day-anim');
     // listeners de log
     root.querySelectorAll('[data-ex]').forEach(row => {
       row.addEventListener('click', () => openLog(row.dataset.ex, row.dataset.name));
     });
+    const doneBtn = document.getElementById('done-btn');
+    if (doneBtn) doneBtn.addEventListener('click', toggleDoneToday);
   }
 
   function fmtSet(s, unit) {
@@ -2172,6 +2239,79 @@
   function openProgress() {
     if (!activeGroup) selectGroup(defaultProgressGroup());
     else renderProgressGroup(activeGroup);
+    renderConsistency();
+  }
+
+  // ====== CONSISTÊNCIA (heatmap + streak) ======
+  const DOW = ['S', 'T', 'Q', 'Q', 'S', 'S', 'D']; // Seg..Dom
+  function isoForWeekDay(wkIdx, dayIdx) {
+    const d = new Date(PROGRAM_START.getTime() + (wkIdx * 7 + dayIdx) * 864e5);
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  }
+  function logsOnDate(iso) {
+    const out = [];
+    Object.keys(LOGS).forEach(id => (LOGS[id] || []).forEach(s => {
+      if (s.date === iso) out.push((EX_NAMES[id] || id) + ': ' + s.sets.map(x => fmtSet(x, EX_UNIT[id])).join(', '));
+    }));
+    return out;
+  }
+  function computeStreak(set) {
+    let n = 0;
+    let d = new Date(todayISO() + 'T00:00:00');
+    const iso = x => x.getFullYear() + '-' + String(x.getMonth() + 1).padStart(2, '0') + '-' + String(x.getDate()).padStart(2, '0');
+    if (!set[iso(d)]) d.setDate(d.getDate() - 1); // hoje ainda pendente não zera streak
+    let guard = 0;
+    while (guard++ < 400) {
+      if (d.getDay() === 0) { d.setDate(d.getDate() - 1); continue; } // domingo: pula (descanso)
+      if (set[iso(d)]) { n++; d.setDate(d.getDate() - 1); } else break;
+    }
+    return n;
+  }
+
+  function renderConsistency() {
+    const box = document.getElementById('consistency');
+    const set = trainedSet();
+    const today = todayISO();
+    const streak = computeStreak(set);
+
+    // treinos da semana atual (Seg..Sáb = 6 agendados)
+    const wk = currentWeekIdx();
+    let weekDone = 0;
+    for (let dia = 0; dia < 6; dia++) if (set[isoForWeekDay(wk, dia)]) weekDone++;
+    const total = Object.keys(set).length;
+
+    let h = '<div class="stats-grid">' +
+      '<div class="stat-box"><div class="stat-label">Sequência</div><div class="stat-value">' + streak + '</div><div class="stat-detail">dias seguidos</div></div>' +
+      '<div class="stat-box"><div class="stat-label">Esta semana</div><div class="stat-value">' + weekDone + '/6</div><div class="stat-detail">treinos</div></div>' +
+      '<div class="stat-box"><div class="stat-label">Total</div><div class="stat-value">' + total + '</div><div class="stat-detail">dias treinados</div></div>' +
+      '<div class="stat-box"><div class="stat-label">Semana ciclo</div><div class="stat-value">' + (wk + 1) + '/8</div><div class="stat-detail">' + WEEKS[wk].phase.split(' ')[0] + '</div></div>' +
+    '</div>';
+
+    // heatmap: 8 semanas do programa, 7 dias (Seg..Dom)
+    h += '<div class="hm">';
+    h += '<div class="hm-row hm-head"><div class="hm-label"></div>' + DOW.map(d => '<div class="hm-dow">' + d + '</div>').join('') + '</div>';
+    for (let w = 0; w < 8; w++) {
+      h += '<div class="hm-row"><div class="hm-label">S' + (w + 1) + '</div>';
+      for (let dia = 0; dia < 7; dia++) {
+        const iso = isoForWeekDay(w, dia);
+        let cls = 'future';
+        if (dia === 6) cls = set[iso] ? 'done' : 'rest';            // domingo
+        else if (set[iso]) cls = 'done';
+        else if (iso < today) cls = 'miss';                          // passado e não treinou
+        else if (iso === today) cls = 'today';
+        h += '<div class="hm-cell ' + cls + '" data-date="' + iso + '"></div>';
+      }
+      h += '</div>';
+    }
+    h += '</div>';
+    h += '<div class="hm-legend"><span class="hm-cell done"></span>treinou <span class="hm-cell miss"></span>faltou <span class="hm-cell rest"></span>descanso <span class="hm-cell future"></span>futuro</div>';
+
+    box.innerHTML = h;
+    box.querySelectorAll('.hm-cell[data-date]').forEach(c => c.addEventListener('click', () => {
+      const iso = c.dataset.date;
+      const ls = logsOnDate(iso);
+      alert(fmtDate(iso) + (ls.length ? ':\n' + ls.join('\n') : ': sem registro' + (set[iso] ? ' de carga (marcado concluído)' : '')));
+    }));
   }
 
   // ====== LISTENERS ======
@@ -2203,6 +2343,28 @@
     if (e.target.files && e.target.files[0]) importData(e.target.files[0]);
     e.target.value = '';
   });
+
+  // ====== SWIPE ENTRE DIAS (wrap) ======
+  const DAY_ORDER = ['seg', 'ter', 'qua', 'qui', 'sex', 'sab', 'dom'];
+  (function () {
+    const area = document.getElementById('view-week');
+    let x0 = null, y0 = null;
+    area.addEventListener('touchstart', e => {
+      // ignora swipe que começa nas pills (scroll horizontal próprio)
+      if (e.target.closest('.day-pills')) { x0 = null; return; }
+      x0 = e.touches[0].clientX; y0 = e.touches[0].clientY;
+    }, { passive: true });
+    area.addEventListener('touchend', e => {
+      if (x0 === null) return;
+      const dx = e.changedTouches[0].clientX - x0;
+      const dy = e.changedTouches[0].clientY - y0;
+      x0 = null;
+      if (Math.abs(dx) < 50 || Math.abs(dx) < Math.abs(dy)) return; // precisa ser horizontal
+      const i = DAY_ORDER.indexOf(activeDay);
+      const next = (i + (dx < 0 ? 1 : -1) + 7) % 7; // wrap
+      selectDay(DAY_ORDER[next]);
+    }, { passive: true });
+  })();
 
   // ====== INIT ======
   buildProgressGroups();
