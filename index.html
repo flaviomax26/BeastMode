@@ -332,6 +332,24 @@
   }
   .table-row:last-child { border-bottom: none; }
   .table-row.deload { background: rgba(255, 159, 10, 0.1); }
+  .table-row.current-week {
+    background: rgba(10, 132, 255, 0.18);
+    box-shadow: inset 3px 0 0 var(--blue);
+  }
+  .table-row.current-week.deload {
+    background: rgba(255, 159, 10, 0.22);
+    box-shadow: inset 3px 0 0 var(--orange);
+  }
+  .week-now {
+    display: inline-block;
+    font-size: 9px;
+    font-weight: 700;
+    color: var(--blue);
+    background: rgba(10, 132, 255, 0.2);
+    border-radius: 4px;
+    padding: 1px 4px;
+    margin-top: 2px;
+  }
   .table-cell-week { font-weight: 600; color: var(--blue); }
   .table-cell-meta { font-size: 13px; color: var(--label-secondary); }
 
@@ -837,7 +855,7 @@
       <div class="section-header">
         <p class="section-title">Cronograma 8 Semanas</p>
       </div>
-      <div class="table-card">
+      <div class="table-card" id="cronograma-rows">
         <div class="table-header">
           <div>Sem</div>
           <div>Fase</div>
@@ -2112,7 +2130,26 @@
     document.getElementById('header-sub').textContent = t.sub;
     if (viewId === 'view-progress') openProgress();
     if (viewId === 'view-health') drawHealthCharts();
+    if (viewId === 'view-program') markCurrentWeek();
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function markCurrentWeek() {
+    const card = document.getElementById('cronograma-rows');
+    if (!card) return;
+    const rows = card.querySelectorAll('.table-row');
+    const idx = currentWeekIdx();
+    rows.forEach((r, i) => {
+      r.classList.toggle('current-week', i === idx);
+      const old = r.querySelector('.week-now');
+      if (old) old.remove();
+      if (i === idx) {
+        const tag = document.createElement('div');
+        tag.className = 'week-now';
+        tag.textContent = '● ATUAL';
+        r.firstElementChild.appendChild(tag);
+      }
+    });
   }
 
   function drawHealthCharts() {
@@ -2163,6 +2200,7 @@
 
   // ====== INIT ======
   buildProgressGroups();
+  markCurrentWeek();
   selectDay(getDayKey());
 </script>
 
