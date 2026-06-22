@@ -27,6 +27,10 @@ Otimizado pra iPhone 16 Pro. Adicione à tela inicial pra experiência de app na
 
 Vai aparecer um ícone na tela inicial. Ao tocar, abre em tela cheia sem barra do Safari — experiência de app nativo.
 
+## 🖼 Imagens de execução
+
+Imagens dos exercícios em `img/` vêm do [free-exercise-db](https://github.com/yuhonas/free-exercise-db) (licença Unlicense / domínio público). Carregam offline (vendoradas no repo).
+
 ## 🛠 Stack atual
 
 - HTML/CSS/JS vanilla (sem dependências)

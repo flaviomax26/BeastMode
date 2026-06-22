@@ -713,6 +713,23 @@
     margin-bottom: 6px;
   }
   .suggest-txt { flex: 1; font-size: 13px; line-height: 1.35; }
+
+  .demo { display: flex; gap: 6px; margin-bottom: 8px; }
+  .demo img {
+    width: 50%;
+    height: 130px;
+    object-fit: contain;
+    background: #fff;
+    border-radius: 10px;
+  }
+  .demo-link {
+    display: inline-block;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--blue);
+    margin-bottom: 10px;
+    text-decoration: none;
+  }
   .suggest-btn {
     flex-shrink: 0;
     background: var(--green);
@@ -1420,6 +1437,7 @@
   <h2 class="sheet-title" id="sheet-title">Exercício</h2>
   <p class="sheet-sub" id="sheet-sub"></p>
   <div id="log-suggest"></div>
+  <div id="log-demo"></div>
 
   <div id="calc-wrap">
     <div class="sheet-block-label">Calculadora Smith</div>
@@ -1790,6 +1808,51 @@
     }
   })));
 
+  // imagens de execução (free-exercise-db, domínio público) — slug -> arquivos em img/
+  const EX_IMG = {
+    'supino-reto-smith': ['Smith_Machine_Bench_Press__0.jpg', 'Smith_Machine_Bench_Press__1.jpg'],
+    'desenv-shoulder': ['Smith_Machine_Overhead_Shoulder_Press__0.jpg', 'Smith_Machine_Overhead_Shoulder_Press__1.jpg'],
+    'supino-inclinado-halter': ['Incline_Dumbbell_Press__0.jpg', 'Incline_Dumbbell_Press__1.jpg'],
+    'crossover-alto': ['Cable_Crossover__0.jpg', 'Cable_Crossover__1.jpg'],
+    'elev-lateral-kb-halter': ['Side_Lateral_Raise__0.jpg', 'Side_Lateral_Raise__1.jpg'],
+    'triceps-corda': ['Triceps_Pushdown_-_Rope_Attachment__0.jpg', 'Triceps_Pushdown_-_Rope_Attachment__1.jpg'],
+    'triceps-unilateral': ['Cable_One_Arm_Tricep_Extension__0.jpg', 'Cable_One_Arm_Tricep_Extension__1.jpg'],
+    'deadlift-barra-hex': ['Trap_Bar_Deadlift__0.jpg', 'Trap_Bar_Deadlift__1.jpg'],
+    'agacho-smith': ['Smith_Machine_Squat__0.jpg', 'Smith_Machine_Squat__1.jpg'],
+    'leg-press': ['Leg_Press__0.jpg', 'Leg_Press__1.jpg'],
+    'cadeira-flexora': ['Seated_Leg_Curl__0.jpg', 'Seated_Leg_Curl__1.jpg'],
+    'bulgaro-halter': ['Split_Squat_with_Dumbbells__0.jpg', 'Split_Squat_with_Dumbbells__1.jpg'],
+    'panturrilha-smith': ['Smith_Machine_Calf_Raise__0.jpg', 'Smith_Machine_Calf_Raise__1.jpg'],
+    'negativa-pull-up': ['Pullups__0.jpg', 'Pullups__1.jpg'],
+    'remada-baixa-cabo': ['Seated_Cable_Rows__0.jpg', 'Seated_Cable_Rows__1.jpg'],
+    'pullover-crossover': ['Straight-Arm_Pulldown__0.jpg', 'Straight-Arm_Pulldown__1.jpg'],
+    'face-pull-crossover': ['Face_Pull__0.jpg', 'Face_Pull__1.jpg'],
+    'rosca-alternada-halter': ['Dumbbell_Alternate_Bicep_Curl__0.jpg', 'Dumbbell_Alternate_Bicep_Curl__1.jpg'],
+    'dead-hang': ['Pullups__0.jpg', 'Pullups__1.jpg'],
+    'supino-inclinado-smith': ['Smith_Machine_Incline_Bench_Press__0.jpg', 'Smith_Machine_Incline_Bench_Press__1.jpg'],
+    'maquina-supino': ['Leverage_Chest_Press__0.jpg', 'Leverage_Chest_Press__1.jpg'],
+    'desenv-halter-sentado': ['Seated_Dumbbell_Press__0.jpg', 'Seated_Dumbbell_Press__1.jpg'],
+    'elev-frontal-halter': ['Front_Dumbbell_Raise__0.jpg', 'Front_Dumbbell_Raise__1.jpg'],
+    'crossover-alto-baixo': ['Cable_Crossover__0.jpg', 'Cable_Crossover__1.jpg'],
+    'triceps-testa-halter': ['Lying_Dumbbell_Tricep_Extension__0.jpg', 'Lying_Dumbbell_Tricep_Extension__1.jpg'],
+    'rotacao-externa-banda': ['External_Rotation_with_Band__0.jpg', 'External_Rotation_with_Band__1.jpg'],
+    'cadeira-extensora': ['Leg_Extensions__0.jpg', 'Leg_Extensions__1.jpg'],
+    'goblet-squat-kb': ['Goblet_Squat__0.jpg', 'Goblet_Squat__1.jpg'],
+    'adutor-abdutor': ['Thigh_Adductor__0.jpg', 'Thigh_Adductor__1.jpg'],
+    'panturrilha-leg-press': ['Calf_Press_On_The_Leg_Press_Machine__0.jpg', 'Calf_Press_On_The_Leg_Press_Machine__1.jpg'],
+    'pull-up-amrap': ['Pullups__0.jpg', 'Pullups__1.jpg'],
+    'remada-barra-hex': ['Bent_Over_Two-Dumbbell_Row__0.jpg', 'Bent_Over_Two-Dumbbell_Row__1.jpg'],
+    'pulldown-supinado': ['Underhand_Cable_Pulldowns__0.jpg', 'Underhand_Cable_Pulldowns__1.jpg'],
+    'remada-maquina': ['Seated_Cable_Rows__0.jpg', 'Seated_Cable_Rows__1.jpg'],
+    'rosca-scott': ['Preacher_Curl__0.jpg', 'Preacher_Curl__1.jpg'],
+    'rosca-corda': ['Cable_Hammer_Curls_-_Rope_Attachment__0.jpg', 'Cable_Hammer_Curls_-_Rope_Attachment__1.jpg'],
+    'prancha-frontal': ['Plank__0.jpg', 'Plank__1.jpg'],
+    'abdominal-cabo-cross45': ['Cable_Crunch__0.jpg', 'Cable_Crunch__1.jpg'],
+    'roda-abdominal-joelhos': ['Ab_Roller__0.jpg', 'Ab_Roller__1.jpg'],
+    'kb-swing': ['One-Arm_Kettlebell_Swings__0.jpg', 'One-Arm_Kettlebell_Swings__1.jpg'],
+    'rosca-punho-halter': ['Seated_Dumbbell_Palms-Up_Wrist_Curl__0.jpg', 'Seated_Dumbbell_Palms-Up_Wrist_Curl__1.jpg']
+  };
+
   // ====== HELPERS DE DATA ======
   function todayISO() {
     const d = new Date();
@@ -1951,6 +2014,21 @@
     });
   }
 
+  // referência visual: imagens da base livre (offline) + link de vídeo
+  function renderDemo(id, name) {
+    const box = document.getElementById('log-demo');
+    const imgs = EX_IMG[id];
+    let h = '';
+    if (imgs && imgs.length) {
+      h += '<div class="demo">' + imgs.map(f =>
+        '<img src="img/' + f + '" alt="execução" loading="lazy">').join('') + '</div>';
+    }
+    const q = encodeURIComponent(name + ' execução técnica');
+    h += '<a class="demo-link" href="https://www.youtube.com/results?search_query=' + q +
+      '" target="_blank" rel="noopener">▶ Ver vídeo de execução</a>';
+    box.innerHTML = h;
+  }
+
   function openLog(id, name) {
     sheetId = id;
     currentUnit = EX_UNIT[id] || 'kg';
@@ -1964,6 +2042,7 @@
 
     // auto-sugestão de carga baseada no RPE da última sessão
     renderSuggestion(id);
+    renderDemo(id, name);
 
     // pré-popula com séries do último treino (carga sugerida), reps/rpe limpos
     const setList = document.getElementById('set-list');
