@@ -657,6 +657,29 @@
     margin-top: 2px;
   }
 
+  .suggest {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(48, 209, 88, 0.12);
+    border-radius: 12px;
+    padding: 10px 12px;
+    margin-bottom: 6px;
+  }
+  .suggest-txt { flex: 1; font-size: 13px; line-height: 1.35; }
+  .suggest-btn {
+    flex-shrink: 0;
+    background: var(--green);
+    color: #000;
+    border: none;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 13px;
+    padding: 8px 14px;
+    cursor: pointer;
+    font-family: inherit;
+  }
+
   /* Progresso */
   select.fld {
     width: 100%;
@@ -1101,6 +1124,17 @@
       <div class="day-pills" id="progress-groups"></div>
       <div id="progress-body"></div>
     </div>
+
+    <div class="section">
+      <div class="section-header"><p class="section-title">Backup dos Dados</p></div>
+      <div class="info-box warn" style="font-size:12px">
+        ⚠ Dados ficam só neste aparelho. Limpar dados do Safari apaga tudo. Exporta de vez em quando.
+      </div>
+      <button class="btn btn-primary" id="export-data">Exportar treinos (JSON)</button>
+      <button class="btn btn-ghost" id="copy-data">Copiar para área de transferência</button>
+      <button class="btn btn-ghost" id="import-btn">Importar de arquivo</button>
+      <input type="file" id="import-file" accept="application/json,.json" style="display:none">
+    </div>
   </div>
 </div>
 
@@ -1333,6 +1367,7 @@
   <div class="sheet-handle"></div>
   <h2 class="sheet-title" id="sheet-title">Exercício</h2>
   <p class="sheet-sub" id="sheet-sub"></p>
+  <div id="log-suggest"></div>
 
   <div id="calc-wrap">
     <div class="sheet-block-label">Calculadora Smith</div>
@@ -1577,6 +1612,72 @@
   }
   let LOGS = loadLogs();
 
+  // ====== BACKUP ======
+  function exportData() {
+    const data = JSON.stringify(LOGS, null, 2);
+    try {
+      if (!window.URL || !URL.createObjectURL) throw new Error('no blob');
+      const blob = new Blob([data], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'beastmode-logs-' + todayISO() + '.json';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    } catch (e) {
+      // PWA iOS às vezes bloqueia download — cai pra cópia
+      copyData();
+    }
+  }
+
+  function copyData() {
+    const data = JSON.stringify(LOGS);
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(data).then(
+        () => alert('Copiado. Cola num bloco de notas pra guardar.'),
+        () => alert('Não consegui copiar. Use Exportar.'));
+    } else {
+      alert('Cópia não suportada neste navegador. Use Exportar.');
+    }
+  }
+
+  // merge não-destrutivo: une por id e data (importado vence em conflito de data)
+  function mergeLogs(incoming) {
+    let added = 0;
+    Object.keys(incoming).forEach(id => {
+      const inc = incoming[id];
+      if (!Array.isArray(inc)) return;
+      if (!LOGS[id]) LOGS[id] = [];
+      inc.forEach(sess => {
+        if (!sess || !sess.date) return;
+        const i = LOGS[id].findIndex(s => s.date === sess.date);
+        if (i >= 0) LOGS[id][i] = sess; else { LOGS[id].push(sess); added++; }
+      });
+      LOGS[id].sort((a, b) => a.date.localeCompare(b.date));
+    });
+    return added;
+  }
+
+  function importData(file) {
+    const reader = new FileReader();
+    reader.onload = e => {
+      try {
+        const obj = JSON.parse(e.target.result);
+        if (typeof obj !== 'object' || Array.isArray(obj)) throw new Error('formato');
+        const added = mergeLogs(obj);
+        saveLogs(LOGS);
+        alert(added + ' sessão(ões) nova(s) importada(s).');
+        if (activeGroup) renderProgressGroup(activeGroup);
+        renderDay(activeDay);
+      } catch (err) {
+        alert('Arquivo inválido. Esperado JSON exportado pelo BeastMode.');
+      }
+    };
+    reader.readAsText(file);
+  }
+
   function slug(s) {
     return s.toLowerCase()
       .normalize('NFD').replace(/[̀-ͯ]/g, '')
@@ -1703,6 +1804,48 @@
   let sheetId = null;
   let currentUnit = 'kg';
 
+  // sugere próximo alvo pela dupla progressão + RPE da última sessão
+  function suggestNext(id) {
+    const ls = lastSession(id);
+    if (!ls) return null;
+    const ts = topSet(ls);
+    const rpe = ts.rpe;
+    if (!rpe) return null; // sem RPE não há base
+    const unit = EX_UNIT[id];
+    let field, base, inc, suffix;
+    if (ts.w > 0) {
+      field = 'w'; base = ts.w;
+      suffix = unit === 'seg' ? 's' : 'kg';
+      inc = unit === 'seg' ? 5 : (EX_SMITH[id] ? 6 : 2.5);
+    } else if (ts.r > 0) {
+      field = 'r'; base = ts.r; suffix = ' reps'; inc = 1;
+    } else { return null; }
+
+    let dir, label;
+    if (rpe <= 7) { dir = 1; label = 'Subir'; }
+    else if (rpe < 8.5) { dir = 0; label = 'Manter'; }
+    else { dir = -1; label = 'Recuar (ou set de pico se semana 4)'; }
+    let value = base + dir * inc;
+    if (value < 0) value = 0;
+    return { field, value, suffix, label, rpe, base };
+  }
+
+  function renderSuggestion(id) {
+    const box = document.getElementById('log-suggest');
+    const s = suggestNext(id);
+    if (!s) { box.innerHTML = ''; return; }
+    const arrow = s.value > s.base ? '↑' : (s.value < s.base ? '↓' : '→');
+    box.innerHTML =
+      '<div class="suggest">' +
+        '<div class="suggest-txt">💡 <strong>' + s.label + '</strong> · última ' + s.base + s.suffix +
+          ' @RPE' + s.rpe + ' ' + arrow + ' <strong>' + s.value + s.suffix + '</strong></div>' +
+        '<button class="suggest-btn" type="button" data-field="' + s.field + '" data-val="' + s.value + '">Usar</button>' +
+      '</div>';
+    box.querySelector('.suggest-btn').addEventListener('click', () => {
+      document.querySelectorAll('#set-list .set-' + s.field).forEach(i => { i.value = s.value; });
+    });
+  }
+
   function openLog(id, name) {
     sheetId = id;
     currentUnit = EX_UNIT[id] || 'kg';
@@ -1713,6 +1856,9 @@
     document.getElementById('sheet-sub').textContent = ls
       ? 'Último (' + agoText(ls.date) + '): ' + ls.sets.map(s => fmtSet(s, currentUnit)).join('  ·  ')
       : 'Primeira vez registrando este exercício.';
+
+    // auto-sugestão de carga baseada no RPE da última sessão
+    renderSuggestion(id);
 
     // pré-popula com séries do último treino (carga sugerida), reps/rpe limpos
     const setList = document.getElementById('set-list');
@@ -2006,6 +2152,15 @@
     if (empty) empty.value = total;
     else addSetRow(total, '', '');
   });
+
+  document.getElementById('export-data').addEventListener('click', exportData);
+  document.getElementById('copy-data').addEventListener('click', copyData);
+  document.getElementById('import-btn').addEventListener('click', () => document.getElementById('import-file').click());
+  document.getElementById('import-file').addEventListener('change', e => {
+    if (e.target.files && e.target.files[0]) importData(e.target.files[0]);
+    e.target.value = '';
+  });
+
   // ====== INIT ======
   buildProgressGroups();
   selectDay(getDayKey());
