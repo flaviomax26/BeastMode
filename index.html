@@ -570,6 +570,25 @@
     background: var(--label-tertiary);
     margin: 8px auto 12px;
   }
+  .sheet-close {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    width: 30px;
+    height: 30px;
+    border-radius: 15px;
+    border: none;
+    background: var(--bg-tertiary);
+    color: var(--label-secondary);
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2;
+  }
+  .sheet-close:active { background: var(--separator); }
   .sheet-title {
     font-size: 20px;
     font-weight: 700;
@@ -1434,6 +1453,7 @@
 <div class="sheet-overlay" id="sheet-overlay"></div>
 <div class="sheet" id="sheet">
   <div class="sheet-handle"></div>
+  <button class="sheet-close" id="sheet-close" type="button" aria-label="Fechar">✕</button>
   <h2 class="sheet-title" id="sheet-title">Exercício</h2>
   <p class="sheet-sub" id="sheet-sub"></p>
   <div id="log-suggest"></div>
@@ -2044,11 +2064,13 @@
     renderSuggestion(id);
     renderDemo(id, name);
 
-    // pré-popula com séries do último treino (carga sugerida), reps/rpe limpos
+    // editar treino de HOJE: carrega tudo (carga+reps+rpe).
+    // treino novo (última sessão é passada): só sugere a carga, reps/rpe em branco.
     const setList = document.getElementById('set-list');
     setList.innerHTML = '';
     if (ls) {
-      ls.sets.forEach(s => addSetRow(s.w, '', ''));
+      const editToday = ls.date === todayISO();
+      ls.sets.forEach(s => addSetRow(s.w, editToday ? s.r : '', editToday ? s.rpe : ''));
     } else {
       addSetRow('', '', '');
     }
@@ -2421,6 +2443,7 @@
   document.getElementById('add-set').addEventListener('click', () => addSetRow('', '', ''));
   document.getElementById('save-log').addEventListener('click', saveLog);
   document.getElementById('cancel-log').addEventListener('click', closeLog);
+  document.getElementById('sheet-close').addEventListener('click', closeLog);
   document.getElementById('sheet-overlay').addEventListener('click', closeLog);
   document.getElementById('calc-bar').addEventListener('input', updateCalc);
   document.getElementById('calc-side').addEventListener('input', updateCalc);
