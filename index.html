@@ -347,9 +347,12 @@
     color: var(--blue);
     background: rgba(10, 132, 255, 0.2);
     border-radius: 4px;
-    padding: 1px 4px;
-    margin-top: 2px;
+    padding: 1px 5px;
+    margin-left: 8px;
+    vertical-align: middle;
+    letter-spacing: 0.3px;
   }
+  .table-row.current-week.deload .week-now { color: var(--orange); background: rgba(255, 159, 10, 0.22); }
   .table-cell-week { font-weight: 600; color: var(--blue); }
   .table-cell-meta { font-size: 13px; color: var(--label-secondary); }
 
@@ -2138,28 +2141,21 @@
     const week = currentWeekIdx() + 1; // semana 1..8
     const tagOf = () => { const t = document.createElement('div'); t.className = 'week-now'; t.textContent = '● ATUAL'; return t; };
 
+    // badge vai na 2ª célula (fase/descrição), mais larga — evita quebrar a coluna estreita
+    const setRow = (r, on) => {
+      r.classList.toggle('current-week', on);
+      const old = r.querySelector('.week-now'); if (old) old.remove();
+      if (on) (r.children[1] || r.firstElementChild).appendChild(tagOf());
+    };
+
     // Cronograma: 1 linha por semana (índice)
     const card = document.getElementById('cronograma-rows');
-    if (card) {
-      card.querySelectorAll('.table-row').forEach((r, i) => {
-        const on = i === week - 1;
-        r.classList.toggle('current-week', on);
-        const old = r.querySelector('.week-now'); if (old) old.remove();
-        if (on) r.firstElementChild.appendChild(tagOf());
-      });
-    }
+    if (card) card.querySelectorAll('.table-row').forEach((r, i) => setRow(r, i === week - 1));
 
     // Pull-up: faixas via data-weeks
     const pu = document.getElementById('pullup-rows');
-    if (pu) {
-      pu.querySelectorAll('.table-row').forEach(r => {
-        const weeks = (r.dataset.weeks || '').split(',').map(Number);
-        const on = weeks.includes(week);
-        r.classList.toggle('current-week', on);
-        const old = r.querySelector('.week-now'); if (old) old.remove();
-        if (on) r.firstElementChild.appendChild(tagOf());
-      });
-    }
+    if (pu) pu.querySelectorAll('.table-row').forEach(r =>
+      setRow(r, (r.dataset.weeks || '').split(',').map(Number).includes(week)));
   }
 
   function drawHealthCharts() {
