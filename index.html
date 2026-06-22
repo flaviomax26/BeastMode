@@ -676,7 +676,19 @@
     padding: 14px;
     margin: 12px 0;
   }
-  .chart-card canvas { width: 100%; height: 180px; display: block; }
+  .chart-card canvas { width: 100%; height: 150px; display: block; }
+  .prog-head { margin-bottom: 8px; }
+  .prog-name {
+    font-size: 15px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+  }
+  .prog-meta {
+    font-size: 12px;
+    color: var(--label-secondary);
+    margin-top: 2px;
+  }
   .empty {
     text-align: center;
     color: var(--label-secondary);
@@ -1035,9 +1047,9 @@
   <div class="container">
     <div class="section">
       <div class="section-header">
-        <p class="section-title">Evolução de Carga</p>
+        <p class="section-title">Evolução por Treino</p>
       </div>
-      <select class="fld" id="progress-select"></select>
+      <div class="day-pills" id="progress-groups"></div>
       <div id="progress-body"></div>
     </div>
   </div>
@@ -1637,49 +1649,73 @@
     saveLogs(LOGS);
     closeLog();
     renderDay(activeDay);
-    refreshProgressSelect();
+    if (document.getElementById('view-progress').classList.contains('active')) renderProgressGroup(activeGroup);
   }
 
-  // ====== PROGRESSO ======
-  function refreshProgressSelect() {
-    const sel = document.getElementById('progress-select');
-    const prev = sel.value;
-    const logged = Object.keys(LOGS).filter(id => LOGS[id] && LOGS[id].length);
+  // ====== PROGRESSO (agrupado por treino) ======
+  const PROGRESS_GROUPS = ['seg', 'ter', 'qua', 'qui', 'sex', 'sab'];
+  const DAY_ABBR = { seg: 'Seg', ter: 'Ter', qua: 'Qua', qui: 'Qui', sex: 'Sex', sab: 'Sáb' };
+  let activeGroup = null;
+
+  function buildProgressGroups() {
+    const wrap = document.getElementById('progress-groups');
+    wrap.innerHTML = PROGRESS_GROUPS.map(k => {
+      const short = DAYS[k].title.split(' — ')[0];
+      return '<div class="day-pill" data-group="' + k + '">' +
+        '<div class="day-pill-name">' + DAY_ABBR[k] + '</div>' +
+        '<div class="day-pill-type">' + short + '</div></div>';
+    }).join('');
+    wrap.querySelectorAll('.day-pill').forEach(p =>
+      p.addEventListener('click', () => selectGroup(p.dataset.group)));
+  }
+
+  function selectGroup(k) {
+    activeGroup = k;
+    document.querySelectorAll('#progress-groups .day-pill').forEach(p =>
+      p.classList.toggle('active', p.dataset.group === k));
+    const pill = document.querySelector('#progress-groups .day-pill[data-group="' + k + '"]');
+    if (pill && pill.scrollIntoView) pill.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+    renderProgressGroup(k);
+  }
+
+  function renderProgressGroup(k) {
+    const body = document.getElementById('progress-body');
+    const items = [];
+    DAYS[k].sections.forEach(s => s.items.forEach(it => { if (it.log) items.push(it); }));
+
+    const logged = items.filter(it => { const a = LOGS[slug(it.n)]; return a && a.length; });
+    const pending = items.length - logged.length;
+
     if (!logged.length) {
-      sel.innerHTML = '<option>Sem registros ainda</option>';
-      document.getElementById('progress-body').innerHTML =
-        '<div class="empty">Registra um treino tocando num exercício na aba <strong>Treino</strong>.<br>O gráfico de evolução aparece aqui.</div>';
+      body.innerHTML = '<div class="empty">Nenhum exercício de <strong>' + DAYS[k].title.split(' — ')[0] +
+        '</strong> registrado ainda.<br>Registra tocando num exercício na aba Treino.</div>';
       return;
     }
-    sel.innerHTML = logged.map(id =>
-      '<option value="' + id + '">' + (EX_NAMES[id] || id) + '</option>').join('');
-    if (logged.includes(prev)) sel.value = prev;
-    drawProgress(sel.value);
-  }
 
-  function drawProgress(id) {
-    const body = document.getElementById('progress-body');
-    const arr = LOGS[id];
-    if (!arr || !arr.length) { body.innerHTML = ''; return; }
-
-    const points = arr.map(s => ({ date: s.date, v: topSet(s).w }));
-    let pr = 0, prReps = 0;
-    arr.forEach(s => s.sets.forEach(set => {
-      if (set.w > pr) { pr = set.w; prReps = set.r; }
-    }));
-    const last = arr[arr.length - 1];
-    const lastTop = topSet(last);
-
-    body.innerHTML =
-      '<div class="chart-card"><canvas id="chart"></canvas></div>' +
-      '<div class="stats-grid">' +
-        '<div class="stat-box"><div class="stat-label">PR carga</div><div class="stat-value">' + pr + 'kg</div><div class="stat-detail">' + (prReps ? '× ' + prReps + ' reps' : '') + '</div></div>' +
-        '<div class="stat-box"><div class="stat-label">Sessões</div><div class="stat-value">' + arr.length + '</div><div class="stat-detail">registradas</div></div>' +
-        '<div class="stat-box"><div class="stat-label">Último top set</div><div class="stat-value">' + lastTop.w + 'kg</div><div class="stat-detail">' + fmtSet(lastTop) + '</div></div>' +
-        '<div class="stat-box"><div class="stat-label">Última sessão</div><div class="stat-value">' + agoText(last.date) + '</div><div class="stat-detail">' + last.date.split('-').reverse().slice(0, 2).join('/') + '</div></div>' +
+    let h = '';
+    logged.forEach(it => {
+      const id = slug(it.n);
+      const arr = LOGS[id];
+      let pr = 0, prReps = 0;
+      arr.forEach(s => s.sets.forEach(set => { if (set.w > pr) { pr = set.w; prReps = set.r; } }));
+      const last = arr[arr.length - 1];
+      const lastTop = topSet(last);
+      const isPR = lastTop.w >= pr;
+      h += '<div class="chart-card">' +
+        '<div class="prog-head">' +
+          '<div class="prog-name">' + it.n + (isPR && arr.length > 1 ? '<span class="pr-flag">PR</span>' : '') + '</div>' +
+          '<div class="prog-meta">PR ' + pr + 'kg' + (prReps ? '×' + prReps : '') + ' · último ' + fmtSet(lastTop) + ' · ' + agoText(last.date) + '</div>' +
+        '</div>' +
+        '<canvas class="prog-canvas" data-id="' + id + '"></canvas>' +
       '</div>';
+    });
+    if (pending > 0) h += '<div class="empty" style="padding:12px">' + pending + ' exercício(s) deste treino ainda sem registro.</div>';
+    body.innerHTML = h;
 
-    drawChart(document.getElementById('chart'), points);
+    body.querySelectorAll('.prog-canvas').forEach(cv => {
+      const arr = LOGS[cv.dataset.id];
+      drawChart(cv, arr.map(s => ({ date: s.date, v: topSet(s).w })));
+    });
   }
 
   function drawChart(cv, pts) {
@@ -1757,12 +1793,21 @@
     const t = titles[viewId];
     document.getElementById('header-title').textContent = t.title;
     document.getElementById('header-sub').textContent = t.sub;
-    if (viewId === 'view-progress') refreshProgressSelect();
+    if (viewId === 'view-progress') openProgress();
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
+  function defaultProgressGroup() {
+    const k = getDayKey();
+    return PROGRESS_GROUPS.includes(k) ? k : 'seg';
+  }
+  function openProgress() {
+    if (!activeGroup) selectGroup(defaultProgressGroup());
+    else renderProgressGroup(activeGroup);
+  }
+
   // ====== LISTENERS ======
-  document.querySelectorAll('.day-pill').forEach(pill => {
+  document.querySelectorAll('#day-pills .day-pill').forEach(pill => {
     pill.addEventListener('click', () => selectDay(pill.dataset.day));
   });
   document.querySelectorAll('.tab').forEach(tab => {
@@ -1782,9 +1827,8 @@
     if (empty) empty.value = total;
     else addSetRow(total, '', '');
   });
-  document.getElementById('progress-select').addEventListener('change', e => drawProgress(e.target.value));
-
   // ====== INIT ======
+  buildProgressGroups();
   selectDay(getDayKey());
 </script>
 
