@@ -917,33 +917,33 @@
       <div class="section-header">
         <p class="section-title">Programa Pull-up</p>
       </div>
-      <div class="table-card">
+      <div class="table-card" id="pullup-rows">
         <div class="table-header" style="grid-template-columns: 50px 1fr 80px;">
           <div>Sem</div>
           <div>Quarta + Sábado</div>
           <div>Meta</div>
         </div>
-        <div class="table-row" style="grid-template-columns: 50px 1fr 80px;">
+        <div class="table-row" data-weeks="1,2" style="grid-template-columns: 50px 1fr 80px;">
           <div class="table-cell-week">1-2</div>
           <div>4×3 negativas (5s) + 3× DH + AMRAP</div>
           <div class="table-cell-meta">1-2 reps</div>
         </div>
-        <div class="table-row" style="grid-template-columns: 50px 1fr 80px;">
+        <div class="table-row" data-weeks="3,4" style="grid-template-columns: 50px 1fr 80px;">
           <div class="table-cell-week">3-4</div>
           <div>4×4 negativas (5-7s) + DH 40-50s</div>
           <div class="table-cell-meta">2-3 reps</div>
         </div>
-        <div class="table-row deload" style="grid-template-columns: 50px 1fr 80px;">
+        <div class="table-row deload" data-weeks="5" style="grid-template-columns: 50px 1fr 80px;">
           <div class="table-cell-week" style="color:var(--orange)">5</div>
           <div>DELOAD — 2×3 negativas + DH leve</div>
           <div class="table-cell-meta">Recup</div>
         </div>
-        <div class="table-row" style="grid-template-columns: 50px 1fr 80px;">
+        <div class="table-row" data-weeks="6,7" style="grid-template-columns: 50px 1fr 80px;">
           <div class="table-cell-week">6-7</div>
           <div>8-10×1 cluster set (30s rest)</div>
           <div class="table-cell-meta">5-6 reps</div>
         </div>
-        <div class="table-row" style="grid-template-columns: 50px 1fr 80px;">
+        <div class="table-row" data-weeks="8" style="grid-template-columns: 50px 1fr 80px;">
           <div class="table-cell-week">8</div>
           <div>8×2 cluster (16 reps total)</div>
           <div class="table-cell-meta" style="color:var(--green); font-weight:700">8 reps</div>
@@ -2135,21 +2135,31 @@
   }
 
   function markCurrentWeek() {
+    const week = currentWeekIdx() + 1; // semana 1..8
+    const tagOf = () => { const t = document.createElement('div'); t.className = 'week-now'; t.textContent = '● ATUAL'; return t; };
+
+    // Cronograma: 1 linha por semana (índice)
     const card = document.getElementById('cronograma-rows');
-    if (!card) return;
-    const rows = card.querySelectorAll('.table-row');
-    const idx = currentWeekIdx();
-    rows.forEach((r, i) => {
-      r.classList.toggle('current-week', i === idx);
-      const old = r.querySelector('.week-now');
-      if (old) old.remove();
-      if (i === idx) {
-        const tag = document.createElement('div');
-        tag.className = 'week-now';
-        tag.textContent = '● ATUAL';
-        r.firstElementChild.appendChild(tag);
-      }
-    });
+    if (card) {
+      card.querySelectorAll('.table-row').forEach((r, i) => {
+        const on = i === week - 1;
+        r.classList.toggle('current-week', on);
+        const old = r.querySelector('.week-now'); if (old) old.remove();
+        if (on) r.firstElementChild.appendChild(tagOf());
+      });
+    }
+
+    // Pull-up: faixas via data-weeks
+    const pu = document.getElementById('pullup-rows');
+    if (pu) {
+      pu.querySelectorAll('.table-row').forEach(r => {
+        const weeks = (r.dataset.weeks || '').split(',').map(Number);
+        const on = weeks.includes(week);
+        r.classList.toggle('current-week', on);
+        const old = r.querySelector('.week-now'); if (old) old.remove();
+        if (on) r.firstElementChild.appendChild(tagOf());
+      });
+    }
   }
 
   function drawHealthCharts() {
