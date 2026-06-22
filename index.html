@@ -31,12 +31,12 @@
     --safe-top: env(safe-area-inset-top);
     --safe-bottom: env(safe-area-inset-bottom);
   }
-  
-  * { 
-    box-sizing: border-box; 
+
+  * {
+    box-sizing: border-box;
     -webkit-tap-highlight-color: transparent;
   }
-  
+
   html, body {
     margin: 0;
     padding: 0;
@@ -47,12 +47,12 @@
     min-height: 100%;
     -webkit-overflow-scrolling: touch;
   }
-  
+
   body {
     padding-top: var(--safe-top);
     padding-bottom: calc(120px + var(--safe-bottom));
   }
-  
+
   /* Header */
   .header {
     position: sticky;
@@ -75,13 +75,13 @@
     font-size: 13px;
     color: var(--label-secondary);
   }
-  
+
   /* Container */
   .container {
     padding: 16px;
     max-width: 100%;
   }
-  
+
   /* Section */
   .section {
     margin-bottom: 24px;
@@ -100,7 +100,7 @@
     letter-spacing: 0.5px;
     margin: 0;
   }
-  
+
   /* Card iOS-style */
   .card {
     background: var(--bg-secondary);
@@ -108,7 +108,7 @@
     overflow: hidden;
     margin-bottom: 12px;
   }
-  
+
   /* Row (estilo Settings) */
   .row {
     display: flex;
@@ -120,7 +120,7 @@
   }
   .row:last-child { border-bottom: none; }
   .row.row-clickable:active { background: var(--bg-tertiary); }
-  
+
   .row-icon {
     width: 30px;
     height: 30px;
@@ -141,7 +141,7 @@
   .row-icon.indigo { background: var(--indigo); }
   .row-icon.gray { background: var(--gray); }
   .row-icon.yellow { background: var(--yellow); color: #000; }
-  
+
   .row-content {
     flex: 1;
     min-width: 0;
@@ -169,7 +169,7 @@
     font-size: 14px;
     flex-shrink: 0;
   }
-  
+
   /* Day pills */
   .day-pills {
     display: flex;
@@ -181,7 +181,7 @@
     -ms-overflow-style: none;
   }
   .day-pills::-webkit-scrollbar { display: none; }
-  
+
   .day-pill {
     flex-shrink: 0;
     background: var(--bg-secondary);
@@ -196,7 +196,7 @@
   .day-pill.active { background: var(--blue); }
   .day-pill.active .day-pill-name,
   .day-pill.active .day-pill-type { color: #FFF; }
-  
+
   .day-pill-name {
     font-size: 11px;
     font-weight: 600;
@@ -210,7 +210,7 @@
     font-weight: 600;
     color: var(--label);
   }
-  
+
   /* Day content (escondido por padrão) */
   .day-content {
     display: none;
@@ -223,7 +223,7 @@
     from { opacity: 0; transform: translateY(4px); }
     to { opacity: 1; transform: translateY(0); }
   }
-  
+
   /* Hero day card */
   .day-hero {
     background: linear-gradient(135deg, var(--bg-secondary), var(--bg-tertiary));
@@ -256,7 +256,7 @@
     align-items: center;
     gap: 4px;
   }
-  
+
   /* Tag */
   .tag {
     display: inline-block;
@@ -275,7 +275,7 @@
   .tag.ombro { background: rgba(255, 214, 10, 0.2); color: var(--yellow); }
   .tag.saude { background: rgba(94, 92, 230, 0.2); color: var(--indigo); }
   .tag.bjj { background: rgba(191, 90, 242, 0.2); color: var(--purple); }
-  
+
   /* RPE scale */
   .rpe-scale {
     display: grid;
@@ -304,7 +304,7 @@
     color: var(--label-secondary);
     line-height: 1.2;
   }
-  
+
   /* Table iOS */
   .table-card {
     background: var(--bg-secondary);
@@ -334,7 +334,7 @@
   .table-row.deload { background: rgba(255, 159, 10, 0.1); }
   .table-cell-week { font-weight: 600; color: var(--blue); }
   .table-cell-meta { font-size: 13px; color: var(--label-secondary); }
-  
+
   /* Tabs bottom */
   .tab-bar {
     position: fixed;
@@ -371,7 +371,7 @@
     font-size: 10px;
     font-weight: 500;
   }
-  
+
   /* Views */
   .view {
     display: none;
@@ -384,14 +384,14 @@
     display: block;
     height: 60px;
   }
-  
+
   /* Exercise specific styles */
   .exercise-reps {
     font-size: 13px;
     color: var(--label-secondary);
     font-weight: 500;
   }
-  
+
   /* RPE legend mini */
   .rpe-mini {
     display: inline-flex;
@@ -404,7 +404,7 @@
     font-weight: 600;
     margin-left: 4px;
   }
-  
+
   /* Info box */
   .info-box {
     background: rgba(10, 132, 255, 0.15);
@@ -418,7 +418,7 @@
   .info-box strong { font-weight: 600; }
   .info-box.warn { background: rgba(255, 159, 10, 0.15); }
   .info-box.success { background: rgba(48, 209, 88, 0.15); }
-  
+
   /* Stats grid */
   .stats-grid {
     display: grid;
@@ -448,7 +448,7 @@
     color: var(--label-secondary);
     margin-top: 2px;
   }
-  
+
   /* Workout detail */
   .workout-section {
     background: var(--bg-secondary);
@@ -473,7 +473,7 @@
     height: 8px;
     border-radius: 4px;
   }
-  
+
   /* Pull-up callouts */
   .callout {
     background: rgba(255, 159, 10, 0.12);
@@ -501,6 +501,199 @@
   .callout-body li {
     margin-bottom: 4px;
   }
+
+  /* ===== Logging / progresso (novo) ===== */
+  .last-line {
+    font-size: 12px;
+    color: var(--green);
+    margin-top: 3px;
+    line-height: 1.3;
+  }
+  .done-badge {
+    flex-shrink: 0;
+    color: var(--green);
+    font-size: 18px;
+  }
+
+  /* Bottom sheet */
+  .sheet-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 200;
+    display: none;
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+  .sheet-overlay.open { display: block; opacity: 1; }
+  .sheet {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    max-height: 90vh;
+    overflow-y: auto;
+    background: var(--bg-secondary);
+    border-radius: 20px 20px 0 0;
+    z-index: 201;
+    transform: translateY(100%);
+    transition: transform 0.25s ease;
+    padding: 0 16px calc(20px + var(--safe-bottom));
+    -webkit-overflow-scrolling: touch;
+  }
+  .sheet.open { transform: translateY(0); }
+  .sheet-handle {
+    width: 36px;
+    height: 5px;
+    border-radius: 3px;
+    background: var(--label-tertiary);
+    margin: 8px auto 12px;
+  }
+  .sheet-title {
+    font-size: 20px;
+    font-weight: 700;
+    margin: 0 0 2px;
+    letter-spacing: -0.3px;
+  }
+  .sheet-sub {
+    font-size: 13px;
+    color: var(--label-secondary);
+    margin: 0 0 14px;
+  }
+  .sheet-block-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--label-secondary);
+    margin: 16px 0 6px;
+    font-weight: 600;
+  }
+
+  .calc {
+    background: var(--bg-tertiary);
+    border-radius: 12px;
+    padding: 12px;
+    display: flex;
+    align-items: flex-end;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .calc-field { flex: 1; min-width: 70px; }
+  .calc-field label {
+    display: block;
+    font-size: 10px;
+    color: var(--label-secondary);
+    margin-bottom: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+  }
+  .calc-total {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--green);
+    white-space: nowrap;
+  }
+
+  input.fld, textarea.fld {
+    width: 100%;
+    background: var(--bg);
+    border: 0.5px solid var(--separator);
+    border-radius: 10px;
+    color: var(--label);
+    font-size: 16px;
+    padding: 10px 12px;
+    font-family: inherit;
+  }
+  input.fld:focus, textarea.fld:focus { outline: none; border-color: var(--blue); }
+
+  .set-row {
+    display: grid;
+    grid-template-columns: 28px 1fr 1fr 1fr 32px;
+    gap: 8px;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+  .set-row .set-n {
+    font-size: 13px;
+    color: var(--label-secondary);
+    text-align: center;
+    font-weight: 600;
+  }
+  .set-row .set-head {
+    font-size: 10px;
+    color: var(--label-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    text-align: center;
+  }
+  .set-del {
+    background: none;
+    border: none;
+    color: var(--red);
+    font-size: 20px;
+    padding: 0;
+    cursor: pointer;
+  }
+
+  .btn {
+    display: block;
+    width: 100%;
+    border: none;
+    border-radius: 12px;
+    padding: 14px;
+    font-size: 16px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    margin-top: 10px;
+  }
+  .btn-primary { background: var(--blue); color: #fff; }
+  .btn-ghost { background: var(--bg-tertiary); color: var(--label); }
+  .btn-add {
+    background: var(--bg-tertiary);
+    color: var(--blue);
+    font-size: 14px;
+    padding: 10px;
+    margin-top: 2px;
+  }
+
+  /* Progresso */
+  select.fld {
+    width: 100%;
+    background: var(--bg-secondary);
+    border: 0.5px solid var(--separator);
+    border-radius: 12px;
+    color: var(--label);
+    font-size: 16px;
+    padding: 12px;
+    font-family: inherit;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+  .chart-card {
+    background: var(--bg-secondary);
+    border-radius: 14px;
+    padding: 14px;
+    margin: 12px 0;
+  }
+  .chart-card canvas { width: 100%; height: 180px; display: block; }
+  .empty {
+    text-align: center;
+    color: var(--label-secondary);
+    font-size: 14px;
+    padding: 32px 16px;
+    line-height: 1.5;
+  }
+  .pr-flag {
+    display: inline-block;
+    background: rgba(48,209,88,0.2);
+    color: var(--green);
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 4px;
+    margin-left: 4px;
+  }
 </style>
 </head>
 <body>
@@ -513,7 +706,7 @@
 
 <!-- VIEW: HOJE/SEMANA -->
 <div class="view active" id="view-week">
-  
+
   <!-- Day pills (horizontal scroll) -->
   <div class="day-pills" id="day-pills">
     <div class="day-pill" data-day="seg">
@@ -547,643 +740,15 @@
   </div>
 
   <div class="container">
-
-    <!-- SEGUNDA -->
-    <div class="day-content" id="day-seg">
-      <div class="day-hero">
-        <div class="day-hero-label">Segunda · Manhã</div>
-        <h2 class="day-hero-title">Push A — Força <span class="tag push">PUSH</span></h2>
-        <div class="day-hero-meta">
-          <div class="day-hero-meta-item">🏋️ ~55 min</div>
-          <div class="day-hero-meta-item">🎯 RPE 7-8</div>
-          <div class="day-hero-meta-item">🥋 BJJ 20h</div>
-        </div>
-      </div>
-
-      <div class="workout-section">
-        <div class="workout-section-header">
-          <div class="workout-section-dot" style="background:var(--red)"></div>
-          Principal
-        </div>
-        <div class="row">
-          <div class="row-icon red">💪</div>
-          <div class="row-content">
-            <div class="row-title">Supino reto Smith</div>
-            <div class="row-subtitle">4 séries × 5-7 reps (pesado)</div>
-          </div>
-        </div>
-        <div class="row">
-          <div class="row-icon red">💪</div>
-          <div class="row-content">
-            <div class="row-title">Desenv. Shoulder</div>
-            <div class="row-subtitle">4 séries × 6-8 reps</div>
-          </div>
-        </div>
-        <div class="row">
-          <div class="row-icon red">💪</div>
-          <div class="row-content">
-            <div class="row-title">Supino inclinado halter</div>
-            <div class="row-subtitle">3 séries × 8-10 reps</div>
-          </div>
-        </div>
-        <div class="row">
-          <div class="row-icon red">💪</div>
-          <div class="row-content">
-            <div class="row-title">Crossover alto</div>
-            <div class="row-subtitle">3 séries × 12-15 reps</div>
-          </div>
-        </div>
-        <div class="row">
-          <div class="row-icon yellow">⭐</div>
-          <div class="row-content">
-            <div class="row-title">Elev. lateral KB/halter <span class="tag ombro">OMBRO</span></div>
-            <div class="row-subtitle">3 séries × 12-15 reps</div>
-          </div>
-        </div>
-        <div class="row">
-          <div class="row-icon red">💪</div>
-          <div class="row-content">
-            <div class="row-title">Tríceps corda</div>
-            <div class="row-subtitle">3 séries × 10-12 reps</div>
-          </div>
-        </div>
-        <div class="row">
-          <div class="row-icon red">💪</div>
-          <div class="row-content">
-            <div class="row-title">Tríceps unilateral</div>
-            <div class="row-subtitle">3 séries × 12-15 reps cada</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="workout-section">
-        <div class="workout-section-header">
-          <div class="workout-section-dot" style="background:var(--pink)"></div>
-          Cardio
-        </div>
-        <div class="row">
-          <div class="row-icon pink">🏃</div>
-          <div class="row-content">
-            <div class="row-title">Esteira ou Bike — Zona 2</div>
-            <div class="row-subtitle">15-20 min · FC 108-126 bpm</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="workout-section">
-        <div class="workout-section-header">
-          <div class="workout-section-dot" style="background:var(--purple)"></div>
-          BJJ
-        </div>
-        <div class="row">
-          <div class="row-icon purple">🥋</div>
-          <div class="row-content">
-            <div class="row-title">BJJ · 20h-21h</div>
-            <div class="row-subtitle">Push manhã não afeta BJJ noite</div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- TERÇA -->
-    <div class="day-content" id="day-ter">
-      <div class="day-hero">
-        <div class="day-hero-label">Terça</div>
-        <h2 class="day-hero-title">Legs A — Força <span class="tag legs">LEGS</span></h2>
-        <div class="day-hero-meta">
-          <div class="day-hero-meta-item">🏋️ ~60 min</div>
-          <div class="day-hero-meta-item">🎯 RPE 7-8</div>
-          <div class="day-hero-meta-item">😴 Sem BJJ</div>
-        </div>
-      </div>
-
-      <div class="workout-section">
-        <div class="workout-section-header">
-          <div class="workout-section-dot" style="background:var(--green)"></div>
-          Principal
-        </div>
-        <div class="row">
-          <div class="row-icon green">🏋️</div>
-          <div class="row-content">
-            <div class="row-title">Deadlift Barra Hex</div>
-            <div class="row-subtitle">5 séries × 3-5 reps (pesado)</div>
-          </div>
-        </div>
-        <div class="row">
-          <div class="row-icon green">🏋️</div>
-          <div class="row-content">
-            <div class="row-title">Agacho Smith</div>
-            <div class="row-subtitle">4 séries × 6-8 reps</div>
-          </div>
-        </div>
-        <div class="row">
-          <div class="row-icon green">🏋️</div>
-          <div class="row-content">
-            <div class="row-title">Leg press</div>
-            <div class="row-subtitle">3 séries × 8-10 reps</div>
-          </div>
-        </div>
-        <div class="row">
-          <div class="row-icon green">🏋️</div>
-          <div class="row-content">
-            <div class="row-title">Cadeira flexora</div>
-            <div class="row-subtitle">3 séries × 10-12 reps</div>
-          </div>
-        </div>
-        <div class="row">
-          <div class="row-icon green">🏋️</div>
-          <div class="row-content">
-            <div class="row-title">Búlgaro halter</div>
-            <div class="row-subtitle">3 séries × 8 reps cada perna</div>
-          </div>
-        </div>
-        <div class="row">
-          <div class="row-icon green">🏋️</div>
-          <div class="row-content">
-            <div class="row-title">Panturrilha Smith</div>
-            <div class="row-subtitle">4 séries × 10-12 reps</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="workout-section">
-        <div class="workout-section-header">
-          <div class="workout-section-dot" style="background:var(--teal)"></div>
-          Abdômen
-        </div>
-        <div class="row">
-          <div class="row-icon teal">🧘</div>
-          <div class="row-content">
-            <div class="row-title">Prancha frontal</div>
-            <div class="row-subtitle">3 séries × 45-60 segundos</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="workout-section">
-        <div class="workout-section-header">
-          <div class="workout-section-dot" style="background:var(--pink)"></div>
-          Cardio
-        </div>
-        <div class="row">
-          <div class="row-icon pink">🚴</div>
-          <div class="row-content">
-            <div class="row-title">Bike leve</div>
-            <div class="row-subtitle">5-10 min (desfadiga pernas)</div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- QUARTA -->
-    <div class="day-content" id="day-qua">
-      <div class="day-hero">
-        <div class="day-hero-label">Quarta · Manhã</div>
-        <h2 class="day-hero-title">Pull A — LEVE <span class="tag pull">PULL</span></h2>
-        <div class="day-hero-meta">
-          <div class="day-hero-meta-item">🏋️ ~45 min</div>
-          <div class="day-hero-meta-item">🎯 RPE 6-7</div>
-          <div class="day-hero-meta-item">🥋 BJJ 20h</div>
-        </div>
-      </div>
-
-      <div class="info-box warn">
-        ⚠ <strong>Dia LEVE.</strong> Preserva pegada e dorsal pro BJJ à noite. Não vai à falha.
-      </div>
-
-      <div class="workout-section">
-        <div class="workout-section-header">
-          <div class="workout-section-dot" style="background:var(--orange)"></div>
-          Pull-up Fase 1
-        </div>
-        <div class="row">
-          <div class="row-icon orange">🎯</div>
-          <div class="row-content">
-            <div class="row-title">Negativa Pull-up</div>
-            <div class="row-subtitle">4 séries × 3 reps (descer em 5s)</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="workout-section">
-        <div class="workout-section-header">
-          <div class="workout-section-dot" style="background:var(--blue)"></div>
-          Principal
-        </div>
-        <div class="row">
-          <div class="row-icon blue">💪</div>
-          <div class="row-content">
-            <div class="row-title">Remada baixa cabo</div>
-            <div class="row-subtitle">3 séries × 10-12 reps</div>
-          </div>
-        </div>
-        <div class="row">
-          <div class="row-icon blue">💪</div>
-          <div class="row-content">
-            <div class="row-title">Pullover crossover</div>
-            <div class="row-subtitle">3 séries × 12-15 reps</div>
-          </div>
-        </div>
-        <div class="row">
-          <div class="row-icon blue">💪</div>
-          <div class="row-content">
-            <div class="row-title">Face pull crossover</div>
-            <div class="row-subtitle">3 séries × 15-20 reps</div>
-          </div>
-        </div>
-        <div class="row">
-          <div class="row-icon blue">💪</div>
-          <div class="row-content">
-            <div class="row-title">Rosca alternada halter</div>
-            <div class="row-subtitle">3 séries × 10-12 reps</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="workout-section">
-        <div class="workout-section-header">
-          <div class="workout-section-dot" style="background:var(--orange)"></div>
-          Pegada
-        </div>
-        <div class="row">
-          <div class="row-icon orange">🤚</div>
-          <div class="row-content">
-            <div class="row-title">Dead Hang</div>
-            <div class="row-subtitle">3 séries até falhar (meta 30s)</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="workout-section">
-        <div class="workout-section-header">
-          <div class="workout-section-dot" style="background:var(--pink)"></div>
-          Cardio
-        </div>
-        <div class="row">
-          <div class="row-icon pink">🏃</div>
-          <div class="row-content">
-            <div class="row-title">Esteira Zona 2</div>
-            <div class="row-subtitle">15 min · FC 108-126 bpm</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="workout-section">
-        <div class="workout-section-header">
-          <div class="workout-section-dot" style="background:var(--purple)"></div>
-          BJJ
-        </div>
-        <div class="row">
-          <div class="row-icon purple">🥋</div>
-          <div class="row-content">
-            <div class="row-title">BJJ · 20h-21h</div>
-            <div class="row-subtitle">Pull leve preserva tatame</div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- QUINTA -->
-    <div class="day-content" id="day-qui">
-      <div class="day-hero">
-        <div class="day-hero-label">Quinta</div>
-        <h2 class="day-hero-title">Push B — Hipertrofia <span class="tag push">PUSH</span></h2>
-        <div class="day-hero-meta">
-          <div class="day-hero-meta-item">🏋️ ~65 min</div>
-          <div class="day-hero-meta-item">🎯 RPE 8</div>
-          <div class="day-hero-meta-item">😴 Sem BJJ</div>
-        </div>
-      </div>
-
-      <div class="workout-section">
-        <div class="workout-section-header">
-          <div class="workout-section-dot" style="background:var(--red)"></div>
-          Principal
-        </div>
-        <div class="row">
-          <div class="row-icon red">💪</div>
-          <div class="row-content">
-            <div class="row-title">Supino inclinado Smith</div>
-            <div class="row-subtitle">4 séries × 8-12 reps</div>
-          </div>
-        </div>
-        <div class="row">
-          <div class="row-icon red">💪</div>
-          <div class="row-content">
-            <div class="row-title">Máquina Supino</div>
-            <div class="row-subtitle">3 séries × 10-12 reps</div>
-          </div>
-        </div>
-        <div class="row">
-          <div class="row-icon red">💪</div>
-          <div class="row-content">
-            <div class="row-title">Desenv. halter sentado</div>
-            <div class="row-subtitle">4 séries × 10-12 reps</div>
-          </div>
-        </div>
-        <div class="row">
-          <div class="row-icon red">💪</div>
-          <div class="row-content">
-            <div class="row-title">Elev. lateral KB</div>
-            <div class="row-subtitle">4 séries × 12-15 reps cada</div>
-          </div>
-        </div>
-        <div class="row">
-          <div class="row-icon yellow">⭐</div>
-          <div class="row-content">
-            <div class="row-title">Elev. frontal halter <span class="tag ombro">OMBRO</span></div>
-            <div class="row-subtitle">3 séries × 12-15 reps</div>
-          </div>
-        </div>
-        <div class="row">
-          <div class="row-icon red">💪</div>
-          <div class="row-content">
-            <div class="row-title">Crossover alto/baixo</div>
-            <div class="row-subtitle">3 séries × 12-15 reps (drop)</div>
-          </div>
-        </div>
-        <div class="row">
-          <div class="row-icon red">💪</div>
-          <div class="row-content">
-            <div class="row-title">Tríceps testa halter</div>
-            <div class="row-subtitle">3 séries × 10-12 reps</div>
-          </div>
-        </div>
-        <div class="row">
-          <div class="row-icon indigo">🛡️</div>
-          <div class="row-content">
-            <div class="row-title">Rotação externa banda <span class="tag saude">SAÚDE</span></div>
-            <div class="row-subtitle">3 séries × 15-20 reps cada</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="workout-section">
-        <div class="workout-section-header">
-          <div class="workout-section-dot" style="background:var(--teal)"></div>
-          Abdômen
-        </div>
-        <div class="row">
-          <div class="row-icon teal">🧘</div>
-          <div class="row-content">
-            <div class="row-title">Abdominal cabo Cross45</div>
-            <div class="row-subtitle">3 séries × 12-15 reps</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="workout-section">
-        <div class="workout-section-header">
-          <div class="workout-section-dot" style="background:var(--pink)"></div>
-          Cardio
-        </div>
-        <div class="row">
-          <div class="row-icon pink">🏃</div>
-          <div class="row-content">
-            <div class="row-title">Esteira ou Bike — Zona 2</div>
-            <div class="row-subtitle">15-20 min · FC 108-126 bpm</div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- SEXTA -->
-    <div class="day-content" id="day-sex">
-      <div class="day-hero">
-        <div class="day-hero-label">Sexta</div>
-        <h2 class="day-hero-title">Legs B — Hipertrofia <span class="tag legs">LEGS</span></h2>
-        <div class="day-hero-meta">
-          <div class="day-hero-meta-item">🏋️ ~60 min</div>
-          <div class="day-hero-meta-item">🎯 RPE 8</div>
-          <div class="day-hero-meta-item">😴 Sem BJJ</div>
-        </div>
-      </div>
-
-      <div class="workout-section">
-        <div class="workout-section-header">
-          <div class="workout-section-dot" style="background:var(--green)"></div>
-          Principal
-        </div>
-        <div class="row">
-          <div class="row-icon green">🏋️</div>
-          <div class="row-content">
-            <div class="row-title">Leg press</div>
-            <div class="row-subtitle">4 séries × 10-12 reps (pesado)</div>
-          </div>
-        </div>
-        <div class="row">
-          <div class="row-icon green">🏋️</div>
-          <div class="row-content">
-            <div class="row-title">Cadeira extensora</div>
-            <div class="row-subtitle">4 séries × 12-15 reps</div>
-          </div>
-        </div>
-        <div class="row">
-          <div class="row-icon green">🏋️</div>
-          <div class="row-content">
-            <div class="row-title">Cadeira flexora</div>
-            <div class="row-subtitle">4 séries × 12-15 reps</div>
-          </div>
-        </div>
-        <div class="row">
-          <div class="row-icon green">🏋️</div>
-          <div class="row-content">
-            <div class="row-title">Goblet squat KB</div>
-            <div class="row-subtitle">3 séries × 10-12 reps</div>
-          </div>
-        </div>
-        <div class="row">
-          <div class="row-icon green">🏋️</div>
-          <div class="row-content">
-            <div class="row-title">Adutor + Abdutor</div>
-            <div class="row-subtitle">3 séries × 12-15 reps cada</div>
-          </div>
-        </div>
-        <div class="row">
-          <div class="row-icon green">🏋️</div>
-          <div class="row-content">
-            <div class="row-title">Panturrilha leg press</div>
-            <div class="row-subtitle">4 séries × 15-20 reps</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="workout-section">
-        <div class="workout-section-header">
-          <div class="workout-section-dot" style="background:var(--orange)"></div>
-          Pegada
-        </div>
-        <div class="row">
-          <div class="row-icon orange">🤚</div>
-          <div class="row-content">
-            <div class="row-title">Rosca punho halter</div>
-            <div class="row-subtitle">3 séries × 12-15 reps cada</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="workout-section">
-        <div class="workout-section-header">
-          <div class="workout-section-dot" style="background:var(--pink)"></div>
-          Cardio
-        </div>
-        <div class="row">
-          <div class="row-icon pink">🚴</div>
-          <div class="row-content">
-            <div class="row-title">Bike leve</div>
-            <div class="row-subtitle">5-10 min</div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- SÁBADO -->
-    <div class="day-content" id="day-sab">
-      <div class="day-hero">
-        <div class="day-hero-label">Sábado</div>
-        <h2 class="day-hero-title">Pull B — Pesado <span class="tag pull">PULL</span></h2>
-        <div class="day-hero-meta">
-          <div class="day-hero-meta-item">🏋️ ~70 min</div>
-          <div class="day-hero-meta-item">🎯 RPE 8-9</div>
-          <div class="day-hero-meta-item">😴 Sem BJJ</div>
-        </div>
-      </div>
-
-      <div class="workout-section">
-        <div class="workout-section-header">
-          <div class="workout-section-dot" style="background:var(--orange)"></div>
-          Pull-up Fase 1
-        </div>
-        <div class="row">
-          <div class="row-icon orange">🎯</div>
-          <div class="row-content">
-            <div class="row-title">Pull-up AMRAP</div>
-            <div class="row-subtitle">2 séries até falhar (3 min descanso)</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="workout-section">
-        <div class="workout-section-header">
-          <div class="workout-section-dot" style="background:var(--blue)"></div>
-          Principal
-        </div>
-        <div class="row">
-          <div class="row-icon blue">💪</div>
-          <div class="row-content">
-            <div class="row-title">Remada barra hex</div>
-            <div class="row-subtitle">4 séries × 6-8 reps (pesado)</div>
-          </div>
-        </div>
-        <div class="row">
-          <div class="row-icon blue">💪</div>
-          <div class="row-content">
-            <div class="row-title">Pulldown supinado</div>
-            <div class="row-subtitle">4 séries × 8-10 reps (pesado)</div>
-          </div>
-        </div>
-        <div class="row">
-          <div class="row-icon blue">💪</div>
-          <div class="row-content">
-            <div class="row-title">Remada máquina</div>
-            <div class="row-subtitle">3 séries × 10-12 reps</div>
-          </div>
-        </div>
-        <div class="row">
-          <div class="row-icon blue">💪</div>
-          <div class="row-content">
-            <div class="row-title">Rosca scott</div>
-            <div class="row-subtitle">4 séries × 10-12 reps</div>
-          </div>
-        </div>
-        <div class="row">
-          <div class="row-icon blue">💪</div>
-          <div class="row-content">
-            <div class="row-title">Rosca corda</div>
-            <div class="row-subtitle">3 séries × 12-15 reps</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="workout-section">
-        <div class="workout-section-header">
-          <div class="workout-section-dot" style="background:var(--teal)"></div>
-          Abdômen
-        </div>
-        <div class="row">
-          <div class="row-icon teal">🧘</div>
-          <div class="row-content">
-            <div class="row-title">Roda abdominal (joelhos)</div>
-            <div class="row-subtitle">3 séries × 8-12 reps</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="workout-section">
-        <div class="workout-section-header">
-          <div class="workout-section-dot" style="background:var(--red)"></div>
-          Finisher
-        </div>
-        <div class="row">
-          <div class="row-icon red">🔥</div>
-          <div class="row-content">
-            <div class="row-title">KB swing</div>
-            <div class="row-subtitle">5 séries × 15 reps (90s rest)</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="workout-section">
-        <div class="workout-section-header">
-          <div class="workout-section-dot" style="background:var(--pink)"></div>
-          Cardio
-        </div>
-        <div class="row">
-          <div class="row-icon pink">🏃</div>
-          <div class="row-content">
-            <div class="row-title">Esteira Zona 2</div>
-            <div class="row-subtitle">15-20 min</div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- DOMINGO -->
-    <div class="day-content" id="day-dom">
-      <div class="day-hero">
-        <div class="day-hero-label">Domingo</div>
-        <h2 class="day-hero-title">Descanso 😴</h2>
-        <div class="day-hero-meta">
-          <div class="day-hero-meta-item">🛌 Recuperação</div>
-        </div>
-      </div>
-
-      <div class="info-box success">
-        ✓ <strong>Domingo é dia de recuperação total.</strong> Sem treino estruturado. Tempo com família, sono em dia.
-      </div>
-
-      <div class="workout-section">
-        <div class="workout-section-header">
-          <div class="workout-section-dot" style="background:var(--pink)"></div>
-          Cardio leve (opcional)
-        </div>
-        <div class="row">
-          <div class="row-icon pink">🚶</div>
-          <div class="row-content">
-            <div class="row-title">Caminhada / passeio</div>
-            <div class="row-subtitle">30 min · Zona 1-2</div>
-          </div>
-        </div>
-      </div>
-    </div>
-
+    <!-- Conteúdo do dia renderizado via JS a partir de DAYS -->
+    <div id="day-root"></div>
   </div>
 </div>
 
 <!-- VIEW: PROGRAMA -->
 <div class="view" id="view-program">
   <div class="container">
-    
+
     <div class="section">
       <div class="section-header">
         <p class="section-title">Cronograma 8 Semanas</p>
@@ -1318,7 +883,7 @@
 <!-- VIEW: TÉCNICA -->
 <div class="view" id="view-technique">
   <div class="container">
-    
+
     <div class="section">
       <div class="section-header">
         <p class="section-title">RPE — Escala</p>
@@ -1346,7 +911,7 @@
         </div>
       </div>
       <div class="info-box" style="margin-top:12px;">
-        Antes da última rep, pergunta: "Quantas reps a mais conseguiria?". <strong>Anota carga + reps + RPE</strong> no Strong app.
+        Antes da última rep, pergunta: "Quantas reps a mais conseguiria?". <strong>Anota carga + reps + RPE</strong> tocando no exercício na aba Treino.
       </div>
     </div>
 
@@ -1354,7 +919,7 @@
       <div class="section-header">
         <p class="section-title">Pull-up — Execução</p>
       </div>
-      
+
       <div class="callout">
         <div class="callout-title">🎯 Negativa Pull-up (Quarta)</div>
         <div class="callout-body">
@@ -1402,7 +967,7 @@
       <div class="section-header">
         <p class="section-title">Foco em Ombros</p>
       </div>
-      
+
       <div class="callout">
         <div class="callout-title">⭐ Elevação Lateral</div>
         <div class="callout-body">
@@ -1465,10 +1030,23 @@
   </div>
 </div>
 
+<!-- VIEW: PROGRESSO -->
+<div class="view" id="view-progress">
+  <div class="container">
+    <div class="section">
+      <div class="section-header">
+        <p class="section-title">Evolução de Carga</p>
+      </div>
+      <select class="fld" id="progress-select"></select>
+      <div id="progress-body"></div>
+    </div>
+  </div>
+</div>
+
 <!-- VIEW: BJJ -->
 <div class="view" id="view-bjj">
   <div class="container">
-    
+
     <div class="section">
       <div class="section-header">
         <p class="section-title">Mobilidade de Quadril</p>
@@ -1604,6 +1182,47 @@
   </div>
 </div>
 
+<!-- SHEET DE LOG -->
+<div class="sheet-overlay" id="sheet-overlay"></div>
+<div class="sheet" id="sheet">
+  <div class="sheet-handle"></div>
+  <h2 class="sheet-title" id="sheet-title">Exercício</h2>
+  <p class="sheet-sub" id="sheet-sub"></p>
+
+  <div id="calc-wrap">
+    <div class="sheet-block-label">Calculadora Smith</div>
+    <div class="calc">
+      <div class="calc-field">
+        <label>Barra (kg)</label>
+        <input class="fld" id="calc-bar" inputmode="decimal" value="22">
+      </div>
+      <div class="calc-field">
+        <label>Anilha / lado</label>
+        <input class="fld" id="calc-side" inputmode="decimal" placeholder="0">
+      </div>
+      <div class="calc-total" id="calc-total">22 kg</div>
+    </div>
+    <button class="btn btn-add" id="calc-use">Usar total na próxima série</button>
+  </div>
+
+  <div class="sheet-block-label">Séries</div>
+  <div class="set-row">
+    <div class="set-n"></div>
+    <div class="set-head">Carga</div>
+    <div class="set-head">Reps</div>
+    <div class="set-head">RPE</div>
+    <div></div>
+  </div>
+  <div id="set-list"></div>
+  <button class="btn btn-add" id="add-set">+ série</button>
+
+  <div class="sheet-block-label">Nota (opcional)</div>
+  <textarea class="fld" id="log-note" rows="2" placeholder="Sensação, ajuste de técnica..."></textarea>
+
+  <button class="btn btn-primary" id="save-log">Salvar treino</button>
+  <button class="btn btn-ghost" id="cancel-log">Cancelar</button>
+</div>
+
 <!-- TAB BAR -->
 <nav class="tab-bar">
   <div class="tab active" data-view="view-week">
@@ -1613,6 +1232,10 @@
   <div class="tab" data-view="view-program">
     <div class="tab-icon">📅</div>
     <div class="tab-label">Programa</div>
+  </div>
+  <div class="tab" data-view="view-progress">
+    <div class="tab-icon">📈</div>
+    <div class="tab-label">Progresso</div>
   </div>
   <div class="tab" data-view="view-technique">
     <div class="tab-icon">📖</div>
@@ -1625,7 +1248,476 @@
 </nav>
 
 <script>
-  // Dia atual selecionado
+  'use strict';
+
+  // ====== DADOS DO PROGRAMA ======
+  const PROGRAM_START = new Date(2026, 5, 22); // 22/06/2026
+  const WEEKS = [
+    { phase: 'Acumulação · F1', rpe: '7' },
+    { phase: 'Intensificação · F1', rpe: '8' },
+    { phase: 'Intensificação · F1', rpe: '8-9' },
+    { phase: 'Realização · F1', rpe: '9' },
+    { phase: 'DELOAD', rpe: '5-6' },
+    { phase: 'Acumulação · F2', rpe: '7' },
+    { phase: 'Intensificação · F2', rpe: '8' },
+    { phase: 'Realização · F2', rpe: '9' }
+  ];
+
+  // log:true => exercício registrável (abre sheet). Cardio/BJJ ficam informativos.
+  const DAYS = {
+    seg: {
+      label: 'Segunda · Manhã',
+      title: 'Push A — Força', tagCls: 'push', tagTxt: 'PUSH',
+      meta: ['🏋️ ~55 min', '🎯 RPE 7-8', '🥋 BJJ 20h'],
+      sections: [
+        { title: 'Principal', dot: 'red', items: [
+          { n: 'Supino reto Smith', icon: '💪', color: 'red', scheme: '4 séries × 5-7 reps (pesado)', log: true },
+          { n: 'Desenv. Shoulder', icon: '💪', color: 'red', scheme: '4 séries × 6-8 reps', log: true },
+          { n: 'Supino inclinado halter', icon: '💪', color: 'red', scheme: '3 séries × 8-10 reps', log: true },
+          { n: 'Crossover alto', icon: '💪', color: 'red', scheme: '3 séries × 12-15 reps', log: true },
+          { n: 'Elev. lateral KB/halter', icon: '⭐', color: 'yellow', tag: { cls: 'ombro', txt: 'OMBRO' }, scheme: '3 séries × 12-15 reps', log: true },
+          { n: 'Tríceps corda', icon: '💪', color: 'red', scheme: '3 séries × 10-12 reps', log: true },
+          { n: 'Tríceps unilateral', icon: '💪', color: 'red', scheme: '3 séries × 12-15 reps cada', log: true }
+        ]},
+        { title: 'Cardio', dot: 'pink', items: [
+          { n: 'Esteira ou Bike — Zona 2', icon: '🏃', color: 'pink', scheme: '15-20 min · FC 108-126 bpm', log: false }
+        ]},
+        { title: 'BJJ', dot: 'purple', items: [
+          { n: 'BJJ · 20h-21h', icon: '🥋', color: 'purple', scheme: 'Push manhã não afeta BJJ noite', log: false }
+        ]}
+      ]
+    },
+    ter: {
+      label: 'Terça',
+      title: 'Legs A — Força', tagCls: 'legs', tagTxt: 'LEGS',
+      meta: ['🏋️ ~60 min', '🎯 RPE 7-8', '😴 Sem BJJ'],
+      sections: [
+        { title: 'Principal', dot: 'green', items: [
+          { n: 'Deadlift Barra Hex', icon: '🏋️', color: 'green', scheme: '5 séries × 3-5 reps (pesado)', log: true },
+          { n: 'Agacho Smith', icon: '🏋️', color: 'green', scheme: '4 séries × 6-8 reps', log: true },
+          { n: 'Leg press', icon: '🏋️', color: 'green', scheme: '3 séries × 8-10 reps', log: true },
+          { n: 'Cadeira flexora', icon: '🏋️', color: 'green', scheme: '3 séries × 10-12 reps', log: true },
+          { n: 'Búlgaro halter', icon: '🏋️', color: 'green', scheme: '3 séries × 8 reps cada perna', log: true },
+          { n: 'Panturrilha Smith', icon: '🏋️', color: 'green', scheme: '4 séries × 10-12 reps', log: true }
+        ]},
+        { title: 'Abdômen', dot: 'teal', items: [
+          { n: 'Prancha frontal', icon: '🧘', color: 'teal', scheme: '3 séries × 45-60 segundos', log: true }
+        ]},
+        { title: 'Cardio', dot: 'pink', items: [
+          { n: 'Bike leve', icon: '🚴', color: 'pink', scheme: '5-10 min (desfadiga pernas)', log: false }
+        ]}
+      ]
+    },
+    qua: {
+      label: 'Quarta · Manhã',
+      title: 'Pull A — LEVE', tagCls: 'pull', tagTxt: 'PULL',
+      meta: ['🏋️ ~45 min', '🎯 RPE 6-7', '🥋 BJJ 20h'],
+      info: { cls: 'warn', html: '⚠ <strong>Dia LEVE.</strong> Preserva pegada e dorsal pro BJJ à noite. Não vai à falha.' },
+      sections: [
+        { title: 'Pull-up Fase 1', dot: 'orange', items: [
+          { n: 'Negativa Pull-up', icon: '🎯', color: 'orange', scheme: '4 séries × 3 reps (descer em 5s)', log: true }
+        ]},
+        { title: 'Principal', dot: 'blue', items: [
+          { n: 'Remada baixa cabo', icon: '💪', color: 'blue', scheme: '3 séries × 10-12 reps', log: true },
+          { n: 'Pullover crossover', icon: '💪', color: 'blue', scheme: '3 séries × 12-15 reps', log: true },
+          { n: 'Face pull crossover', icon: '💪', color: 'blue', scheme: '3 séries × 15-20 reps', log: true },
+          { n: 'Rosca alternada halter', icon: '💪', color: 'blue', scheme: '3 séries × 10-12 reps', log: true }
+        ]},
+        { title: 'Pegada', dot: 'orange', items: [
+          { n: 'Dead Hang', icon: '🤚', color: 'orange', scheme: '3 séries até falhar (meta 30s)', log: true }
+        ]},
+        { title: 'Cardio', dot: 'pink', items: [
+          { n: 'Esteira Zona 2', icon: '🏃', color: 'pink', scheme: '15 min · FC 108-126 bpm', log: false }
+        ]},
+        { title: 'BJJ', dot: 'purple', items: [
+          { n: 'BJJ · 20h-21h', icon: '🥋', color: 'purple', scheme: 'Pull leve preserva tatame', log: false }
+        ]}
+      ]
+    },
+    qui: {
+      label: 'Quinta',
+      title: 'Push B — Hipertrofia', tagCls: 'push', tagTxt: 'PUSH',
+      meta: ['🏋️ ~65 min', '🎯 RPE 8', '😴 Sem BJJ'],
+      sections: [
+        { title: 'Principal', dot: 'red', items: [
+          { n: 'Supino inclinado Smith', icon: '💪', color: 'red', scheme: '4 séries × 8-12 reps', log: true },
+          { n: 'Máquina Supino', icon: '💪', color: 'red', scheme: '3 séries × 10-12 reps', log: true },
+          { n: 'Desenv. halter sentado', icon: '💪', color: 'red', scheme: '4 séries × 10-12 reps', log: true },
+          { n: 'Elev. lateral KB', icon: '💪', color: 'red', scheme: '4 séries × 12-15 reps cada', log: true },
+          { n: 'Elev. frontal halter', icon: '⭐', color: 'yellow', tag: { cls: 'ombro', txt: 'OMBRO' }, scheme: '3 séries × 12-15 reps', log: true },
+          { n: 'Crossover alto/baixo', icon: '💪', color: 'red', scheme: '3 séries × 12-15 reps (drop)', log: true },
+          { n: 'Tríceps testa halter', icon: '💪', color: 'red', scheme: '3 séries × 10-12 reps', log: true },
+          { n: 'Rotação externa banda', icon: '🛡️', color: 'indigo', tag: { cls: 'saude', txt: 'SAÚDE' }, scheme: '3 séries × 15-20 reps cada', log: true }
+        ]},
+        { title: 'Abdômen', dot: 'teal', items: [
+          { n: 'Abdominal cabo Cross45', icon: '🧘', color: 'teal', scheme: '3 séries × 12-15 reps', log: true }
+        ]},
+        { title: 'Cardio', dot: 'pink', items: [
+          { n: 'Esteira ou Bike — Zona 2', icon: '🏃', color: 'pink', scheme: '15-20 min · FC 108-126 bpm', log: false }
+        ]}
+      ]
+    },
+    sex: {
+      label: 'Sexta',
+      title: 'Legs B — Hipertrofia', tagCls: 'legs', tagTxt: 'LEGS',
+      meta: ['🏋️ ~60 min', '🎯 RPE 8', '😴 Sem BJJ'],
+      sections: [
+        { title: 'Principal', dot: 'green', items: [
+          { n: 'Leg press', icon: '🏋️', color: 'green', scheme: '4 séries × 10-12 reps (pesado)', log: true },
+          { n: 'Cadeira extensora', icon: '🏋️', color: 'green', scheme: '4 séries × 12-15 reps', log: true },
+          { n: 'Cadeira flexora', icon: '🏋️', color: 'green', scheme: '4 séries × 12-15 reps', log: true },
+          { n: 'Goblet squat KB', icon: '🏋️', color: 'green', scheme: '3 séries × 10-12 reps', log: true },
+          { n: 'Adutor + Abdutor', icon: '🏋️', color: 'green', scheme: '3 séries × 12-15 reps cada', log: true },
+          { n: 'Panturrilha leg press', icon: '🏋️', color: 'green', scheme: '4 séries × 15-20 reps', log: true }
+        ]},
+        { title: 'Pegada', dot: 'orange', items: [
+          { n: 'Rosca punho halter', icon: '🤚', color: 'orange', scheme: '3 séries × 12-15 reps cada', log: true }
+        ]},
+        { title: 'Cardio', dot: 'pink', items: [
+          { n: 'Bike leve', icon: '🚴', color: 'pink', scheme: '5-10 min', log: false }
+        ]}
+      ]
+    },
+    sab: {
+      label: 'Sábado',
+      title: 'Pull B — Pesado', tagCls: 'pull', tagTxt: 'PULL',
+      meta: ['🏋️ ~70 min', '🎯 RPE 8-9', '😴 Sem BJJ'],
+      sections: [
+        { title: 'Pull-up Fase 1', dot: 'orange', items: [
+          { n: 'Pull-up AMRAP', icon: '🎯', color: 'orange', scheme: '2 séries até falhar (3 min descanso)', log: true }
+        ]},
+        { title: 'Principal', dot: 'blue', items: [
+          { n: 'Remada barra hex', icon: '💪', color: 'blue', scheme: '4 séries × 6-8 reps (pesado)', log: true },
+          { n: 'Pulldown supinado', icon: '💪', color: 'blue', scheme: '4 séries × 8-10 reps (pesado)', log: true },
+          { n: 'Remada máquina', icon: '💪', color: 'blue', scheme: '3 séries × 10-12 reps', log: true },
+          { n: 'Rosca scott', icon: '💪', color: 'blue', scheme: '4 séries × 10-12 reps', log: true },
+          { n: 'Rosca corda', icon: '💪', color: 'blue', scheme: '3 séries × 12-15 reps', log: true }
+        ]},
+        { title: 'Abdômen', dot: 'teal', items: [
+          { n: 'Roda abdominal (joelhos)', icon: '🧘', color: 'teal', scheme: '3 séries × 8-12 reps', log: true }
+        ]},
+        { title: 'Finisher', dot: 'red', items: [
+          { n: 'KB swing', icon: '🔥', color: 'red', scheme: '5 séries × 15 reps (90s rest)', log: true }
+        ]},
+        { title: 'Cardio', dot: 'pink', items: [
+          { n: 'Esteira Zona 2', icon: '🏃', color: 'pink', scheme: '15-20 min', log: false }
+        ]}
+      ]
+    },
+    dom: {
+      label: 'Domingo',
+      title: 'Descanso 😴', tagCls: '', tagTxt: '',
+      meta: ['🛌 Recuperação'],
+      info: { cls: 'success', html: '✓ <strong>Domingo é dia de recuperação total.</strong> Sem treino estruturado. Tempo com família, sono em dia.' },
+      sections: [
+        { title: 'Cardio leve (opcional)', dot: 'pink', items: [
+          { n: 'Caminhada / passeio', icon: '🚶', color: 'pink', scheme: '30 min · Zona 1-2', log: false }
+        ]}
+      ]
+    }
+  };
+
+  // ====== STORAGE ======
+  const LS_KEY = 'beastmode.logs.v1';
+  function loadLogs() {
+    try { return JSON.parse(localStorage.getItem(LS_KEY)) || {}; }
+    catch (e) { return {}; }
+  }
+  function saveLogs(logs) {
+    localStorage.setItem(LS_KEY, JSON.stringify(logs));
+  }
+  let LOGS = loadLogs();
+
+  function slug(s) {
+    return s.toLowerCase()
+      .normalize('NFD').replace(/[̀-ͯ]/g, '')
+      .replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  }
+
+  // índice id -> nome (exercícios registráveis)
+  const EX_NAMES = {};
+  Object.values(DAYS).forEach(d => d.sections.forEach(s => s.items.forEach(it => {
+    if (it.log) EX_NAMES[slug(it.n)] = it.n;
+  })));
+
+  // ====== HELPERS DE DATA ======
+  function todayISO() {
+    const d = new Date();
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  }
+  function agoText(iso) {
+    const a = new Date(iso + 'T00:00:00');
+    const b = new Date(todayISO() + 'T00:00:00');
+    const days = Math.round((b - a) / 864e5);
+    if (days <= 0) return 'hoje';
+    if (days === 1) return 'ontem';
+    if (days < 7) return 'há ' + days + 'd';
+    const w = Math.floor(days / 7);
+    return 'há ' + w + 'sem';
+  }
+  function currentWeekIdx() {
+    const wk = Math.floor((Date.now() - PROGRAM_START.getTime()) / (7 * 864e5));
+    return Math.min(Math.max(wk, 0), WEEKS.length - 1);
+  }
+
+  // top set = maior carga; desempate por reps
+  function topSet(session) {
+    return session.sets.reduce((best, s) =>
+      (s.w > best.w || (s.w === best.w && s.r > best.r)) ? s : best, session.sets[0]);
+  }
+  function lastSession(id) {
+    const arr = LOGS[id];
+    if (!arr || !arr.length) return null;
+    return arr[arr.length - 1];
+  }
+
+  // ====== RENDER DO DIA ======
+  let activeDay = null;
+
+  function renderDay(key) {
+    const d = DAYS[key];
+    const root = document.getElementById('day-root');
+    let h = '';
+
+    // Hero
+    const tag = d.tagTxt ? '<span class="tag ' + d.tagCls + '">' + d.tagTxt + '</span>' : '';
+    const wkIdx = currentWeekIdx();
+    const wk = WEEKS[wkIdx];
+    const meta = d.meta.slice();
+    meta.push('📅 Sem ' + (wkIdx + 1) + '/8 · ' + wk.phase + ' · RPE ' + wk.rpe);
+    h += '<div class="day-hero">';
+    h += '<div class="day-hero-label">' + d.label + '</div>';
+    h += '<h2 class="day-hero-title">' + d.title + ' ' + tag + '</h2>';
+    h += '<div class="day-hero-meta">' + meta.map(m => '<div class="day-hero-meta-item">' + m + '</div>').join('') + '</div>';
+    h += '</div>';
+
+    if (d.info) h += '<div class="info-box ' + d.info.cls + '">' + d.info.html + '</div>';
+
+    // Seções
+    d.sections.forEach(sec => {
+      h += '<div class="workout-section">';
+      h += '<div class="workout-section-header"><div class="workout-section-dot" style="background:var(--' + sec.dot + ')"></div>' + sec.title + '</div>';
+      sec.items.forEach(it => {
+        const id = slug(it.n);
+        const tagHtml = it.tag ? ' <span class="tag ' + it.tag.cls + '">' + it.tag.txt + '</span>' : '';
+        let last = '';
+        let badge = '';
+        if (it.log) {
+          const ls = lastSession(id);
+          if (ls) {
+            const ts = topSet(ls);
+            last = '<div class="last-line">último: ' + fmtSet(ts) + ' · ' + agoText(ls.date) + '</div>';
+            if (ls.date === todayISO()) badge = '<div class="done-badge">✓</div>';
+          }
+        }
+        const clickable = it.log ? ' row-clickable' : '';
+        const onclick = it.log ? ' data-ex="' + id + '" data-name="' + it.n.replace(/"/g, '&quot;') + '"' : '';
+        const chevron = it.log ? '<div class="row-chevron">›</div>' : '';
+        h += '<div class="row' + clickable + '"' + onclick + '>';
+        h += '<div class="row-icon ' + it.color + '">' + it.icon + '</div>';
+        h += '<div class="row-content"><div class="row-title">' + it.n + tagHtml + '</div><div class="row-subtitle">' + it.scheme + '</div>' + last + '</div>';
+        h += badge || chevron;
+        h += '</div>';
+      });
+      h += '</div>';
+    });
+
+    root.innerHTML = h;
+    // listeners de log
+    root.querySelectorAll('[data-ex]').forEach(row => {
+      row.addEventListener('click', () => openLog(row.dataset.ex, row.dataset.name));
+    });
+  }
+
+  function fmtSet(s) {
+    const w = (s.w || s.w === 0) ? s.w + 'kg' : '';
+    const r = s.r ? ' × ' + s.r : '';
+    const rpe = s.rpe ? ' @' + s.rpe : '';
+    return (w + r + rpe).trim() || '—';
+  }
+
+  // ====== SHEET DE LOG ======
+  let sheetId = null;
+
+  function openLog(id, name) {
+    sheetId = id;
+    document.getElementById('sheet-title').textContent = name;
+
+    const ls = lastSession(id);
+    document.getElementById('sheet-sub').textContent = ls
+      ? 'Último (' + agoText(ls.date) + '): ' + ls.sets.map(fmtSet).join('  ·  ')
+      : 'Primeira vez registrando este exercício.';
+
+    // pré-popula com séries do último treino (carga sugerida), reps/rpe limpos
+    const setList = document.getElementById('set-list');
+    setList.innerHTML = '';
+    if (ls) {
+      ls.sets.forEach(s => addSetRow(s.w, '', ''));
+    } else {
+      addSetRow('', '', '');
+    }
+
+    document.getElementById('log-note').value = '';
+    document.getElementById('calc-side').value = '';
+    document.getElementById('calc-bar').value = '22';
+    updateCalc();
+
+    document.getElementById('sheet-overlay').classList.add('open');
+    document.getElementById('sheet').classList.add('open');
+  }
+
+  function closeLog() {
+    document.getElementById('sheet-overlay').classList.remove('open');
+    document.getElementById('sheet').classList.remove('open');
+    sheetId = null;
+  }
+
+  function addSetRow(w, r, rpe) {
+    const list = document.getElementById('set-list');
+    const idx = list.children.length + 1;
+    const div = document.createElement('div');
+    div.className = 'set-row';
+    div.innerHTML =
+      '<div class="set-n">' + idx + '</div>' +
+      '<input class="fld set-w" inputmode="decimal" placeholder="kg" value="' + (w !== '' && w != null ? w : '') + '">' +
+      '<input class="fld set-r" inputmode="numeric" placeholder="reps" value="' + (r !== '' && r != null ? r : '') + '">' +
+      '<input class="fld set-rpe" inputmode="decimal" placeholder="rpe" value="' + (rpe !== '' && rpe != null ? rpe : '') + '">' +
+      '<button class="set-del" type="button">×</button>';
+    div.querySelector('.set-del').addEventListener('click', () => {
+      div.remove();
+      renumberSets();
+    });
+    list.appendChild(div);
+  }
+
+  function renumberSets() {
+    document.querySelectorAll('#set-list .set-row').forEach((row, i) => {
+      row.querySelector('.set-n').textContent = i + 1;
+    });
+  }
+
+  function updateCalc() {
+    const bar = parseFloat(document.getElementById('calc-bar').value) || 0;
+    const side = parseFloat(document.getElementById('calc-side').value) || 0;
+    const total = bar + side * 2;
+    document.getElementById('calc-total').textContent = total + ' kg';
+    return total;
+  }
+
+  function saveLog() {
+    if (!sheetId) return;
+    const sets = [];
+    document.querySelectorAll('#set-list .set-row').forEach(row => {
+      const w = parseFloat(row.querySelector('.set-w').value);
+      const r = parseInt(row.querySelector('.set-r').value, 10);
+      const rpe = parseFloat(row.querySelector('.set-rpe').value);
+      if (!isNaN(w) || !isNaN(r)) {
+        sets.push({ w: isNaN(w) ? 0 : w, r: isNaN(r) ? 0 : r, rpe: isNaN(rpe) ? 0 : rpe });
+      }
+    });
+    if (!sets.length) { closeLog(); return; }
+
+    const note = document.getElementById('log-note').value.trim();
+    const today = todayISO();
+    if (!LOGS[sheetId]) LOGS[sheetId] = [];
+    // se já houver registro de hoje, substitui (re-edição do dia)
+    const arr = LOGS[sheetId];
+    const existingIdx = arr.findIndex(s => s.date === today);
+    const entry = { date: today, sets: sets, note: note };
+    if (existingIdx >= 0) arr[existingIdx] = entry; else arr.push(entry);
+    arr.sort((a, b) => a.date.localeCompare(b.date));
+
+    saveLogs(LOGS);
+    closeLog();
+    renderDay(activeDay);
+    refreshProgressSelect();
+  }
+
+  // ====== PROGRESSO ======
+  function refreshProgressSelect() {
+    const sel = document.getElementById('progress-select');
+    const prev = sel.value;
+    const logged = Object.keys(LOGS).filter(id => LOGS[id] && LOGS[id].length);
+    if (!logged.length) {
+      sel.innerHTML = '<option>Sem registros ainda</option>';
+      document.getElementById('progress-body').innerHTML =
+        '<div class="empty">Registra um treino tocando num exercício na aba <strong>Treino</strong>.<br>O gráfico de evolução aparece aqui.</div>';
+      return;
+    }
+    sel.innerHTML = logged.map(id =>
+      '<option value="' + id + '">' + (EX_NAMES[id] || id) + '</option>').join('');
+    if (logged.includes(prev)) sel.value = prev;
+    drawProgress(sel.value);
+  }
+
+  function drawProgress(id) {
+    const body = document.getElementById('progress-body');
+    const arr = LOGS[id];
+    if (!arr || !arr.length) { body.innerHTML = ''; return; }
+
+    const points = arr.map(s => ({ date: s.date, v: topSet(s).w }));
+    let pr = 0, prReps = 0;
+    arr.forEach(s => s.sets.forEach(set => {
+      if (set.w > pr) { pr = set.w; prReps = set.r; }
+    }));
+    const last = arr[arr.length - 1];
+    const lastTop = topSet(last);
+
+    body.innerHTML =
+      '<div class="chart-card"><canvas id="chart"></canvas></div>' +
+      '<div class="stats-grid">' +
+        '<div class="stat-box"><div class="stat-label">PR carga</div><div class="stat-value">' + pr + 'kg</div><div class="stat-detail">' + (prReps ? '× ' + prReps + ' reps' : '') + '</div></div>' +
+        '<div class="stat-box"><div class="stat-label">Sessões</div><div class="stat-value">' + arr.length + '</div><div class="stat-detail">registradas</div></div>' +
+        '<div class="stat-box"><div class="stat-label">Último top set</div><div class="stat-value">' + lastTop.w + 'kg</div><div class="stat-detail">' + fmtSet(lastTop) + '</div></div>' +
+        '<div class="stat-box"><div class="stat-label">Última sessão</div><div class="stat-value">' + agoText(last.date) + '</div><div class="stat-detail">' + last.date.split('-').reverse().slice(0, 2).join('/') + '</div></div>' +
+      '</div>';
+
+    drawChart(document.getElementById('chart'), points);
+  }
+
+  function drawChart(cv, pts) {
+    const dpr = window.devicePixelRatio || 1;
+    const cssW = cv.clientWidth, cssH = cv.clientHeight;
+    cv.width = cssW * dpr; cv.height = cssH * dpr;
+    const ctx = cv.getContext('2d');
+    if (!ctx) return;
+    ctx.scale(dpr, dpr);
+    ctx.clearRect(0, 0, cssW, cssH);
+    if (!pts.length) return;
+
+    const pad = 34;
+    const vals = pts.map(p => p.v);
+    let min = Math.min.apply(null, vals);
+    let max = Math.max.apply(null, vals);
+    if (min === max) { min -= 5; max += 5; }
+    const span = max - min;
+    const n = pts.length;
+    const x = i => pad + (n === 1 ? (cssW - 2 * pad) / 2 : i * (cssW - 2 * pad) / (n - 1));
+    const y = v => (cssH - pad) - (v - min) / span * (cssH - 2 * pad);
+
+    // grid min/max labels
+    ctx.fillStyle = 'rgba(235,235,245,0.35)';
+    ctx.font = '11px -apple-system, sans-serif';
+    ctx.fillText(max + 'kg', 4, y(max) + 4);
+    ctx.fillText(min + 'kg', 4, y(min) + 4);
+
+    // linha
+    ctx.strokeStyle = '#0A84FF';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    pts.forEach((p, i) => { i ? ctx.lineTo(x(i), y(p.v)) : ctx.moveTo(x(i), y(p.v)); });
+    ctx.stroke();
+
+    // pontos
+    pts.forEach((p, i) => {
+      ctx.fillStyle = (p.v === max) ? '#30D158' : '#0A84FF';
+      ctx.beginPath();
+      ctx.arc(x(i), y(p.v), 4, 0, 2 * Math.PI);
+      ctx.fill();
+    });
+  }
+
+  // ====== NAVEGAÇÃO ======
   function getDayKey() {
     const days = ['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sab'];
     return days[new Date().getDay()];
@@ -1633,53 +1725,59 @@
 
   function selectDay(day) {
     document.querySelectorAll('.day-pill').forEach(p => p.classList.remove('active'));
-    document.querySelectorAll('.day-content').forEach(c => c.classList.remove('active'));
-    
-    const pill = document.querySelector(`.day-pill[data-day="${day}"]`);
-    const content = document.getElementById(`day-${day}`);
-    if (pill) pill.classList.add('active');
-    if (content) content.classList.add('active');
-    
-    // Scroll pill into view
+    const pill = document.querySelector('.day-pill[data-day="' + day + '"]');
     if (pill) {
-      pill.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+      pill.classList.add('active');
+      if (pill.scrollIntoView) pill.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
     }
+    activeDay = day;
+    renderDay(day);
   }
 
   function switchView(viewId) {
     document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-    
     document.getElementById(viewId).classList.add('active');
-    document.querySelector(`.tab[data-view="${viewId}"]`).classList.add('active');
-    
-    // Atualiza header
+    document.querySelector('.tab[data-view="' + viewId + '"]').classList.add('active');
+
     const titles = {
       'view-week': { title: 'Treino', sub: 'Programa Completo · Início 22/06' },
       'view-program': { title: 'Programa', sub: 'Cronograma 8 Semanas' },
+      'view-progress': { title: 'Progresso', sub: 'Evolução de cargas registradas' },
       'view-technique': { title: 'Técnica', sub: 'RPE · Execução de exercícios' },
       'view-bjj': { title: 'BJJ', sub: 'Mobilidade + Guardas' }
     };
     const t = titles[viewId];
     document.getElementById('header-title').textContent = t.title;
     document.getElementById('header-sub').textContent = t.sub;
-    
+    if (viewId === 'view-progress') refreshProgressSelect();
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
-  // Event listeners
+  // ====== LISTENERS ======
   document.querySelectorAll('.day-pill').forEach(pill => {
     pill.addEventListener('click', () => selectDay(pill.dataset.day));
   });
-
   document.querySelectorAll('.tab').forEach(tab => {
     tab.addEventListener('click', () => switchView(tab.dataset.view));
   });
 
-  // Inicializa no dia atual
-  document.addEventListener('DOMContentLoaded', () => {
-    selectDay(getDayKey());
+  document.getElementById('add-set').addEventListener('click', () => addSetRow('', '', ''));
+  document.getElementById('save-log').addEventListener('click', saveLog);
+  document.getElementById('cancel-log').addEventListener('click', closeLog);
+  document.getElementById('sheet-overlay').addEventListener('click', closeLog);
+  document.getElementById('calc-bar').addEventListener('input', updateCalc);
+  document.getElementById('calc-side').addEventListener('input', updateCalc);
+  document.getElementById('calc-use').addEventListener('click', () => {
+    const total = updateCalc();
+    // preenche a primeira série com carga vazia, ou adiciona nova
+    const empty = Array.from(document.querySelectorAll('#set-list .set-w')).find(i => !i.value);
+    if (empty) empty.value = total;
+    else addSetRow(total, '', '');
   });
+  document.getElementById('progress-select').addEventListener('change', e => drawProgress(e.target.value));
+
+  // ====== INIT ======
   selectDay(getDayKey());
 </script>
 
