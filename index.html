@@ -689,6 +689,55 @@
     color: var(--label-secondary);
     margin-top: 2px;
   }
+  .hist {
+    margin-top: 10px;
+    border-top: 0.5px solid var(--separator);
+    padding-top: 8px;
+  }
+  .hist summary {
+    font-size: 12px;
+    color: var(--blue);
+    cursor: pointer;
+    list-style: none;
+    font-weight: 600;
+  }
+  .hist summary::-webkit-details-marker { display: none; }
+  .hist summary::before { content: '▸ '; }
+  .hist[open] summary::before { content: '▾ '; }
+  .hist-row {
+    display: flex;
+    gap: 10px;
+    padding: 6px 0;
+    border-bottom: 0.5px solid var(--separator);
+    font-size: 13px;
+    flex-wrap: wrap;
+  }
+  .hist-row:last-child { border-bottom: none; }
+  .hist-date { color: var(--label-secondary); min-width: 42px; font-weight: 600; }
+  .hist-sets { flex: 1; min-width: 0; }
+  .hist-note {
+    width: 100%;
+    font-size: 12px;
+    color: var(--label-secondary);
+    font-style: italic;
+    margin-top: 2px;
+  }
+
+  /* Saúde */
+  .health-charts { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .health-charts .chart-card { margin: 0; padding: 10px; }
+  .health-charts canvas { height: 130px; }
+  .health-charts .prog-name { font-size: 13px; }
+  .lab-status {
+    flex-shrink: 0;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 6px;
+  }
+  .lab-status.ok { background: rgba(48,209,88,0.2); color: var(--green); }
+  .lab-status.warn { background: rgba(255,159,10,0.2); color: var(--orange); }
+  .lab-status.bad { background: rgba(255,69,58,0.2); color: var(--red); }
   .empty {
     text-align: center;
     color: var(--label-secondary);
@@ -1055,6 +1104,90 @@
   </div>
 </div>
 
+<!-- VIEW: SAÚDE -->
+<div class="view" id="view-health">
+  <div class="container">
+
+    <div class="info-box">
+      🩺 <strong>Baseline Junho/2026.</strong> DEXA Lunar Prodigy (20/06) é padrão ouro. InBody mensal pra acompanhar.
+    </div>
+
+    <div class="section">
+      <div class="section-header"><p class="section-title">Composição Corporal (atual)</p></div>
+      <div class="stats-grid">
+        <div class="stat-box"><div class="stat-label">Peso real</div><div class="stat-value">~104<span style="font-size:14px">kg</span></div><div class="stat-detail">DEXA ajustado</div></div>
+        <div class="stat-box"><div class="stat-label">% Gordura</div><div class="stat-value">~15,7<span style="font-size:14px">%</span></div><div class="stat-detail">meta 6m: 12-13%</div></div>
+        <div class="stat-box"><div class="stat-label">Massa magra</div><div class="stat-value">86,2<span style="font-size:14px">kg</span></div><div class="stat-detail">preservar/ganhar</div></div>
+        <div class="stat-box"><div class="stat-label">Massa gorda</div><div class="stat-value">~17,5<span style="font-size:14px">kg</span></div><div class="stat-detail">meta 6m: 11-12kg</div></div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-header"><p class="section-title">Trajetória das Metas</p></div>
+      <div class="health-charts">
+        <div class="chart-card"><div class="prog-head"><div class="prog-name">% Gordura</div></div><canvas id="chart-fat"></canvas></div>
+        <div class="chart-card"><div class="prog-head"><div class="prog-name">Peso (kg)</div></div><canvas id="chart-weight"></canvas></div>
+      </div>
+      <div class="info-box" style="margin-top:8px;font-size:12px">Hoje → 3 meses → 6 meses. Verde = alvo (menor é melhor).</div>
+    </div>
+
+    <div class="section">
+      <div class="section-header"><p class="section-title">Indicadores DEXA (20/06)</p></div>
+      <div class="card">
+        <div class="row"><div class="row-content"><div class="row-title">T-score</div><div class="row-subtitle">Densidade óssea — elite atlética</div></div><div class="lab-status ok">+3,8 🏆</div></div>
+        <div class="row"><div class="row-content"><div class="row-title">BMD Total</div><div class="row-subtitle">~30% acima da média</div></div><div class="lab-status ok">1,581</div></div>
+        <div class="row"><div class="row-content"><div class="row-title">RSMI</div><div class="row-subtitle">71% acima do limite de sarcopenia</div></div><div class="lab-status ok">12,45</div></div>
+        <div class="row"><div class="row-content"><div class="row-title">Gordura andróide</div><div class="row-subtitle">Abdominal — limítrofe</div></div><div class="lab-status warn">18,5%</div></div>
+        <div class="row"><div class="row-content"><div class="row-title">Taxa A/G</div><div class="row-subtitle">Ideal &lt;1,0 — limítrofe</div></div><div class="lab-status warn">1,04</div></div>
+        <div class="row"><div class="row-content"><div class="row-title">% Gordura tronco</div><div class="row-subtitle">Ponto fraco a melhorar</div></div><div class="lab-status warn">17,0%</div></div>
+        <div class="row"><div class="row-content"><div class="row-title">TMR (Harris-Benedict)</div><div class="row-subtitle">Taxa metabólica de repouso</div></div><div class="lab-status ok">2.169 kcal</div></div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-header"><p class="section-title">Exames Laboratoriais</p></div>
+      <div class="card">
+        <div class="row"><div class="row-content"><div class="row-title">HbA1c</div><div class="row-subtitle">Pré-diabetes — refazer</div></div><div class="lab-status bad">5,9%</div></div>
+        <div class="row"><div class="row-content"><div class="row-title">Vitamina D</div><div class="row-subtitle">Em queda — suplementar 2-4k UI/dia</div></div><div class="lab-status warn">27</div></div>
+        <div class="row"><div class="row-content"><div class="row-title">Estradiol (E2)</div><div class="row-subtitle">Acima do ideal (≤39,8) · fev/26</div></div><div class="lab-status warn">44,6</div></div>
+        <div class="row"><div class="row-content"><div class="row-title">eGFR</div><div class="row-subtitle">Função renal — limítrofe</div></div><div class="lab-status warn">76</div></div>
+        <div class="row"><div class="row-content"><div class="row-title">Creatinina</div><div class="row-subtitle">No limite</div></div><div class="lab-status warn">1,23</div></div>
+        <div class="row"><div class="row-content"><div class="row-title">HDL</div><div class="row-subtitle">No limite inferior</div></div><div class="lab-status warn">40</div></div>
+        <div class="row"><div class="row-content"><div class="row-title">Pressão noturna</div><div class="row-subtitle">Média — limítrofe</div></div><div class="lab-status warn">129/77</div></div>
+        <div class="row"><div class="row-content"><div class="row-title">Rim direito</div><div class="row-subtitle">Cálculo — monitorar</div></div><div class="lab-status warn">0,35cm</div></div>
+        <div class="row"><div class="row-content"><div class="row-title">Rim esquerdo</div><div class="row-subtitle">Cisto — monitorar</div></div><div class="lab-status warn">1,6cm</div></div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-header"><p class="section-title">Metas de Composição</p></div>
+      <div class="table-card">
+        <div class="table-header" style="grid-template-columns: 1fr 70px 70px 70px;">
+          <div>Métrica</div><div>Hoje</div><div>3m</div><div>6m</div>
+        </div>
+        <div class="table-row" style="grid-template-columns: 1fr 70px 70px 70px;"><div>% Gordura</div><div class="table-cell-meta">15,7</div><div class="table-cell-meta">14-15</div><div class="table-cell-meta" style="color:var(--green)">12-13</div></div>
+        <div class="table-row" style="grid-template-columns: 1fr 70px 70px 70px;"><div>Massa gorda</div><div class="table-cell-meta">17,5</div><div class="table-cell-meta">14-15</div><div class="table-cell-meta" style="color:var(--green)">11-12</div></div>
+        <div class="table-row" style="grid-template-columns: 1fr 70px 70px 70px;"><div>Massa magra</div><div class="table-cell-meta">86,2</div><div class="table-cell-meta">86-87</div><div class="table-cell-meta" style="color:var(--green)">87-88</div></div>
+        <div class="table-row" style="grid-template-columns: 1fr 70px 70px 70px;"><div>% Tronco</div><div class="table-cell-meta">17,0</div><div class="table-cell-meta">14-15</div><div class="table-cell-meta" style="color:var(--green)">12-13</div></div>
+        <div class="table-row" style="grid-template-columns: 1fr 70px 70px 70px;"><div>Taxa A/G</div><div class="table-cell-meta">1,04</div><div class="table-cell-meta">&lt;1,0</div><div class="table-cell-meta" style="color:var(--green)">0,9-0,95</div></div>
+        <div class="table-row" style="grid-template-columns: 1fr 70px 70px 70px;"><div>Peso</div><div class="table-cell-meta">~104</div><div class="table-cell-meta">100-102</div><div class="table-cell-meta" style="color:var(--green)">97-99</div></div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-header"><p class="section-title">Lembretes / Pendências</p></div>
+      <div class="card">
+        <div class="row"><div class="row-icon red">📞</div><div class="row-content"><div class="row-title">VAT em gramas no DEXA</div><div class="row-subtitle">Ligar Delboni (11) 3049-6999</div></div></div>
+        <div class="row"><div class="row-icon orange">📸</div><div class="row-content"><div class="row-title">Foto baseline + cintura</div><div class="row-subtitle">Frente/lado/costas · medir no umbigo</div></div></div>
+        <div class="row"><div class="row-icon blue">🧪</div><div class="row-content"><div class="row-title">Exames hormonais</div><div class="row-subtitle">Out/2026 — Testo, E2, SHBG, VitD, HbA1c</div></div></div>
+        <div class="row"><div class="row-icon purple">🦴</div><div class="row-content"><div class="row-title">Re-DEXA</div><div class="row-subtitle">Dez/2026 — mesma unidade Delboni Itaim</div></div></div>
+        <div class="row"><div class="row-icon teal">💧</div><div class="row-content"><div class="row-title">Hidratação 3-4 L/dia</div><div class="row-subtitle">eGFR limítrofe pede atenção</div></div></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
 <!-- VIEW: BJJ -->
 <div class="view" id="view-bjj">
   <div class="container">
@@ -1248,6 +1381,10 @@
   <div class="tab" data-view="view-progress">
     <div class="tab-icon">📈</div>
     <div class="tab-label">Progresso</div>
+  </div>
+  <div class="tab" data-view="view-health">
+    <div class="tab-icon">🩺</div>
+    <div class="tab-label">Saúde</div>
   </div>
   <div class="tab" data-view="view-technique">
     <div class="tab-icon">📖</div>
@@ -1476,6 +1613,13 @@
   function currentWeekIdx() {
     const wk = Math.floor((Date.now() - PROGRAM_START.getTime()) / (7 * 864e5));
     return Math.min(Math.max(wk, 0), WEEKS.length - 1);
+  }
+  function fmtDate(iso) {
+    const p = iso.split('-');
+    return p[2] + '/' + p[1];
+  }
+  function esc(s) {
+    return String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
   }
 
   // top set = maior carga; desempate por reps
@@ -1715,6 +1859,13 @@
           '<div class="prog-meta">PR ' + pr + sfx + (prReps ? '×' + prReps : '') + ' · último ' + fmtSet(lastTop, unit) + ' · ' + agoText(last.date) + '</div>' +
         '</div>' +
         '<canvas class="prog-canvas" data-id="' + id + '"></canvas>' +
+        '<details class="hist"><summary>Histórico (' + arr.length + ' sessões)</summary>' +
+          arr.slice().reverse().map(s =>
+            '<div class="hist-row"><span class="hist-date">' + fmtDate(s.date) + '</span>' +
+            '<span class="hist-sets">' + s.sets.map(x => fmtSet(x, unit)).join(' · ') + '</span>' +
+            (s.note ? '<div class="hist-note">' + esc(s.note) + '</div>' : '') + '</div>'
+          ).join('') +
+        '</details>' +
       '</div>';
     });
     if (pending > 0) h += '<div class="empty" style="padding:12px">' + pending + ' exercício(s) deste treino ainda sem registro.</div>';
@@ -1726,8 +1877,9 @@
     });
   }
 
-  function drawChart(cv, pts, unit) {
-    const sfx = unit === 'seg' ? 's' : 'kg';
+  function drawChart(cv, pts, unit, opts) {
+    opts = opts || {};
+    const sfx = unit === 'seg' ? 's' : (unit || 'kg');
     const dpr = window.devicePixelRatio || 1;
     const cssW = cv.clientWidth, cssH = cv.clientHeight;
     cv.width = cssW * dpr; cv.height = cssH * dpr;
@@ -1753,6 +1905,14 @@
     ctx.fillText(max + sfx, 4, y(max) + 4);
     ctx.fillText(min + sfx, 4, y(min) + 4);
 
+    // rótulos do eixo X (opcional)
+    if (opts.xlabels) {
+      ctx.fillStyle = 'rgba(235,235,245,0.45)';
+      ctx.textAlign = 'center';
+      opts.xlabels.forEach((lb, i) => ctx.fillText(lb, x(i), cssH - 6));
+      ctx.textAlign = 'start';
+    }
+
     // linha
     ctx.strokeStyle = '#0A84FF';
     ctx.lineWidth = 2;
@@ -1760,9 +1920,10 @@
     pts.forEach((p, i) => { i ? ctx.lineTo(x(i), y(p.v)) : ctx.moveTo(x(i), y(p.v)); });
     ctx.stroke();
 
-    // pontos
+    // pontos (verde = melhor valor; bestLow => menor é melhor)
+    const best = opts.bestLow ? min : max;
     pts.forEach((p, i) => {
-      ctx.fillStyle = (p.v === max) ? '#30D158' : '#0A84FF';
+      ctx.fillStyle = (p.v === best) ? '#30D158' : '#0A84FF';
       ctx.beginPath();
       ctx.arc(x(i), y(p.v), 4, 0, 2 * Math.PI);
       ctx.fill();
@@ -1796,6 +1957,7 @@
       'view-week': { title: 'Treino', sub: 'Programa Completo · Início 22/06' },
       'view-program': { title: 'Programa', sub: 'Cronograma 8 Semanas' },
       'view-progress': { title: 'Progresso', sub: 'Evolução de cargas registradas' },
+      'view-health': { title: 'Saúde', sub: 'Exames · DEXA · Metas' },
       'view-technique': { title: 'Técnica', sub: 'RPE · Execução de exercícios' },
       'view-bjj': { title: 'BJJ', sub: 'Mobilidade + Guardas' }
     };
@@ -1803,7 +1965,15 @@
     document.getElementById('header-title').textContent = t.title;
     document.getElementById('header-sub').textContent = t.sub;
     if (viewId === 'view-progress') openProgress();
+    if (viewId === 'view-health') drawHealthCharts();
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function drawHealthCharts() {
+    drawChart(document.getElementById('chart-fat'),
+      [{ v: 15.7 }, { v: 14.5 }, { v: 12.5 }], '%', { bestLow: true, xlabels: ['Hoje', '3m', '6m'] });
+    drawChart(document.getElementById('chart-weight'),
+      [{ v: 104 }, { v: 101 }, { v: 98 }], 'kg', { bestLow: true, xlabels: ['Hoje', '3m', '6m'] });
   }
 
   function defaultProgressGroup() {
