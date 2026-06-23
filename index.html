@@ -610,6 +610,12 @@
     margin: 0 0 2px;
     letter-spacing: -0.3px;
   }
+  .sheet-plan {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--blue);
+    margin: 0 0 2px;
+  }
   .sheet-sub {
     font-size: 13px;
     color: var(--label-secondary);
@@ -1505,6 +1511,7 @@
     <button class="sheet-close" id="sheet-close" type="button" aria-label="Fechar">✕</button>
   </div>
   <h2 class="sheet-title" id="sheet-title">Exercício</h2>
+  <p class="sheet-plan" id="sheet-plan"></p>
   <p class="sheet-sub" id="sheet-sub"></p>
   <div id="log-suggest"></div>
   <div id="log-demo"></div>
@@ -2187,6 +2194,7 @@
     sheetId = id;
     currentUnit = EX_UNIT[id] || 'kg';
     document.getElementById('sheet-title').textContent = name;
+    document.getElementById('sheet-plan').textContent = '🎯 Programa: ' + (EX_SCHEME[id] || '');
     document.getElementById('set-head-w').textContent = currentUnit === 'seg' ? 'Seg' : 'Carga';
     // exercício de tempo (prancha/dead hang): esconde coluna de reps
     document.getElementById('sheet').classList.toggle('unit-seg', currentUnit === 'seg');
