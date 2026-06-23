@@ -1648,7 +1648,7 @@
         rerenderAll();
       }
       await pushState();
-      setSyncStatus('sincronizado ✓');
+      setSyncStatus('✓ Sincronizado');
     } catch (e) { setSyncStatus('erro: ' + (e.message || e)); }
   }
 
@@ -1666,7 +1666,7 @@
     setSyncStatus('pendente…');
     clearTimeout(pushTimer);
     pushTimer = setTimeout(async () => {
-      try { await pushState(); setSyncStatus('sincronizado ✓'); }
+      try { await pushState(); setSyncStatus('✓ Sincronizado'); }
       catch (e) { setSyncStatus('pendente (sem rede)'); }
     }, 1500);
   }
@@ -1703,7 +1703,7 @@
     }
     if (sbUser) {
       box.innerHTML =
-        '<div class="info-box success" style="font-size:13px">✓ Conectado: <strong>' + esc(sbUser.email) + '</strong><br><span id="sync-status">' + (sbStatus || 'sincronizado ✓') + '</span></div>' +
+        '<div class="info-box success" style="font-size:13px">✓ Conectado: <strong>' + esc(sbUser.email) + '</strong><br><span id="sync-status">' + (sbStatus || '✓ Sincronizado') + '</span></div>' +
         '<button class="btn btn-ghost" id="sync-now">Sincronizar agora</button>' +
         '<button class="btn btn-ghost" id="sync-out">Sair</button>';
       box.querySelector('#sync-now').addEventListener('click', fullSync);
