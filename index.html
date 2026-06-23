@@ -1031,7 +1031,7 @@
       </div>
     </div>
 
-    <div class="section">
+    <div class="section" id="pullup-section">
       <div class="section-header">
         <p class="section-title">Programa Pull-up</p>
       </div>
@@ -1286,7 +1286,7 @@
           <div class="row-content"><div class="row-title">Saúde</div><div class="row-subtitle">Exames, DEXA, metas</div></div>
           <div class="row-chevron">›</div>
         </div>
-        <div class="row row-clickable" data-goto="view-bjj">
+        <div class="row row-clickable" data-goto="view-bjj" id="menu-bjj-row">
           <div class="row-icon purple">🥋</div>
           <div class="row-content"><div class="row-title">BJJ</div><div class="row-subtitle">Mobilidade + guardas</div></div>
           <div class="row-chevron">›</div>
@@ -1567,13 +1567,14 @@
     if (!sb || !sbUser) return;
     setSyncStatus('sincronizando…');
     try {
-      const { data, error } = await sb.from('app_state').select('logs,done,health').eq('user_id', sbUser.id).maybeSingle();
+      const { data, error } = await sb.from('app_state').select('logs,done,health,program').eq('user_id', sbUser.id).maybeSingle();
       if (error) throw error;
       if (data) {
         mergeLogs(data.logs || {});
         mergeDone(data.done || []);
         if (data.health) healthData = data.health;
         saveLogs(LOGS); saveDone();
+        applyProgram(data.program || DEFAULT_PROGRAM); // programa da conta (ou padrão)
         rerenderAll();
         if (document.getElementById('view-health').classList.contains('active')) renderHealth();
       }
@@ -1621,7 +1622,9 @@
   }
   async function sbSignOut() {
     try { await sb.auth.signOut(); } catch (e) {}
-    sbUser = null; setSyncStatus(''); renderSyncBox();
+    sbUser = null; healthData = null; setSyncStatus(''); renderSyncBox();
+    applyProgram(DEFAULT_PROGRAM); // volta ao programa padrão ao sair
+    if (document.getElementById('view-health').classList.contains('active')) renderHealth();
   }
 
   function renderSyncBox() {
@@ -1651,8 +1654,8 @@
   }
 
   // ====== DADOS DO PROGRAMA ======
-  const PROGRAM_START = new Date(2026, 5, 22); // 22/06/2026
-  const WEEKS = [
+  let PROGRAM_START = new Date(2026, 5, 22); // 22/06/2026 (default; sobrescrito pela conta)
+  let WEEKS = [
     { phase: 'Acumulação · F1', rpe: '7' },
     { phase: 'Intensificação · F1', rpe: '8' },
     { phase: 'Intensificação · F1', rpe: '8-9' },
@@ -1662,9 +1665,11 @@
     { phase: 'Intensificação · F2', rpe: '8' },
     { phase: 'Realização · F2', rpe: '9' }
   ];
+  let showBjj = true;   // visível por conta (esposa não pratica)
+  let hasPullup = true; // tabela do programa pull-up por conta
 
   // log:true => exercício registrável (abre sheet). Cardio/BJJ ficam informativos.
-  const DAYS = {
+  let DAYS = {
     seg: {
       label: 'Segunda · Manhã',
       title: 'Push A — Força', tagCls: 'push', tagTxt: 'PUSH',
@@ -1817,6 +1822,34 @@
     }
   };
 
+  // programa padrão (meu) — usado quando a conta não tem programa próprio
+  const DEFAULT_PROGRAM = {
+    start: '2026-06-22', weeks: WEEKS, days: DAYS, bjj: true, pullup: true
+  };
+
+  // aplica um programa (da conta ou o padrão): troca DAYS/início/semanas/flags e re-renderiza
+  function applyProgram(p) {
+    p = p || DEFAULT_PROGRAM;
+    DAYS = p.days || DEFAULT_PROGRAM.days;
+    WEEKS = p.weeks || DEFAULT_PROGRAM.weeks;
+    showBjj = p.bjj !== false;
+    hasPullup = p.pullup !== false;
+    if (p.start) { const a = p.start.split('-'); PROGRAM_START = new Date(+a[0], +a[1] - 1, +a[2]); }
+    buildExIndexes();
+    renderDayPills();
+    buildProgressGroups();
+    renderCronograma();
+    applyProgramVisibility();
+    if (activeDay) selectDay(activeDay); else selectDay(getDayKey());
+  }
+
+  function applyProgramVisibility() {
+    const bjjRow = document.getElementById('menu-bjj-row');
+    if (bjjRow) bjjRow.style.display = showBjj ? '' : 'none';
+    const pu = document.getElementById('pullup-section');
+    if (pu) pu.style.display = hasPullup ? '' : 'none';
+  }
+
   // ====== STORAGE ======
   const LS_KEY = 'beastmode.logs.v1';
   function loadLogs() {
@@ -1944,19 +1977,20 @@
       .replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
   }
 
-  // índice id -> nome (exercícios registráveis) + set dos que usam Smith
-  const EX_NAMES = {};
-  const EX_SMITH = {};
-  const EX_UNIT = {};
-  const EX_SCHEME = {};
-  Object.values(DAYS).forEach(d => d.sections.forEach(s => s.items.forEach(it => {
-    if (it.log) {
-      EX_NAMES[slug(it.n)] = it.n;
-      if (it.smith) EX_SMITH[slug(it.n)] = true;
-      EX_UNIT[slug(it.n)] = it.unit || 'kg';
-      EX_SCHEME[slug(it.n)] = it.scheme;
-    }
-  })));
+  // índices id -> {nome, smith, unidade, scheme} — reconstruídos quando o programa muda
+  let EX_NAMES = {}, EX_SMITH = {}, EX_UNIT = {}, EX_SCHEME = {};
+  function buildExIndexes() {
+    EX_NAMES = {}; EX_SMITH = {}; EX_UNIT = {}; EX_SCHEME = {};
+    Object.values(DAYS).forEach(d => d.sections.forEach(s => s.items.forEach(it => {
+      if (it.log) {
+        EX_NAMES[slug(it.n)] = it.n;
+        if (it.smith) EX_SMITH[slug(it.n)] = true;
+        EX_UNIT[slug(it.n)] = it.unit || 'kg';
+        EX_SCHEME[slug(it.n)] = it.scheme;
+      }
+    })));
+  }
+  buildExIndexes();
 
   // extrai nº de séries e reps-alvo do texto do programa
   function parseScheme(scheme) {
@@ -2376,8 +2410,41 @@
 
   // ====== PROGRESSO (agrupado por treino) ======
   const PROGRESS_GROUPS = ['seg', 'ter', 'qua', 'qui', 'sex', 'sab'];
-  const DAY_ABBR = { seg: 'Seg', ter: 'Ter', qua: 'Qua', qui: 'Qui', sex: 'Sex', sab: 'Sáb' };
+  const DAY_ABBR = { seg: 'Seg', ter: 'Ter', qua: 'Qua', qui: 'Qui', sex: 'Sex', sab: 'Sáb', dom: 'Dom' };
   let activeGroup = null;
+
+  // pills de dias (renderizadas do DAYS — mudam por programa)
+  function renderDayPills() {
+    const wrap = document.getElementById('day-pills');
+    if (!wrap) return;
+    wrap.innerHTML = ['seg', 'ter', 'qua', 'qui', 'sex', 'sab', 'dom'].map(k => {
+      const d = DAYS[k];
+      const type = d ? d.title.split(' — ')[0].replace('Descanso 😴', 'Rest') : '';
+      return '<div class="day-pill" data-day="' + k + '"><div class="day-pill-name">' + DAY_ABBR[k] +
+        '</div><div class="day-pill-type">' + esc(type) + '</div></div>';
+    }).join('');
+    wrap.querySelectorAll('.day-pill').forEach(p => p.addEventListener('click', () => selectDay(p.dataset.day)));
+  }
+
+  // cronograma (datas calculadas do início + fases das WEEKS)
+  function renderCronograma() {
+    const card = document.getElementById('cronograma-rows');
+    if (!card) return;
+    const dd = x => String(x.getDate()).padStart(2, '0') + '/' + String(x.getMonth() + 1).padStart(2, '0');
+    let h = '<div class="table-header"><div>Sem</div><div>Fase</div><div>RPE</div><div>Datas</div></div>';
+    WEEKS.forEach((w, i) => {
+      const a = new Date(PROGRAM_START.getTime() + i * 7 * 864e5);
+      const b = new Date(a.getTime() + 6 * 864e5);
+      const deload = /deload/i.test(w.phase);
+      h += '<div class="table-row' + (deload ? ' deload' : '') + '">' +
+        '<div class="table-cell-week"' + (deload ? ' style="color:var(--orange)"' : '') + '>' + (i + 1) + '</div>' +
+        '<div>' + esc(w.phase) + '</div>' +
+        '<div class="table-cell-meta">' + esc(w.rpe) + '</div>' +
+        '<div class="table-cell-meta">' + dd(a) + '-' + dd(b) + '</div></div>';
+    });
+    card.innerHTML = h;
+    markCurrentWeek();
+  }
 
   function buildProgressGroups() {
     const wrap = document.getElementById('progress-groups');
@@ -2777,9 +2844,7 @@
   window.addEventListener('online', () => { if (sbUser) fullSync(); });
 
   // ====== INIT ======
-  buildProgressGroups();
-  markCurrentWeek();
-  selectDay(getDayKey());
+  applyProgram(DEFAULT_PROGRAM); // monta pills, índices, cronograma, dia atual
   // sync inicia após o cliente Supabase (defer) carregar
   window.addEventListener('load', initSync);
 </script>
