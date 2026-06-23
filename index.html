@@ -749,6 +749,29 @@
     margin-bottom: 10px;
     text-decoration: none;
   }
+
+  .stack-strip {
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    margin-bottom: 6px;
+    scrollbar-width: none;
+  }
+  .stack-strip::-webkit-scrollbar { display: none; }
+  .stack-chip {
+    flex-shrink: 0;
+    background: var(--bg-tertiary);
+    color: var(--label);
+    border: none;
+    border-radius: 9px;
+    padding: 9px 13px;
+    font-size: 15px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+  }
+  .stack-chip:active { background: var(--blue); color: #fff; }
   .suggest-btn {
     flex-shrink: 0;
     background: var(--green);
@@ -1475,6 +1498,8 @@
     <button class="btn btn-add" id="calc-use">Usar total na próxima série</button>
   </div>
 
+  <div id="log-stack"></div>
+
   <div class="sheet-block-label">Séries</div>
   <div class="set-row">
     <div class="set-n"></div>
@@ -1873,6 +1898,23 @@
     'rosca-punho-halter': ['Seated_Dumbbell_Palms-Up_Wrist_Curl__0.jpg', 'Seated_Dumbbell_Palms-Up_Wrist_Curl__1.jpg']
   };
 
+  // valores reais do pino de cada stack (medidos nas máquinas da academia)
+  const STACKS = {
+    movement: [3.5, 8.5, 13.5, 18.5, 23.5, 33.5, 43.5, 53.5, 63.5, 73.5, 83.5, 93.5, 103.5],
+    legpress: [7, 17, 27, 37, 47, 57, 77, 97, 117, 137, 157],
+    cross45: [2.5, 5, 7.5, 10, 12.5, 15, 17.5, 20, 22.5, 25, 27.5, 30, 32.5, 35, 37.5, 40, 42.5, 45, 47.5]
+  };
+  // exercício -> stack (apenas máquinas/cabo selectorizados; Smith e pesos livres ficam de fora)
+  const EX_STACK = {
+    'cadeira-flexora': 'movement', 'cadeira-extensora': 'movement', 'adutor-abdutor': 'movement',
+    'remada-maquina': 'movement', 'maquina-supino': 'movement', 'desenv-shoulder': 'movement',
+    'pulldown-supinado': 'movement', 'remada-baixa-cabo': 'movement',
+    'leg-press': 'legpress', 'panturrilha-leg-press': 'legpress',
+    'crossover-alto': 'cross45', 'crossover-alto-baixo': 'cross45', 'pullover-crossover': 'cross45',
+    'face-pull-crossover': 'cross45', 'triceps-corda': 'cross45', 'triceps-unilateral': 'cross45',
+    'abdominal-cabo-cross45': 'cross45', 'rosca-corda': 'cross45'
+  };
+
   // ====== HELPERS DE DATA ======
   function todayISO() {
     const d = new Date();
@@ -1999,6 +2041,21 @@
     const ts = topSet(ls);
     const rpe = ts.rpe;
     if (!rpe) return null; // sem RPE não há base
+
+    let dir, label;
+    if (rpe <= 7) { dir = 1; label = 'Subir'; }
+    else if (rpe < 8.5) { dir = 0; label = 'Manter'; }
+    else { dir = -1; label = 'Recuar (ou set de pico se semana 4)'; }
+
+    // máquina com stack: pula pro próximo pino real
+    if (EX_STACK[id] && ts.w > 0) {
+      const stack = STACKS[EX_STACK[id]];
+      let idx = 0, best = Infinity;
+      stack.forEach((v, i) => { const d = Math.abs(v - ts.w); if (d < best) { best = d; idx = i; } });
+      const ni = Math.min(Math.max(idx + dir, 0), stack.length - 1);
+      return { field: 'w', value: stack[ni], suffix: 'kg', label, rpe, base: ts.w };
+    }
+
     const unit = EX_UNIT[id];
     let field, base, inc, suffix;
     if (ts.w > 0) {
@@ -2009,10 +2066,6 @@
       field = 'r'; base = ts.r; suffix = ' reps'; inc = 1;
     } else { return null; }
 
-    let dir, label;
-    if (rpe <= 7) { dir = 1; label = 'Subir'; }
-    else if (rpe < 8.5) { dir = 0; label = 'Manter'; }
-    else { dir = -1; label = 'Recuar (ou set de pico se semana 4)'; }
     let value = base + dir * inc;
     if (value < 0) value = 0;
     return { field, value, suffix, label, rpe, base };
@@ -2049,6 +2102,22 @@
     box.innerHTML = h;
   }
 
+  // picker dos valores reais do pino da máquina
+  function renderStack(id) {
+    const box = document.getElementById('log-stack');
+    const key = EX_STACK[id];
+    if (!key) { box.innerHTML = ''; return; }
+    const stack = STACKS[key];
+    box.innerHTML = '<div class="sheet-block-label">Carga da máquina (pino)</div>' +
+      '<div class="stack-strip">' + stack.map(v =>
+        '<button type="button" class="stack-chip" data-v="' + v + '">' + v + '</button>').join('') + '</div>';
+    box.querySelectorAll('.stack-chip').forEach(c => c.addEventListener('click', () => {
+      const v = c.dataset.v;
+      const empty = Array.from(document.querySelectorAll('#set-list .set-w')).find(i => !i.value);
+      if (empty) empty.value = v; else addSetRow(v, '', '');
+    }));
+  }
+
   function openLog(id, name) {
     sheetId = id;
     currentUnit = EX_UNIT[id] || 'kg';
@@ -2063,6 +2132,7 @@
     // auto-sugestão de carga baseada no RPE da última sessão
     renderSuggestion(id);
     renderDemo(id, name);
+    renderStack(id);
 
     // editar treino de HOJE: carrega tudo (carga+reps+rpe).
     // treino novo (última sessão é passada): só sugere a carga, reps/rpe em branco.
