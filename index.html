@@ -746,6 +746,14 @@
   .hm-legend { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--label-secondary); flex-wrap: wrap; }
   .hm-legend .hm-cell { width: 12px; height: 12px; aspect-ratio: auto; cursor: default; margin-left: 8px; font-size: 0; }
   .hm-legend .hm-cell:first-child { margin-left: 0; }
+
+  /* matriz de sobreposição muscular */
+  .mm { overflow-x: auto; scrollbar-width: none; }
+  .mm::-webkit-scrollbar { display: none; }
+  .mm-row { display: flex; gap: 3px; align-items: center; margin-bottom: 3px; }
+  .mm-label { width: 78px; flex-shrink: 0; font-size: 11px; color: var(--label-secondary); font-weight: 600; }
+  .mm-d { width: 18px; flex-shrink: 0; text-align: center; font-size: 9px; color: var(--label-tertiary); }
+  .mm-cell { width: 18px; height: 18px; flex-shrink: 0; border-radius: 4px; background: var(--bg-tertiary); }
   .btn-add {
     background: var(--bg-tertiary);
     color: var(--blue);
@@ -1277,6 +1285,11 @@
     <div class="section">
       <div class="section-header"><p class="section-title">Consistência</p></div>
       <div id="consistency"></div>
+    </div>
+
+    <div class="section">
+      <div class="section-header"><p class="section-title">Sobreposição Muscular</p></div>
+      <div id="muscle-matrix"></div>
     </div>
 
     <div class="section">
@@ -2089,6 +2102,36 @@
     'abdominal-infra': ['Reverse_Crunch__0.jpg', 'Reverse_Crunch__1.jpg']
   };
 
+  // grupo muscular por exercício (do free-exercise-db) — pro tracker de sobreposição
+  const EX_GROUP = {
+    'supino-reto-smith': 'Peito', 'desenv-shoulder': 'Ombro', 'supino-inclinado-halter': 'Peito',
+    'crossover-alto': 'Peito', 'elev-lateral-kb-halter': 'Ombro', 'triceps-corda': 'Tríceps',
+    'triceps-unilateral': 'Tríceps', 'deadlift-barra-hex': 'Quadríceps', 'agacho-smith': 'Quadríceps',
+    'leg-press': 'Quadríceps', 'cadeira-flexora': 'Posterior', 'bulgaro-halter': 'Quadríceps',
+    'panturrilha-smith': 'Panturrilha', 'negativa-pull-up': 'Costas', 'remada-baixa-cabo': 'Costas',
+    'pullover-crossover': 'Costas', 'face-pull-crossover': 'Ombro', 'rosca-alternada-halter': 'Bíceps',
+    'dead-hang': 'Costas', 'supino-inclinado-smith': 'Peito', 'maquina-supino': 'Peito',
+    'desenv-halter-sentado': 'Ombro', 'elev-frontal-halter': 'Ombro', 'crossover-alto-baixo': 'Peito',
+    'triceps-testa-halter': 'Tríceps', 'rotacao-externa-banda': 'Ombro', 'cadeira-extensora': 'Quadríceps',
+    'goblet-squat-kb': 'Quadríceps', 'adutor-abdutor': 'Adutor', 'panturrilha-leg-press': 'Panturrilha',
+    'pull-up-amrap': 'Costas', 'remada-barra-hex': 'Costas', 'pulldown-supinado': 'Costas',
+    'remada-maquina': 'Costas', 'rosca-scott': 'Bíceps', 'rosca-corda': 'Bíceps',
+    'prancha-frontal': 'Core', 'abdominal-cabo-cross45': 'Core', 'roda-abdominal-joelhos': 'Core',
+    'kb-swing': 'Posterior', 'rosca-punho-halter': 'Antebraço', 'elevacao-pelvica': 'Glúteo',
+    'afundo': 'Quadríceps', 'cadeira-abdutora': 'Abdutor', 'cadeira-adutora': 'Adutor',
+    'panturrilha': 'Panturrilha', 'puxada-na-frente': 'Costas', 'remada-baixa': 'Costas',
+    'remada-unilateral': 'Costas', 'rosca-biceps': 'Bíceps', 'triceps-na-polia': 'Tríceps',
+    'prancha': 'Core', 'stiff': 'Posterior', 'gluteo-no-cabo': 'Glúteo',
+    'desenvolvimento-com-halter': 'Ombro', 'elevacao-lateral': 'Ombro', 'supino': 'Peito',
+    'crucifixo': 'Peito', 'triceps': 'Tríceps', 'biceps': 'Bíceps',
+    'leg-press-leve': 'Quadríceps', 'supino-leve': 'Peito', 'abdominal-infra': 'Core'
+  };
+  const GROUP_COLOR = {
+    'Peito': '#FF453A', 'Costas': '#0A84FF', 'Ombro': '#FFD60A', 'Bíceps': '#64D2FF',
+    'Tríceps': '#FF9F0A', 'Quadríceps': '#30D158', 'Posterior': '#5E5CE6', 'Glúteo': '#FF375F',
+    'Panturrilha': '#8E8E93', 'Core': '#BF5AF2', 'Antebraço': '#AC8E68', 'Adutor': '#64D2FF', 'Abdutor': '#5AC8FA'
+  };
+
   // valores reais do pino de cada stack (medidos nas máquinas da academia)
   const STACKS = {
     movement: [3.5, 8.5, 13.5, 18.5, 23.5, 33.5, 43.5, 53.5, 63.5, 73.5, 83.5, 93.5, 103.5],
@@ -2767,6 +2810,48 @@
     if (!activeGroup) selectGroup(defaultProgressGroup());
     else renderProgressGroup(activeGroup);
     renderConsistency();
+    renderMuscleMatrix();
+  }
+
+  // ====== SOBREPOSIÇÃO MUSCULAR ======
+  function renderMuscleMatrix() {
+    const box = document.getElementById('muscle-matrix');
+    if (!box) return;
+    // data -> Set de grupos treinados
+    const byDate = {};
+    Object.keys(LOGS).forEach(id => {
+      const g = EX_GROUP[id]; if (!g) return;
+      (LOGS[id] || []).forEach(s => { (byDate[s.date] = byDate[s.date] || new Set()).add(g); });
+    });
+    if (!Object.keys(byDate).length) {
+      box.innerHTML = '<div class="empty">Registre treinos pra ver quais músculos trabalhou em cada dia.</div>';
+      return;
+    }
+    // grupos por frequência (mais treinados no topo)
+    const freq = {};
+    Object.values(byDate).forEach(set => set.forEach(g => { freq[g] = (freq[g] || 0) + 1; }));
+    const groups = Object.keys(freq).sort((a, b) => freq[b] - freq[a]);
+    // últimos 14 dias
+    const N = 14;
+    const isoOf = d => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+    const today = new Date(todayISO() + 'T00:00:00');
+    const days = [];
+    for (let i = N - 1; i >= 0; i--) days.push(new Date(today.getTime() - i * 864e5));
+
+    let h = '<div class="mm">';
+    h += '<div class="mm-row mm-head"><div class="mm-label"></div>' +
+      days.map(d => '<div class="mm-d">' + d.getDate() + '</div>').join('') + '</div>';
+    groups.forEach(g => {
+      const col = GROUP_COLOR[g] || '#8E8E93';
+      h += '<div class="mm-row"><div class="mm-label">' + esc(g) + '</div>' +
+        days.map(d => {
+          const on = (byDate[isoOf(d)] || new Set()).has(g);
+          return '<div class="mm-cell"' + (on ? ' style="background:' + col + '"' : '') + '></div>';
+        }).join('') + '</div>';
+    });
+    h += '</div>';
+    h += '<div class="empty" style="padding:8px 0 0;font-size:11px;text-align:left">Últimos 14 dias. Cada quadrado = músculo trabalhado naquele dia. Útil pra ver frequência e recuperação.</div>';
+    box.innerHTML = h;
   }
 
   // ====== CONSISTÊNCIA (heatmap + streak) ======
