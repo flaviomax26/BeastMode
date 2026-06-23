@@ -816,6 +816,25 @@
     font-family: inherit;
   }
 
+  .toast {
+    position: fixed;
+    left: 50%;
+    bottom: calc(90px + var(--safe-bottom));
+    transform: translateX(-50%) translateY(20px);
+    background: var(--green);
+    color: #000;
+    font-weight: 700;
+    font-size: 14px;
+    padding: 12px 20px;
+    border-radius: 12px;
+    z-index: 300;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s, transform 0.2s;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
   /* Progresso */
   select.fld {
     width: 100%;
@@ -2231,6 +2250,7 @@
   // ====== SHEET DE LOG ======
   let sheetId = null;
   let currentUnit = 'kg';
+  let sheetDirty = false; // há dados digitados não salvos no sheet
 
   // sugere próximo alvo pela dupla progressão + RPE da última sessão
   function suggestNext(id) {
@@ -2359,14 +2379,29 @@
     document.getElementById('calc-bar').value = barCfg ? barCfg.bar : '22';
     updateCalc();
 
+    sheetDirty = false; // recém-aberto: pré-preenchidos não contam como alteração
     document.getElementById('sheet-overlay').classList.add('open');
     document.getElementById('sheet').classList.add('open');
   }
 
-  function closeLog() {
+  function closeLog(force) {
+    // alerta se há dados digitados e não salvos
+    if (!force && sheetDirty && !window.confirm('Você digitou dados que ainda não foram salvos. Descartar?')) return;
+    sheetDirty = false;
     document.getElementById('sheet-overlay').classList.remove('open');
     document.getElementById('sheet').classList.remove('open');
     sheetId = null;
+  }
+
+  // toast simples de confirmação
+  let toastTimer = null;
+  function toast(msg) {
+    let t = document.getElementById('toast');
+    if (!t) { t = document.createElement('div'); t.id = 'toast'; t.className = 'toast'; document.body.appendChild(t); }
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove('show'), 1800);
   }
 
   function addSetRow(w, r, rpe) {
@@ -2412,7 +2447,7 @@
         sets.push({ w: isNaN(w) ? 0 : w, r: isNaN(r) ? 0 : r, rpe: isNaN(rpe) ? 0 : rpe });
       }
     });
-    if (!sets.length) { closeLog(); return; }
+    if (!sets.length) { closeLog(true); return; }
 
     const note = document.getElementById('log-note').value.trim();
     const today = todayISO();
@@ -2425,7 +2460,9 @@
     arr.sort((a, b) => a.date.localeCompare(b.date));
 
     saveLogs(LOGS);
-    closeLog();
+    sheetDirty = false;
+    closeLog(true);
+    toast('✓ Treino salvo');
     renderDay(activeDay);
     if (document.getElementById('view-progress').classList.contains('active')) renderProgressGroup(activeGroup);
     queuePush();
@@ -2811,9 +2848,12 @@
     addSetRow(w, r, '');
   });
   document.getElementById('save-log').addEventListener('click', saveLog);
-  document.getElementById('cancel-log').addEventListener('click', closeLog);
-  document.getElementById('sheet-close').addEventListener('click', closeLog);
-  document.getElementById('sheet-overlay').addEventListener('click', closeLog);
+  document.getElementById('cancel-log').addEventListener('click', () => closeLog());
+  document.getElementById('sheet-close').addEventListener('click', () => closeLog());
+  document.getElementById('sheet-overlay').addEventListener('click', () => closeLog());
+  // marca "não salvo" ao digitar nas séries/nota
+  document.getElementById('set-list').addEventListener('input', () => { sheetDirty = true; });
+  document.getElementById('log-note').addEventListener('input', () => { sheetDirty = true; });
   document.getElementById('calc-bar').addEventListener('input', updateCalc);
   document.getElementById('calc-side').addEventListener('input', updateCalc);
   document.getElementById('calc-use').addEventListener('click', () => {
