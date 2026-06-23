@@ -666,6 +666,7 @@
     font-family: inherit;
   }
   input.fld:focus, textarea.fld:focus { outline: none; border-color: var(--blue); }
+  input.fld.field-missing { border-color: var(--orange); background: rgba(255,159,10,0.08); }
 
   .set-row {
     display: grid;
@@ -2438,16 +2439,29 @@
 
   function saveLog() {
     if (!sheetId) return;
+    const isTime = currentUnit === 'seg';
     const sets = [];
-    document.querySelectorAll('#set-list .set-row').forEach(row => {
-      const w = parseFloat(row.querySelector('.set-w').value);
-      const r = parseInt(row.querySelector('.set-r').value, 10);
-      const rpe = parseFloat(row.querySelector('.set-rpe').value);
-      if (!isNaN(w) || !isNaN(r)) {
-        sets.push({ w: isNaN(w) ? 0 : w, r: isNaN(r) ? 0 : r, rpe: isNaN(rpe) ? 0 : rpe });
-      }
+    const incompletas = [];
+    document.querySelectorAll('#set-list .set-row').forEach((row, i) => {
+      const wEl = row.querySelector('.set-w'), rEl = row.querySelector('.set-r'), rpeEl = row.querySelector('.set-rpe');
+      [wEl, rEl, rpeEl].forEach(e => e && e.classList.remove('field-missing'));
+      const w = parseFloat(wEl.value);
+      const r = parseInt(rEl.value, 10);
+      const rpe = parseFloat(rpeEl.value);
+      const touched = row.dataset.touched === '1';
+      const any = !isNaN(w) || !isNaN(r) || !isNaN(rpe);
+      // conta como série feita só se: tem peso/tempo OU o usuário mexeu na linha
+      // (ignora reps pré-preenchidas de linhas não usadas → sem série fantasma)
+      if (!any || !(!isNaN(w) || touched)) return;
+      // série feita mas faltando reps (não-tempo) ou RPE → marca incompleta
+      let falta = false;
+      if (!isTime && isNaN(r)) { rEl.classList.add('field-missing'); falta = true; }
+      if (isNaN(rpe)) { rpeEl.classList.add('field-missing'); falta = true; }
+      if (falta) incompletas.push(i + 1);
+      sets.push({ w: isNaN(w) ? 0 : w, r: isNaN(r) ? 0 : r, rpe: isNaN(rpe) ? 0 : rpe });
     });
     if (!sets.length) { closeLog(true); return; }
+    if (incompletas.length && !window.confirm('Série(s) ' + incompletas.join(', ') + ' sem reps/RPE — isso atrapalha a análise depois. Salvar assim mesmo?')) return;
 
     const note = document.getElementById('log-note').value.trim();
     const today = todayISO();
@@ -2851,8 +2865,12 @@
   document.getElementById('cancel-log').addEventListener('click', () => closeLog());
   document.getElementById('sheet-close').addEventListener('click', () => closeLog());
   document.getElementById('sheet-overlay').addEventListener('click', () => closeLog());
-  // marca "não salvo" ao digitar nas séries/nota
-  document.getElementById('set-list').addEventListener('input', () => { sheetDirty = true; });
+  // marca "não salvo" ao digitar nas séries/nota + marca a linha como tocada
+  document.getElementById('set-list').addEventListener('input', (e) => {
+    sheetDirty = true;
+    const row = e.target.closest && e.target.closest('.set-row');
+    if (row) row.dataset.touched = '1';
+  });
   document.getElementById('log-note').addEventListener('input', () => { sheetDirty = true; });
   document.getElementById('calc-bar').addEventListener('input', updateCalc);
   document.getElementById('calc-side').addEventListener('input', updateCalc);
