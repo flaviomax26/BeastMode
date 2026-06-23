@@ -1483,7 +1483,7 @@
   <div id="log-demo"></div>
 
   <div id="calc-wrap">
-    <div class="sheet-block-label">Calculadora Smith</div>
+    <div class="sheet-block-label" id="calc-label">Calculadora Smith</div>
     <div class="calc">
       <div class="calc-field">
         <label>Barra (kg)</label>
@@ -1915,6 +1915,12 @@
     'abdominal-cabo-cross45': 'cross45', 'rosca-corda': 'cross45'
   };
 
+  // calculadora de barra: slug -> { peso da barra, rótulo }
+  const EX_BARCALC = {};
+  Object.keys(EX_SMITH).forEach(id => { EX_BARCALC[id] = { bar: 22, label: 'Calculadora Smith' }; });
+  EX_BARCALC['deadlift-barra-hex'] = { bar: 9, label: 'Calculadora Barra Hexagonal' };
+  EX_BARCALC['remada-barra-hex'] = { bar: 9, label: 'Calculadora Barra Hexagonal' };
+
   // ====== HELPERS DE DATA ======
   function todayISO() {
     const d = new Date();
@@ -2145,12 +2151,14 @@
       addSetRow('', '', '');
     }
 
-    // calculadora Smith só pra exercícios da Smith Machine
-    document.getElementById('calc-wrap').style.display = EX_SMITH[id] ? 'block' : 'none';
+    // calculadora de barra (Smith 22kg / Hexagonal 9kg)
+    const barCfg = EX_BARCALC[id];
+    document.getElementById('calc-wrap').style.display = barCfg ? 'block' : 'none';
+    if (barCfg) document.getElementById('calc-label').textContent = barCfg.label;
 
     document.getElementById('log-note').value = '';
     document.getElementById('calc-side').value = '';
-    document.getElementById('calc-bar').value = '22';
+    document.getElementById('calc-bar').value = barCfg ? barCfg.bar : '22';
     updateCalc();
 
     document.getElementById('sheet-overlay').classList.add('open');
