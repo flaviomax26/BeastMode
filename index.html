@@ -1266,11 +1266,38 @@
       <div class="day-pills" id="progress-groups"></div>
       <div id="progress-body"></div>
     </div>
+  </div>
+</div>
+
+<!-- VIEW: MENU -->
+<div class="view" id="view-menu">
+  <div class="container">
+
+    <div class="section">
+      <div class="section-header"><p class="section-title">Conta / Sincronização</p></div>
+      <div id="sync-box"></div>
+    </div>
+
+    <div class="section">
+      <div class="section-header"><p class="section-title">Mais</p></div>
+      <div class="card">
+        <div class="row row-clickable" data-goto="view-health">
+          <div class="row-icon indigo">🩺</div>
+          <div class="row-content"><div class="row-title">Saúde</div><div class="row-subtitle">Exames, DEXA, metas</div></div>
+          <div class="row-chevron">›</div>
+        </div>
+        <div class="row row-clickable" data-goto="view-bjj">
+          <div class="row-icon purple">🥋</div>
+          <div class="row-content"><div class="row-title">BJJ</div><div class="row-subtitle">Mobilidade + guardas</div></div>
+          <div class="row-chevron">›</div>
+        </div>
+      </div>
+    </div>
 
     <div class="section">
       <div class="section-header"><p class="section-title">Backup dos Dados</p></div>
       <div class="info-box warn" style="font-size:12px">
-        ⚠ Dados ficam só neste aparelho. Limpar dados do Safari apaga tudo. Exporta de vez em quando.
+        ⚠ Sem login, os dados ficam só neste aparelho. Com a conta acima, sincronizam. Exporta de vez em quando como segurança.
       </div>
       <button class="btn btn-primary" id="export-data">Exportar treinos (JSON)</button>
       <button class="btn btn-ghost" id="copy-data">Copiar para área de transferência</button>
@@ -1283,11 +1310,6 @@
 <!-- VIEW: SAÚDE -->
 <div class="view" id="view-health">
   <div class="container">
-
-    <div class="section">
-      <div class="section-header"><p class="section-title">Conta / Sincronização</p></div>
-      <div id="sync-box"></div>
-    </div>
 
     <div class="info-box">
       🩺 <strong>Baseline Junho/2026.</strong> DEXA Lunar Prodigy (20/06) é padrão ouro. InBody mensal pra acompanhar.
@@ -1575,13 +1597,9 @@
     <div class="tab-icon">📖</div>
     <div class="tab-label">Técnica</div>
   </div>
-  <div class="tab" data-view="view-bjj">
-    <div class="tab-icon">🥋</div>
-    <div class="tab-label">BJJ</div>
-  </div>
-  <div class="tab" data-view="view-health">
-    <div class="tab-icon">🩺</div>
-    <div class="tab-label">Saúde</div>
+  <div class="tab" data-view="view-menu">
+    <div class="tab-icon">☰</div>
+    <div class="tab-label">Menu</div>
   </div>
 </nav>
 
@@ -2575,12 +2593,17 @@
     document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
     document.getElementById(viewId).classList.add('active');
-    document.querySelector('.tab[data-view="' + viewId + '"]').classList.add('active');
+    // Saúde e BJJ ficam "dentro" do Menu — destaca a aba Menu nesses casos
+    const tabFor = { 'view-health': 'view-menu', 'view-bjj': 'view-menu' };
+    const tabSel = '.tab[data-view="' + (tabFor[viewId] || viewId) + '"]';
+    const tab = document.querySelector(tabSel);
+    if (tab) tab.classList.add('active');
 
     const titles = {
       'view-week': { title: 'Treino', sub: 'Programa Completo · Início 22/06' },
       'view-program': { title: 'Programa', sub: 'Cronograma 8 Semanas' },
       'view-progress': { title: 'Progresso', sub: 'Evolução de cargas registradas' },
+      'view-menu': { title: 'Menu', sub: 'Conta · Backup · Mais' },
       'view-health': { title: 'Saúde', sub: 'Exames · DEXA · Metas' },
       'view-technique': { title: 'Técnica', sub: 'RPE · Execução de exercícios' },
       'view-bjj': { title: 'BJJ', sub: 'Mobilidade + Guardas' }
@@ -2710,6 +2733,10 @@
   });
   document.querySelectorAll('.tab').forEach(tab => {
     tab.addEventListener('click', () => switchView(tab.dataset.view));
+  });
+  // rows do Menu que abrem outras views (Saúde, BJJ)
+  document.querySelectorAll('[data-goto]').forEach(row => {
+    row.addEventListener('click', () => switchView(row.dataset.goto));
   });
 
   document.getElementById('add-set').addEventListener('click', () => {
