@@ -1924,6 +1924,20 @@
     'abdominal-cabo-cross45': 'cross45', 'rosca-corda': 'cross45'
   };
 
+  // pegador recomendado por exercício de cabo (Cross 45 / puxada)
+  const GRIP = {
+    'triceps-corda': 'corda',
+    'rosca-corda': 'corda',
+    'face-pull-crossover': 'corda',
+    'abdominal-cabo-cross45': 'corda',
+    'triceps-unilateral': 'estribo',
+    'crossover-alto': '2 estribos',
+    'crossover-alto-baixo': '2 estribos',
+    'pullover-crossover': 'barra reta',
+    'remada-baixa-cabo': 'triângulo',
+    'pulldown-supinado': 'barra (supinada)'
+  };
+
   // calculadora de barra: slug -> { peso da barra, rótulo }
   const EX_BARCALC = {};
   Object.keys(EX_SMITH).forEach(id => { EX_BARCALC[id] = { bar: 22, label: 'Calculadora Smith' }; });
@@ -2019,7 +2033,8 @@
         const chevron = it.log ? '<div class="row-chevron">›</div>' : '';
         h += '<div class="row' + clickable + '"' + onclick + '>';
         h += '<div class="row-icon ' + it.color + '">' + it.icon + '</div>';
-        h += '<div class="row-content"><div class="row-title">' + it.n + tagHtml + '</div><div class="row-subtitle">' + it.scheme + '</div>' + last + '</div>';
+        const grip = GRIP[id] ? ' · 🪢 ' + GRIP[id] : '';
+        h += '<div class="row-content"><div class="row-title">' + it.n + tagHtml + '</div><div class="row-subtitle">' + it.scheme + grip + '</div>' + last + '</div>';
         h += badge || chevron;
         h += '</div>';
       });
