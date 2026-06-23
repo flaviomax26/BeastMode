@@ -1,0 +1,84 @@
+'use strict';
+  function getDayKey() {
+    const days = ['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sab'];
+    return days[new Date().getDay()];
+  }
+
+  function selectDay(day) {
+    document.querySelectorAll('.day-pill').forEach(p => p.classList.remove('active'));
+    const pill = document.querySelector('.day-pill[data-day="' + day + '"]');
+    if (pill) {
+      pill.classList.add('active');
+      if (pill.scrollIntoView) pill.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+    }
+    activeDay = day;
+    renderDay(day);
+  }
+
+  function switchView(viewId) {
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.getElementById(viewId).classList.add('active');
+    // Saúde e BJJ ficam "dentro" do Menu — destaca a aba Menu nesses casos
+    const tabFor = { 'view-health': 'view-menu', 'view-bjj': 'view-menu' };
+    const tabSel = '.tab[data-view="' + (tabFor[viewId] || viewId) + '"]';
+    const tab = document.querySelector(tabSel);
+    if (tab) tab.classList.add('active');
+
+    const titles = {
+      'view-week': { title: 'Treino', sub: 'Programa Completo · Início 22/06' },
+      'view-program': { title: 'Programa', sub: 'Cronograma 8 Semanas' },
+      'view-progress': { title: 'Progresso', sub: 'Evolução de cargas registradas' },
+      'view-menu': { title: 'Menu', sub: 'Conta · Backup · Mais' },
+      'view-health': { title: 'Saúde', sub: 'Exames · DEXA · Metas' },
+      'view-technique': { title: 'Técnica', sub: 'RPE · Execução de exercícios' },
+      'view-bjj': { title: 'BJJ', sub: 'Mobilidade + Guardas' }
+    };
+    const t = titles[viewId];
+    document.getElementById('header-title').textContent = t.title;
+    document.getElementById('header-sub').textContent = t.sub;
+    if (viewId === 'view-progress') openProgress();
+    if (viewId === 'view-health') renderHealth();
+    if (viewId === 'view-bjj') renderMobility();
+    if (viewId === 'view-program') markCurrentWeek();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  const DAY_ORDER = ['seg', 'ter', 'qua', 'qui', 'sex', 'sab', 'dom'];
+  (function () {
+    const area = document.getElementById('view-week');
+    let x0 = null, y0 = null;
+    area.addEventListener('touchstart', e => {
+      // ignora swipe que começa nas pills (scroll horizontal próprio)
+      if (e.target.closest('.day-pills')) { x0 = null; return; }
+      x0 = e.touches[0].clientX; y0 = e.touches[0].clientY;
+    }, { passive: true });
+    area.addEventListener('touchend', e => {
+      if (x0 === null) return;
+      const dx = e.changedTouches[0].clientX - x0;
+      const dy = e.changedTouches[0].clientY - y0;
+      x0 = null;
+      if (Math.abs(dx) < 50 || Math.abs(dx) < Math.abs(dy)) return; // precisa ser horizontal
+      const i = DAY_ORDER.indexOf(activeDay);
+      const next = (i + (dx < 0 ? 1 : -1) + 7) % 7; // wrap
+      selectDay(DAY_ORDER[next]);
+    }, { passive: true });
+  })();
+
+  // atualiza ao voltar pro foco (vira o dia/meia-noite sem precisar recarregar)
+
+  function refreshOnFocus() {
+    if (document.hidden) return;
+    if (sheetId) return; // não mexe enquanto loga
+    if (activeDay) renderDay(activeDay);
+    markCurrentWeek();
+    if (document.getElementById('view-progress').classList.contains('active')) openProgress();
+  }
+  document.addEventListener('visibilitychange', refreshOnFocus);
+  window.addEventListener('pageshow', refreshOnFocus);
+  window.addEventListener('online', () => { if (sbUser) fullSync(); });
+
+  // ====== INIT ======
+  applyProgram(DEFAULT_PROGRAM); // monta pills, índices, cronograma, dia atual
+  // sync inicia após o cliente Supabase (defer) carregar
+  window.addEventListener('load', initSync);
