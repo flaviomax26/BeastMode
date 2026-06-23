@@ -937,6 +937,13 @@
     color: var(--label-secondary);
     margin-top: 2px;
   }
+  .prog-toggle { display: flex; gap: 6px; margin: 6px 0 2px; }
+  .pt-btn {
+    border: none; border-radius: 8px; padding: 5px 12px;
+    font-size: 12px; font-weight: 600; font-family: inherit; cursor: pointer;
+    background: var(--bg-tertiary); color: var(--label-secondary);
+  }
+  .pt-btn.on { background: var(--blue); color: #fff; }
   .hist {
     margin-top: 10px;
     border-top: 0.5px solid var(--separator);
@@ -2689,6 +2696,7 @@
   const PROGRESS_GROUPS = ['seg', 'ter', 'qua', 'qui', 'sex', 'sab'];
   const DAY_ABBR = { seg: 'Seg', ter: 'Ter', qua: 'Qua', qui: 'Qui', sex: 'Sex', sab: 'Sáb', dom: 'Dom' };
   let activeGroup = null;
+  const progMode = {}; // id -> 'carga' | 'e1rm' (modo do gráfico)
 
   // pills de dias (renderizadas do DAYS — mudam por programa)
   function renderDayPills() {
@@ -2771,11 +2779,19 @@
       const isPR = lastTop.w >= pr;
       const b = exerciseBests(id);
       const e1txt = (unit !== 'seg' && b.e1 > 0) ? ' · e1RM ~' + Math.round(b.e1) + 'kg' : '';
+      const canToggle = unit !== 'seg' && b.e1 > 0;
+      const mode = progMode[id] || 'carga';
+      const toggle = canToggle ?
+        '<div class="prog-toggle">' +
+          '<button type="button" class="pt-btn' + (mode === 'carga' ? ' on' : '') + '" data-id="' + id + '" data-mode="carga">Carga</button>' +
+          '<button type="button" class="pt-btn' + (mode === 'e1rm' ? ' on' : '') + '" data-id="' + id + '" data-mode="e1rm">e1RM</button>' +
+        '</div>' : '';
       h += '<div class="chart-card">' +
         '<div class="prog-head">' +
           '<div class="prog-name">' + it.n + (isPR && arr.length > 1 ? '<span class="pr-flag">PR</span>' : '') + '</div>' +
           '<div class="prog-meta">PR ' + pr + sfx + (prReps ? '×' + prReps : '') + e1txt + ' · último ' + fmtSet(lastTop, unit) + ' · ' + agoText(last.date) + '</div>' +
         '</div>' +
+        toggle +
         '<canvas class="prog-canvas" data-id="' + id + '"></canvas>' +
         '<details class="hist"><summary>Histórico (' + arr.length + ' sessões)</summary>' +
           arr.slice().reverse().map(s =>
@@ -2789,10 +2805,26 @@
     if (pending > 0) h += '<div class="empty" style="padding:12px">' + pending + ' exercício(s) deste treino ainda sem registro.</div>';
     body.innerHTML = h;
 
-    body.querySelectorAll('.prog-canvas').forEach(cv => {
-      const arr = LOGS[cv.dataset.id];
-      drawChart(cv, arr.map(s => ({ date: s.date, v: topSet(s).w })), EX_UNIT[cv.dataset.id]);
-    });
+    body.querySelectorAll('.prog-canvas').forEach(cv => drawExerciseChart(cv));
+    // toggle Carga / e1RM
+    body.querySelectorAll('.pt-btn').forEach(btn => btn.addEventListener('click', () => {
+      progMode[btn.dataset.id] = btn.dataset.mode;
+      const card = btn.closest('.chart-card');
+      card.querySelectorAll('.pt-btn').forEach(b => b.classList.toggle('on', b.dataset.mode === btn.dataset.mode));
+      drawExerciseChart(card.querySelector('.prog-canvas'));
+    }));
+  }
+
+  // e1RM máximo de uma sessão (fallback: carga do top set)
+  function sessionE1(s) {
+    let e = 0; s.sets.forEach(set => { const v = e1rm(set.w, set.r); if (v > e) e = v; });
+    return e > 0 ? Math.round(e) : topSet(s).w;
+  }
+  function drawExerciseChart(cv) {
+    const id = cv.dataset.id, arr = LOGS[id], unit = EX_UNIT[id];
+    const mode = progMode[id] || 'carga';
+    const pts = arr.map(s => ({ date: s.date, v: mode === 'e1rm' ? sessionE1(s) : topSet(s).w }));
+    drawChart(cv, pts, unit);
   }
 
   function drawChart(cv, pts, unit, opts) {
