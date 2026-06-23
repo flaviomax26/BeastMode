@@ -2208,6 +2208,48 @@
     return arr[arr.length - 1];
   }
 
+  // e1RM estimado (Epley)
+  function e1rm(w, r) { return (w > 0 && r > 0) ? w * (1 + r / 30) : 0; }
+
+  // melhores marcas históricas do exercício (opcionalmente excluindo uma data)
+  function exerciseBests(id, excludeDate) {
+    let pr = 0, vol = 0, e1 = 0, secs = 0, reps = 0;
+    (LOGS[id] || []).forEach(s => {
+      if (excludeDate && s.date === excludeDate) return;
+      s.sets.forEach(set => {
+        if (set.w > pr) pr = set.w;
+        if (set.w * set.r > vol) vol = set.w * set.r;
+        const e = e1rm(set.w, set.r); if (e > e1) e1 = e;
+        if (set.w > secs) secs = set.w;     // tempo (exercício de segundos)
+        if (set.r > reps) reps = set.r;     // reps (peso corporal)
+      });
+    });
+    return { pr: pr, vol: vol, e1: e1, secs: secs, reps: reps };
+  }
+
+  // compara séries novas com os recordes anteriores → lista de PRs batidos
+  function detectPR(sets, prior, unit) {
+    let np = 0, nv = 0, ne = 0, ns = 0, nr = 0;
+    sets.forEach(set => {
+      np = Math.max(np, set.w);
+      nv = Math.max(nv, set.w * set.r);
+      ne = Math.max(ne, e1rm(set.w, set.r));
+      ns = Math.max(ns, set.w);
+      nr = Math.max(nr, set.r);
+    });
+    const hits = [];
+    if (unit === 'seg') {
+      if (ns > prior.secs && ns > 0) hits.push('tempo ' + ns + 's');
+    } else if (np > 0) {
+      if (np > prior.pr) hits.push('carga ' + np + 'kg');
+      if (ne > prior.e1 && ne > 0) hits.push('e1RM ' + Math.round(ne) + 'kg');
+      if (nv > prior.vol && nv > 0) hits.push('volume ' + nv);
+    } else if (nr > prior.reps && nr > 0) {
+      hits.push('reps ' + nr);
+    }
+    return hits;
+  }
+
   // ====== RENDER DO DIA ======
   let activeDay = null;
 
@@ -2508,6 +2550,10 @@
 
     const note = document.getElementById('log-note').value.trim();
     const today = todayISO();
+    // recordes anteriores (exclui hoje, que está sendo salvo) → detecta PR
+    const prior = exerciseBests(sheetId, today);
+    const prHits = detectPR(sets, prior, currentUnit);
+
     if (!LOGS[sheetId]) LOGS[sheetId] = [];
     // se já houver registro de hoje, substitui (re-edição do dia)
     const arr = LOGS[sheetId];
@@ -2519,7 +2565,7 @@
     saveLogs(LOGS);
     sheetDirty = false;
     closeLog(true);
-    toast('✓ Treino salvo');
+    toast(prHits.length ? '🏆 PR! ' + prHits.join(' · ') : '✓ Treino salvo');
     renderDay(activeDay);
     if (document.getElementById('view-progress').classList.contains('active')) renderProgressGroup(activeGroup);
     queuePush();
@@ -2609,10 +2655,12 @@
       const last = arr[arr.length - 1];
       const lastTop = topSet(last);
       const isPR = lastTop.w >= pr;
+      const b = exerciseBests(id);
+      const e1txt = (unit !== 'seg' && b.e1 > 0) ? ' · e1RM ~' + Math.round(b.e1) + 'kg' : '';
       h += '<div class="chart-card">' +
         '<div class="prog-head">' +
           '<div class="prog-name">' + it.n + (isPR && arr.length > 1 ? '<span class="pr-flag">PR</span>' : '') + '</div>' +
-          '<div class="prog-meta">PR ' + pr + sfx + (prReps ? '×' + prReps : '') + ' · último ' + fmtSet(lastTop, unit) + ' · ' + agoText(last.date) + '</div>' +
+          '<div class="prog-meta">PR ' + pr + sfx + (prReps ? '×' + prReps : '') + e1txt + ' · último ' + fmtSet(lastTop, unit) + ' · ' + agoText(last.date) + '</div>' +
         '</div>' +
         '<canvas class="prog-canvas" data-id="' + id + '"></canvas>' +
         '<details class="hist"><summary>Histórico (' + arr.length + ' sessões)</summary>' +
