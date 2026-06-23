@@ -98,10 +98,16 @@
     const rpe = ts.rpe;
     if (!rpe) return null; // sem RPE não há base
 
+    // sugestão ciente da fase da semana (deload reduz; teto de RPE sobe no bloco)
+    const wk = WEEKS[currentWeekIdx()];
+    const isDeload = /deload/i.test(wk.phase);
+    const rm = String(wk.rpe).match(/(\d+)(?:-(\d+))?/);
+    const hi = rm ? (rm[2] ? +rm[2] : +rm[1]) : 8; // teto de RPE da semana
     let dir, label;
-    if (rpe <= 7) { dir = 1; label = 'Subir'; }
-    else if (rpe < 8.5) { dir = 0; label = 'Manter'; }
-    else { dir = -1; label = 'Recuar (ou set de pico se semana 4)'; }
+    if (isDeload) { dir = -1; label = 'Deload — reduza (semana leve)'; }
+    else if (rpe < hi) { dir = 1; label = 'Subir (abaixo do alvo RPE ' + wk.rpe + ')'; }
+    else if (rpe > hi) { dir = -1; label = 'Recuar (acima do alvo RPE ' + wk.rpe + ')'; }
+    else { dir = 0; label = 'Manter (no alvo RPE ' + wk.rpe + ')'; }
 
     // máquina com stack: pula pro próximo pino real
     if (EX_STACK[id] && ts.w > 0) {
