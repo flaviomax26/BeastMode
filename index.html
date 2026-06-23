@@ -1284,6 +1284,11 @@
 <div class="view" id="view-health">
   <div class="container">
 
+    <div class="section">
+      <div class="section-header"><p class="section-title">Conta / Sincronização</p></div>
+      <div id="sync-box"></div>
+    </div>
+
     <div class="info-box">
       🩺 <strong>Baseline Junho/2026.</strong> DEXA Lunar Prodigy (20/06) é padrão ouro. InBody mensal pra acompanhar.
     </div>
@@ -1580,8 +1585,122 @@
   </div>
 </nav>
 
+<script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
   'use strict';
+
+  // ====== SUPABASE / SYNC ======
+  const SB_URL = 'https://tjhkoizmtbwtdfmgwvdd.supabase.co';
+  const SB_KEY = 'sb_publishable_S3z-t7htlrDMmZ-g-nfQxg_r2Te3IVQ';
+  let sb = null, sbUser = null, sbStatus = '', pushTimer = null;
+
+  function setSyncStatus(s) {
+    sbStatus = s;
+    const el = document.getElementById('sync-status');
+    if (el) el.textContent = s;
+  }
+
+  async function initSync() {
+    if (!window.supabase) { renderSyncBox(); return; } // offline/CDN bloqueado
+    sb = window.supabase.createClient(SB_URL, SB_KEY);
+    try {
+      const { data } = await sb.auth.getSession();
+      if (data && data.session) { sbUser = data.session.user; renderSyncBox(); await fullSync(); }
+    } catch (e) { /* ignora */ }
+    renderSyncBox();
+    sb.auth.onAuthStateChange((_e, s) => { sbUser = s ? s.user : null; renderSyncBox(); });
+  }
+
+  function rerenderAll() {
+    if (activeDay) renderDay(activeDay);
+    markCurrentWeek();
+    if (document.getElementById('view-progress').classList.contains('active')) openProgress();
+  }
+
+  async function fullSync() {
+    if (!sb || !sbUser) return;
+    setSyncStatus('sincronizando…');
+    try {
+      const { data, error } = await sb.from('app_state').select('logs,done').eq('user_id', sbUser.id).maybeSingle();
+      if (error) throw error;
+      if (data) {
+        mergeLogs(data.logs || {});
+        mergeDone(data.done || []);
+        saveLogs(LOGS); saveDone();
+        rerenderAll();
+      }
+      await pushState();
+      setSyncStatus('sincronizado ✓');
+    } catch (e) { setSyncStatus('erro: ' + (e.message || e)); }
+  }
+
+  async function pushState() {
+    if (!sb || !sbUser) return;
+    const { error } = await sb.from('app_state').upsert({
+      user_id: sbUser.id, logs: LOGS, done: DONE, updated_at: new Date().toISOString()
+    });
+    if (error) throw error;
+  }
+
+  // empurra com debounce após salvar localmente
+  function queuePush() {
+    if (!sb || !sbUser) return;
+    setSyncStatus('pendente…');
+    clearTimeout(pushTimer);
+    pushTimer = setTimeout(async () => {
+      try { await pushState(); setSyncStatus('sincronizado ✓'); }
+      catch (e) { setSyncStatus('pendente (sem rede)'); }
+    }, 1500);
+  }
+
+  async function sbSignIn() {
+    const email = document.getElementById('sync-email').value.trim();
+    const pass = document.getElementById('sync-pass').value;
+    if (!email || !pass) { alert('Preencha email e senha.'); return; }
+    setSyncStatus('entrando…');
+    const { data, error } = await sb.auth.signInWithPassword({ email: email, password: pass });
+    if (error) { alert('Erro ao entrar: ' + error.message); setSyncStatus(''); return; }
+    sbUser = data.user; renderSyncBox(); await fullSync();
+  }
+  async function sbSignUp() {
+    const email = document.getElementById('sync-email').value.trim();
+    const pass = document.getElementById('sync-pass').value;
+    if (!email || pass.length < 6) { alert('Email válido + senha de no mínimo 6 caracteres.'); return; }
+    const { data, error } = await sb.auth.signUp({ email: email, password: pass });
+    if (error) { alert('Erro ao criar: ' + error.message); return; }
+    sbUser = data.user; renderSyncBox();
+    if (sbUser) await fullSync();
+  }
+  async function sbSignOut() {
+    try { await sb.auth.signOut(); } catch (e) {}
+    sbUser = null; setSyncStatus(''); renderSyncBox();
+  }
+
+  function renderSyncBox() {
+    const box = document.getElementById('sync-box');
+    if (!box) return;
+    if (!window.supabase || !sb) {
+      box.innerHTML = '<div class="info-box warn" style="font-size:12px">Sincronização indisponível agora (sem rede ou bloqueada). O app funciona normal — os dados ficam no aparelho.</div>';
+      return;
+    }
+    if (sbUser) {
+      box.innerHTML =
+        '<div class="info-box success" style="font-size:13px">✓ Conectado: <strong>' + esc(sbUser.email) + '</strong><br><span id="sync-status">' + (sbStatus || 'sincronizado ✓') + '</span></div>' +
+        '<button class="btn btn-ghost" id="sync-now">Sincronizar agora</button>' +
+        '<button class="btn btn-ghost" id="sync-out">Sair</button>';
+      box.querySelector('#sync-now').addEventListener('click', fullSync);
+      box.querySelector('#sync-out').addEventListener('click', sbSignOut);
+    } else {
+      box.innerHTML =
+        '<input class="fld" id="sync-email" type="email" inputmode="email" autocomplete="username" placeholder="email" style="margin-bottom:8px">' +
+        '<input class="fld" id="sync-pass" type="password" autocomplete="current-password" placeholder="senha" style="margin-bottom:8px">' +
+        '<button class="btn btn-primary" id="sync-in">Entrar</button>' +
+        '<button class="btn btn-ghost" id="sync-up">Criar conta</button>' +
+        '<div class="info-box" style="font-size:11px;margin-top:8px">Mesma conta = mesmos treinos em qualquer dispositivo. Protegido por login (RLS).</div>';
+      box.querySelector('#sync-in').addEventListener('click', sbSignIn);
+      box.querySelector('#sync-up').addEventListener('click', sbSignUp);
+    }
+  }
 
   // ====== DADOS DO PROGRAMA ======
   const PROGRAM_START = new Date(2026, 5, 22); // 22/06/2026
@@ -1784,6 +1903,7 @@
     if (i >= 0) DONE.splice(i, 1); else DONE.push(t);
     saveDone();
     renderDay(activeDay);
+    queuePush();
   }
 
   // ====== BACKUP ======
@@ -1860,6 +1980,7 @@
         saveLogs(LOGS);
         saveDone();
         alert(added + ' sessão(ões) e ' + addedDone + ' dia(s) concluído(s) importado(s).');
+        queuePush();
         if (activeGroup) renderProgressGroup(activeGroup);
         renderDay(activeDay);
       } catch (err) {
@@ -2302,6 +2423,7 @@
     closeLog();
     renderDay(activeDay);
     if (document.getElementById('view-progress').classList.contains('active')) renderProgressGroup(activeGroup);
+    queuePush();
   }
 
   // ====== PROGRESSO (agrupado por treino) ======
@@ -2652,11 +2774,14 @@
   }
   document.addEventListener('visibilitychange', refreshOnFocus);
   window.addEventListener('pageshow', refreshOnFocus);
+  window.addEventListener('online', () => { if (sbUser) fullSync(); });
 
   // ====== INIT ======
   buildProgressGroups();
   markCurrentWeek();
   selectDay(getDayKey());
+  // sync inicia após o cliente Supabase (defer) carregar
+  window.addEventListener('load', initSync);
 </script>
 
 </body>
