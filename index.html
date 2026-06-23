@@ -661,6 +661,10 @@
     align-items: center;
     margin-bottom: 8px;
   }
+  /* exercício de tempo: sem coluna de reps */
+  .sheet.unit-seg .set-row { grid-template-columns: 28px 1fr 1fr 32px; }
+  .sheet.unit-seg .set-r,
+  .sheet.unit-seg .set-head-reps { display: none; }
   .set-row .set-n {
     font-size: 13px;
     color: var(--label-secondary);
@@ -713,14 +717,20 @@
     border-radius: 5px;
     background: var(--bg-tertiary);
     cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--label-tertiary);
   }
-  .hm-cell.done { background: var(--green); }
-  .hm-cell.miss { background: rgba(255,69,58,0.35); }
+  .hm-cell.done { background: var(--green); color: #000; }
+  .hm-cell.miss { background: rgba(255,69,58,0.35); color: rgba(255,255,255,0.85); }
   .hm-cell.rest { background: rgba(235,235,245,0.08); }
   .hm-cell.future { background: rgba(235,235,245,0.05); }
-  .hm-cell.today { background: var(--bg-tertiary); box-shadow: inset 0 0 0 2px var(--blue); }
+  .hm-cell.today { background: var(--bg-tertiary); box-shadow: inset 0 0 0 2px var(--blue); color: var(--blue); }
   .hm-legend { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--label-secondary); flex-wrap: wrap; }
-  .hm-legend .hm-cell { width: 12px; height: 12px; aspect-ratio: auto; cursor: default; margin-left: 8px; }
+  .hm-legend .hm-cell { width: 12px; height: 12px; aspect-ratio: auto; cursor: default; margin-left: 8px; font-size: 0; }
   .hm-legend .hm-cell:first-child { margin-left: 0; }
   .btn-add {
     background: var(--bg-tertiary);
@@ -1514,7 +1524,7 @@
   <div class="set-row">
     <div class="set-n"></div>
     <div class="set-head" id="set-head-w">Carga</div>
-    <div class="set-head">Reps</div>
+    <div class="set-head set-head-reps">Reps</div>
     <div class="set-head">RPE</div>
     <div></div>
   </div>
@@ -2154,6 +2164,8 @@
     currentUnit = EX_UNIT[id] || 'kg';
     document.getElementById('sheet-title').textContent = name;
     document.getElementById('set-head-w').textContent = currentUnit === 'seg' ? 'Seg' : 'Carga';
+    // exercício de tempo (prancha/dead hang): esconde coluna de reps
+    document.getElementById('sheet').classList.toggle('unit-seg', currentUnit === 'seg');
 
     const ls = lastSession(id);
     document.getElementById('sheet-sub').textContent = ls
@@ -2520,7 +2532,7 @@
         else if (set[iso]) cls = 'done';
         else if (iso < today) cls = 'miss';                          // passado e não treinou
         else if (iso === today) cls = 'today';
-        h += '<div class="hm-cell ' + cls + '" data-date="' + iso + '"></div>';
+        h += '<div class="hm-cell ' + cls + '" data-date="' + iso + '">' + Number(iso.split('-')[2]) + '</div>';
       }
       h += '</div>';
     }
@@ -2543,7 +2555,14 @@
     tab.addEventListener('click', () => switchView(tab.dataset.view));
   });
 
-  document.getElementById('add-set').addEventListener('click', () => addSetRow('', '', ''));
+  document.getElementById('add-set').addEventListener('click', () => {
+    // copia peso e reps da última série; RPE em branco
+    const rows = document.querySelectorAll('#set-list .set-row');
+    const last = rows[rows.length - 1];
+    const w = last ? last.querySelector('.set-w').value : '';
+    const r = last ? last.querySelector('.set-r').value : '';
+    addSetRow(w, r, '');
+  });
   document.getElementById('save-log').addEventListener('click', saveLog);
   document.getElementById('cancel-log').addEventListener('click', closeLog);
   document.getElementById('sheet-close').addEventListener('click', closeLog);
