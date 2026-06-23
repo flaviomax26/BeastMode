@@ -524,10 +524,17 @@
   }
 
   /* ===== Logging / progresso (novo) ===== */
-  .last-line {
+  .hoje-line {
     font-size: 12px;
     color: var(--green);
+    font-weight: 600;
     margin-top: 3px;
+    line-height: 1.3;
+  }
+  .last-line {
+    font-size: 12px;
+    color: var(--label-secondary);
+    margin-top: 2px;
     line-height: 1.3;
   }
   .done-badge {
@@ -1865,13 +1872,25 @@
   const EX_NAMES = {};
   const EX_SMITH = {};
   const EX_UNIT = {};
+  const EX_SCHEME = {};
   Object.values(DAYS).forEach(d => d.sections.forEach(s => s.items.forEach(it => {
     if (it.log) {
       EX_NAMES[slug(it.n)] = it.n;
       if (it.smith) EX_SMITH[slug(it.n)] = true;
       EX_UNIT[slug(it.n)] = it.unit || 'kg';
+      EX_SCHEME[slug(it.n)] = it.scheme;
     }
   })));
+
+  // extrai nº de séries e reps-alvo do texto do programa
+  function parseScheme(scheme) {
+    let sets = 1, reps = '';
+    const ms = (scheme || '').match(/(\d+)\s*s[ée]ries?/i);
+    if (ms) sets = parseInt(ms[1], 10);
+    const mr = (scheme || '').match(/×\s*(\d+)(?:\s*-\s*\d+)?\s*reps?/i);
+    if (mr) reps = mr[1]; // limite inferior da faixa
+    return { sets: sets || 1, reps: reps };
+  }
 
   // imagens de execução (free-exercise-db, domínio público) — slug -> arquivos em img/
   const EX_IMG = {
@@ -2032,11 +2051,16 @@
         let last = '';
         let badge = '';
         if (it.log) {
-          const ls = lastSession(id);
-          if (ls) {
-            const ts = topSet(ls);
-            last = '<div class="last-line">último: ' + fmtSet(ts, EX_UNIT[id]) + ' · ' + agoText(ls.date) + '</div>';
-            if (ls.date === todayISO()) badge = '<div class="done-badge">✓</div>';
+          const arr = LOGS[id] || [];
+          const u = EX_UNIT[id];
+          const today = arr.find(s => s.date === todayISO());
+          const prev = arr.slice().reverse().find(s => s.date !== todayISO()); // último anterior a hoje
+          if (today) {
+            last += '<div class="hoje-line">hoje: ' + today.sets.map(x => fmtSet(x, u)).join(' · ') + '</div>';
+            badge = '<div class="done-badge">✓</div>';
+          }
+          if (prev) {
+            last += '<div class="last-line">último: ' + fmtSet(topSet(prev), u) + ' · ' + agoText(prev.date) + '</div>';
           }
         }
         const clickable = it.log ? ' row-clickable' : '';
@@ -2178,14 +2202,17 @@
     renderStack(id);
 
     // editar treino de HOJE: carrega tudo (carga+reps+rpe).
-    // treino novo (última sessão é passada): só sugere a carga, reps/rpe em branco.
+    // treino novo: nº de séries + reps-alvo do programa; carga = sugestão da última (se houver).
     const setList = document.getElementById('set-list');
     setList.innerHTML = '';
-    if (ls) {
-      const editToday = ls.date === todayISO();
-      ls.sets.forEach(s => addSetRow(s.w, editToday ? s.r : '', editToday ? s.rpe : ''));
+    const editToday = ls && ls.date === todayISO();
+    if (editToday) {
+      ls.sets.forEach(s => addSetRow(s.w, s.r, s.rpe));
     } else {
-      addSetRow('', '', '');
+      const plan = parseScheme(EX_SCHEME[id]);
+      const sugW = ls ? topSet(ls).w : '';                 // peso sugerido (última sessão)
+      const tgtR = currentUnit === 'seg' ? '' : plan.reps; // reps-alvo (tempo não usa reps)
+      for (let i = 0; i < plan.sets; i++) addSetRow(sugW, tgtR, '');
     }
 
     // calculadora de barra (Smith 22kg / Hexagonal 9kg)
