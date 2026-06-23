@@ -563,17 +563,25 @@
     -webkit-overflow-scrolling: touch;
   }
   .sheet.open { transform: translateY(0); }
+  .sheet-top {
+    position: sticky;
+    top: 0;
+    z-index: 3;
+    background: var(--bg-secondary);
+    margin: 0 -16px 6px;
+    padding: 8px 16px 8px;
+  }
   .sheet-handle {
     width: 36px;
     height: 5px;
     border-radius: 3px;
     background: var(--label-tertiary);
-    margin: 8px auto 12px;
+    margin: 0 auto;
   }
   .sheet-close {
     position: absolute;
-    top: 14px;
-    right: 14px;
+    top: 6px;
+    right: 12px;
     width: 30px;
     height: 30px;
     border-radius: 15px;
@@ -586,7 +594,6 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 2;
   }
   .sheet-close:active { background: var(--separator); }
   .sheet-title {
@@ -1475,8 +1482,10 @@
 <!-- SHEET DE LOG -->
 <div class="sheet-overlay" id="sheet-overlay"></div>
 <div class="sheet" id="sheet">
-  <div class="sheet-handle"></div>
-  <button class="sheet-close" id="sheet-close" type="button" aria-label="Fechar">✕</button>
+  <div class="sheet-top">
+    <div class="sheet-handle"></div>
+    <button class="sheet-close" id="sheet-close" type="button" aria-label="Fechar">✕</button>
+  </div>
   <h2 class="sheet-title" id="sheet-title">Exercício</h2>
   <p class="sheet-sub" id="sheet-sub"></p>
   <div id="log-suggest"></div>
