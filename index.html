@@ -2642,6 +2642,17 @@
     }, { passive: true });
   })();
 
+  // atualiza ao voltar pro foco (vira o dia/meia-noite sem precisar recarregar)
+  function refreshOnFocus() {
+    if (document.hidden) return;
+    if (sheetId) return; // não mexe enquanto loga
+    if (activeDay) renderDay(activeDay);
+    markCurrentWeek();
+    if (document.getElementById('view-progress').classList.contains('active')) openProgress();
+  }
+  document.addEventListener('visibilitychange', refreshOnFocus);
+  window.addEventListener('pageshow', refreshOnFocus);
+
   // ====== INIT ======
   buildProgressGroups();
   markCurrentWeek();
