@@ -754,6 +754,14 @@
   .mm-label { width: 78px; flex-shrink: 0; font-size: 11px; color: var(--label-secondary); font-weight: 600; }
   .mm-d { width: 18px; flex-shrink: 0; text-align: center; font-size: 9px; color: var(--label-tertiary); }
   .mm-cell { width: 18px; height: 18px; flex-shrink: 0; border-radius: 4px; background: var(--bg-tertiary); }
+
+  .mob-week { display: flex; gap: 8px; margin-bottom: 10px; }
+  .mob-chip {
+    flex: 1; text-align: center; padding: 12px 0; border-radius: 12px;
+    background: var(--bg-secondary); font-weight: 600; font-size: 15px;
+    color: var(--label-secondary);
+  }
+  .mob-chip.done { background: rgba(48,209,88,0.2); color: var(--green); }
   .btn-add {
     background: var(--bg-tertiary);
     color: var(--blue);
@@ -1399,6 +1407,11 @@
   <div class="container">
 
     <div class="section">
+      <div class="section-header"><p class="section-title">Mobilidade — Esta Semana</p></div>
+      <div id="mobility-box"></div>
+    </div>
+
+    <div class="section">
       <div class="section-header">
         <p class="section-title">Mobilidade de Quadril</p>
       </div>
@@ -1642,16 +1655,18 @@
     if (!sb || !sbUser) return;
     setSyncStatus('sincronizando…');
     try {
-      const { data, error } = await sb.from('app_state').select('logs,done,health,program').eq('user_id', sbUser.id).maybeSingle();
+      const { data, error } = await sb.from('app_state').select('logs,done,health,program,mobility').eq('user_id', sbUser.id).maybeSingle();
       if (error) throw error;
       if (data) {
         mergeLogs(data.logs || {});
         mergeDone(data.done || []);
+        mergeMob(data.mobility || []);
         if (data.health) healthData = data.health;
-        saveLogs(LOGS); saveDone();
+        saveLogs(LOGS); saveDone(); saveMob();
         applyProgram(data.program || DEFAULT_PROGRAM); // programa da conta (ou padrão)
         rerenderAll();
         if (document.getElementById('view-health').classList.contains('active')) renderHealth();
+        if (document.getElementById('view-bjj').classList.contains('active')) renderMobility();
       }
       await pushState();
       setSyncStatus('✓ Sincronizado');
@@ -1661,7 +1676,7 @@
   async function pushState() {
     if (!sb || !sbUser) return;
     const { error } = await sb.from('app_state').upsert({
-      user_id: sbUser.id, logs: LOGS, done: DONE, updated_at: new Date().toISOString()
+      user_id: sbUser.id, logs: LOGS, done: DONE, mobility: MOB, updated_at: new Date().toISOString()
     });
     if (error) throw error;
   }
@@ -1945,6 +1960,21 @@
   let DONE = loadDone();
   function saveDone() { localStorage.setItem(DONE_KEY, JSON.stringify(DONE)); }
 
+  // mobilidade de quadril (datas feitas) — sincroniza junto com logs/done
+  const MOB_KEY = 'beastmode.mob.v1';
+  function loadMob() { try { return JSON.parse(localStorage.getItem(MOB_KEY)) || []; } catch (e) { return []; } }
+  let MOB = loadMob();
+  function saveMob() { localStorage.setItem(MOB_KEY, JSON.stringify(MOB)); }
+  function mergeMob(arr) { let a = 0; (arr || []).forEach(d => { if (d && MOB.indexOf(d) < 0) { MOB.push(d); a++; } }); MOB.sort(); return a; }
+  function toggleMobToday() {
+    const t = todayISO();
+    const i = MOB.indexOf(t);
+    if (i >= 0) MOB.splice(i, 1); else MOB.push(t);
+    saveMob();
+    renderMobility();
+    queuePush();
+  }
+
   // conjunto de datas em que treinou = logou algum exercício OU marcou manual
   function trainedSet() {
     const set = {};
@@ -1964,7 +1994,7 @@
 
   // ====== BACKUP ======
   function backupPayload(pretty) {
-    return JSON.stringify({ v: 1, logs: LOGS, done: DONE }, null, pretty ? 2 : 0);
+    return JSON.stringify({ v: 1, logs: LOGS, done: DONE, mobility: MOB }, null, pretty ? 2 : 0);
   }
   function exportData() {
     const data = backupPayload(true);
@@ -2033,8 +2063,10 @@
         const donePart = isNew ? obj.done : null;
         const added = mergeLogs(logsPart);
         const addedDone = mergeDone(donePart);
+        if (isNew && obj.mobility) mergeMob(obj.mobility);
         saveLogs(LOGS);
         saveDone();
+        saveMob();
         alert(added + ' sessão(ões) e ' + addedDone + ' dia(s) concluído(s) importado(s).');
         queuePush();
         if (activeGroup) renderProgressGroup(activeGroup);
@@ -2840,6 +2872,7 @@
     document.getElementById('header-sub').textContent = t.sub;
     if (viewId === 'view-progress') openProgress();
     if (viewId === 'view-health') renderHealth();
+    if (viewId === 'view-bjj') renderMobility();
     if (viewId === 'view-program') markCurrentWeek();
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
@@ -2920,13 +2953,59 @@
     return PROGRESS_GROUPS.includes(k) ? k : 'seg';
   }
   function openProgress() {
-    if (!activeGroup) selectGroup(defaultProgressGroup());
-    else renderProgressGroup(activeGroup);
+    // selectGroup re-marca a pill ativa (corrige perda do destaque após sync/foco)
+    selectGroup(activeGroup && DAYS[activeGroup] ? activeGroup : defaultProgressGroup());
     renderConsistency();
     renderMuscleMatrix();
   }
 
   // ====== SOBREPOSIÇÃO MUSCULAR ======
+  // ====== MOBILIDADE (3x/semana) ======
+  function mondayOf(date) {
+    const x = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+    const off = (x.getDay() + 6) % 7; // 0=segunda
+    x.setDate(x.getDate() - off);
+    return x;
+  }
+  function isoLocal(d) {
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  }
+  function renderMobility() {
+    const box = document.getElementById('mobility-box');
+    if (!box) return;
+    const set = new Set(MOB);
+    const today = new Date(todayISO() + 'T00:00:00');
+    const mon = mondayOf(today);
+    const weekDates = []; for (let i = 0; i < 7; i++) weekDates.push(isoLocal(new Date(mon.getTime() + i * 864e5)));
+    const targets = [['Seg', 0], ['Qua', 2], ['Sex', 4]];
+    const weekCount = weekDates.filter(d => set.has(d)).length;
+
+    // streak de semanas com >=3 sessões (semana atual incompleta não quebra)
+    let streak = 0, m = new Date(mon);
+    for (let g = 0; g < 400; g++) {
+      const wd = []; for (let i = 0; i < 7; i++) wd.push(isoLocal(new Date(m.getTime() + i * 864e5)));
+      const c = wd.filter(d => set.has(d)).length;
+      const isCurrent = m.getTime() === mon.getTime();
+      if (c >= 3) { streak++; m = new Date(m.getTime() - 7 * 864e5); }
+      else if (isCurrent) { m = new Date(m.getTime() - 7 * 864e5); }
+      else break;
+    }
+
+    const todayDone = set.has(todayISO());
+    let h = '<div class="stats-grid">' +
+      '<div class="stat-box"><div class="stat-label">Esta semana</div><div class="stat-value">' + weekCount + '/3</div><div class="stat-detail">sessões</div></div>' +
+      '<div class="stat-box"><div class="stat-label">Sequência</div><div class="stat-value">' + streak + '</div><div class="stat-detail">semanas ≥3</div></div>' +
+      '</div>';
+    h += '<div class="mob-week">' + targets.map(t => {
+      const done = set.has(weekDates[t[1]]);
+      return '<div class="mob-chip' + (done ? ' done' : '') + '">' + t[0] + (done ? ' ✓' : '') + '</div>';
+    }).join('') + '</div>';
+    h += '<button class="btn ' + (todayDone ? 'btn-done' : 'btn-primary') + '" id="mob-btn">' +
+      (todayDone ? '✓ Mobilidade feita hoje' : 'Marcar mobilidade hoje') + '</button>';
+    box.innerHTML = h;
+    document.getElementById('mob-btn').addEventListener('click', toggleMobToday);
+  }
+
   function renderMuscleMatrix() {
     const box = document.getElementById('muscle-matrix');
     if (!box) return;
