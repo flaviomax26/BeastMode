@@ -32,10 +32,18 @@ Imagens em `img/` vêm do [free-exercise-db](https://github.com/yuhonas/free-exe
 
 ```
 BeastMode/
-├── index.html   # App (single file)
-├── img/         # Imagens de execução
+├── index.html        # markup + refs
+├── css/styles.css    # estilos
+├── js/
+│   ├── data.js       # programa, exercícios, mapas, helpers puros
+│   ├── sync.js       # Supabase + estado local (localStorage)
+│   ├── workout.js    # dia, modal de log, calc, sugestão, PR, toast
+│   ├── progress.js   # gráficos, heatmap, matriz muscular, saúde, mobilidade
+│   └── app.js        # navegação, wiring, init
+├── img/              # imagens de execução
 └── README.md
 ```
+Scripts carregam em ordem (`data → sync → workout → progress → app`), escopo global compartilhado (sem build).
 
 ## ⚠️ Cache do iOS
 
