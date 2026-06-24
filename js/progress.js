@@ -262,6 +262,63 @@
     if (cw && mc.peso) drawChart(cw, mc.peso.map(v => ({ v: v })), 'kg', { bestLow: true, xlabels: ['Hoje', '3m', '6m'] });
   }
 
+  // ====== MEDIDAS InBody ======
+  const MEAS_METRICS = [
+    { key: 'peso', label: 'Peso', unit: 'kg', low: true },
+    { key: 'gordura', label: '% Gordura', unit: '%', low: true },
+    { key: 'magra', label: 'Massa magra', unit: 'kg', low: false },
+    { key: 'cintura', label: 'Cintura', unit: 'cm', low: true }
+  ];
+  function addMeasure() {
+    const get = k => { const v = parseFloat(document.getElementById('meas-' + k).value.replace(',', '.')); return isNaN(v) ? null : v; };
+    const m = { date: todayISO() };
+    let any = false;
+    MEAS_METRICS.forEach(x => { const v = get(x.key); if (v != null) { m[x.key] = v; any = true; } });
+    if (!any) { alert('Preencha pelo menos um campo.'); return; }
+    const i = MEAS.findIndex(x => x.date === m.date);
+    if (i >= 0) MEAS[i] = m; else MEAS.push(m);
+    MEAS.sort((a, b) => a.date.localeCompare(b.date));
+    saveMeas();
+    renderMeasures();
+    queuePush();
+    toast('✓ Medida salva');
+  }
+  function renderMeasures() {
+    const box = document.getElementById('measures-box');
+    if (!box) return;
+    const arr = MEAS.slice().sort((a, b) => a.date.localeCompare(b.date));
+    let h = '<div class="meas-form">' +
+      MEAS_METRICS.map(x => '<div class="meas-field"><label>' + x.label + ' (' + x.unit + ')</label>' +
+        '<input class="fld" id="meas-' + x.key + '" inputmode="decimal" placeholder="—"></div>').join('') +
+      '<button class="btn btn-primary" id="meas-save">Salvar medida de hoje</button></div>';
+    if (arr.length) {
+      MEAS_METRICS.forEach(x => {
+        const pts = arr.filter(m => m[x.key] != null).map(m => ({ date: m.date, v: m[x.key] }));
+        if (pts.length < 1) return;
+        const last = pts[pts.length - 1].v, first = pts[0].v;
+        const delta = pts.length > 1 ? (last - first) : 0;
+        const dtxt = delta ? (delta > 0 ? '+' : '') + (Math.round(delta * 10) / 10) + x.unit : '';
+        h += '<div class="chart-card"><div class="prog-head">' +
+          '<div class="prog-name">' + x.label + '</div>' +
+          '<div class="prog-meta">atual ' + last + x.unit + (dtxt ? ' · Δ ' + dtxt : '') + ' · ' + pts.length + ' medida(s)</div>' +
+          '</div><canvas class="meas-canvas" data-key="' + x.key + '"></canvas></div>';
+      });
+      h += '<details class="hist"><summary>Histórico (' + arr.length + ')</summary>' +
+        arr.slice().reverse().map(m => '<div class="hist-row"><span class="hist-date">' + fmtDate(m.date) + '</span><span class="hist-sets">' +
+          MEAS_METRICS.filter(x => m[x.key] != null).map(x => m[x.key] + x.unit).join(' · ') + '</span></div>').join('') +
+        '</details>';
+    } else {
+      h += '<div class="empty">Registre sua 1ª medida (InBody) pra ver a evolução real.</div>';
+    }
+    box.innerHTML = h;
+    document.getElementById('meas-save').addEventListener('click', addMeasure);
+    box.querySelectorAll('.meas-canvas').forEach(cv => {
+      const x = MEAS_METRICS.find(m => m.key === cv.dataset.key);
+      const pts = arr.filter(m => m[x.key] != null).map(m => ({ date: m.date, v: m[x.key] }));
+      drawChart(cv, pts, x.unit, { bestLow: x.low });
+    });
+  }
+
   function defaultProgressGroup() {
     const k = getDayKey();
     return PROGRESS_GROUPS.includes(k) ? k : 'seg';

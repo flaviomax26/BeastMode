@@ -32,17 +32,18 @@
     if (!sb || !sbUser) return;
     setSyncStatus('sincronizando…');
     try {
-      const { data, error } = await sb.from('app_state').select('logs,done,health,program,mobility').eq('user_id', sbUser.id).maybeSingle();
+      const { data, error } = await sb.from('app_state').select('logs,done,health,program,mobility,measures').eq('user_id', sbUser.id).maybeSingle();
       if (error) throw error;
       if (data) {
         mergeLogs(data.logs || {});
         mergeDone(data.done || []);
         mergeMob(data.mobility || []);
+        mergeMeas(data.measures || []);
         if (data.health) healthData = data.health;
-        saveLogs(LOGS); saveDone(); saveMob();
+        saveLogs(LOGS); saveDone(); saveMob(); saveMeas();
         applyProgram(data.program || DEFAULT_PROGRAM); // programa da conta (ou padrão)
         rerenderAll();
-        if (document.getElementById('view-health').classList.contains('active')) renderHealth();
+        if (document.getElementById('view-health').classList.contains('active')) { renderHealth(); renderMeasures(); }
         if (document.getElementById('view-bjj').classList.contains('active')) renderMobility();
       }
       await pushState();
@@ -53,7 +54,7 @@
   async function pushState() {
     if (!sb || !sbUser) return;
     const { error } = await sb.from('app_state').upsert({
-      user_id: sbUser.id, logs: LOGS, done: DONE, mobility: MOB, updated_at: new Date().toISOString()
+      user_id: sbUser.id, logs: LOGS, done: DONE, mobility: MOB, measures: MEAS, updated_at: new Date().toISOString()
     });
     if (error) throw error;
   }
@@ -163,6 +164,23 @@
 
   function mergeMob(arr) { let a = 0; (arr || []).forEach(d => { if (d && MOB.indexOf(d) < 0) { MOB.push(d); a++; } }); MOB.sort(); return a; }
 
+  // medidas InBody (array de {date, peso, gordura, magra, cintura})
+  const MEAS_KEY = 'beastmode.meas.v1';
+  function loadMeas() { try { return JSON.parse(localStorage.getItem(MEAS_KEY)) || []; } catch (e) { return []; } }
+  let MEAS = loadMeas();
+  function saveMeas() { localStorage.setItem(MEAS_KEY, JSON.stringify(MEAS)); }
+  // merge por data (importado/remoto vence em conflito)
+  function mergeMeas(arr) {
+    let a = 0;
+    (arr || []).forEach(m => {
+      if (!m || !m.date) return;
+      const i = MEAS.findIndex(x => x.date === m.date);
+      if (i >= 0) MEAS[i] = m; else { MEAS.push(m); a++; }
+    });
+    MEAS.sort((x, y) => x.date.localeCompare(y.date));
+    return a;
+  }
+
   function toggleMobToday() {
     const t = todayISO();
     const i = MOB.indexOf(t);
@@ -195,7 +213,7 @@
   // ====== BACKUP ======
 
   function backupPayload(pretty) {
-    return JSON.stringify({ v: 1, logs: LOGS, done: DONE, mobility: MOB }, null, pretty ? 2 : 0);
+    return JSON.stringify({ v: 1, logs: LOGS, done: DONE, mobility: MOB, measures: MEAS }, null, pretty ? 2 : 0);
   }
 
   function exportData() {
@@ -268,9 +286,11 @@
         const added = mergeLogs(logsPart);
         const addedDone = mergeDone(donePart);
         if (isNew && obj.mobility) mergeMob(obj.mobility);
+        if (isNew && obj.measures) mergeMeas(obj.measures);
         saveLogs(LOGS);
         saveDone();
         saveMob();
+        saveMeas();
         alert(added + ' sessão(ões) e ' + addedDone + ' dia(s) concluído(s) importado(s).');
         queuePush();
         if (activeGroup) renderProgressGroup(activeGroup);

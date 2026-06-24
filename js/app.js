@@ -38,7 +38,7 @@
     document.getElementById('header-title').textContent = t.title;
     document.getElementById('header-sub').textContent = t.sub;
     if (viewId === 'view-progress') openProgress();
-    if (viewId === 'view-health') renderHealth();
+    if (viewId === 'view-health') { renderHealth(); renderMeasures(); }
     if (viewId === 'view-bjj') renderMobility();
     if (viewId === 'view-program') markCurrentWeek();
     window.scrollTo({ top: 0, behavior: 'smooth' });
