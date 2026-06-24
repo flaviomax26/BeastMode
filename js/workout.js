@@ -74,6 +74,7 @@
   }
 
   function fmtSet(s, unit) {
+    if (unit === 'rep') return s.r ? s.r + ' reps' : '—';
     const suffix = unit === 'seg' ? 's' : 'kg';
     const w = (s.w || s.w === 0) ? s.w + suffix : '';
     const r = s.r ? ' × ' + s.r : '';
@@ -89,23 +90,73 @@
 
   let sheetDirty = false; // há dados digitados não salvos no sheet
 
+  // ombro/saúde preventiva: mantêm carga e volume normais mesmo no deload
+  const DELOAD_SKIP = {
+    'rotacao-externa-banda': 1, 'face-pull-crossover': 1,
+    'elev-lateral-kb-halter': 1, 'elev-lateral-kb': 1, 'elev-frontal-halter': 1
+  };
+
+  // carga de deload: ~65% do recorde, arredondada pro incremento REAL do equipamento
+  function deloadSuggest(id) {
+    const unit = EX_UNIT[id];
+    const b = exerciseBests(id);
+    const label = 'Deload — ~65% (semana leve, RPE 5-6)';
+    const M = 0.65;
+
+    // exercício de tempo (prancha, dead hang): ~65% do tempo recorde, múltiplo de 5s
+    if (unit === 'seg') {
+      if (!(b.secs > 0)) return null;
+      const v = Math.max(5, Math.round(b.secs * M / 5) * 5);
+      return { field: 'w', value: v, suffix: 's', label, rpe: null, base: b.secs };
+    }
+
+    const pr = b.pr;
+    if (!(pr > 0)) {
+      // sem carga histórica (peso corporal: pull-up) → reps a ~65%
+      if (b.reps > 0) {
+        const v = Math.max(1, Math.round(b.reps * M));
+        return { field: 'r', value: v, suffix: ' reps', label, rpe: null, base: b.reps };
+      }
+      return null;
+    }
+
+    const target = pr * M;
+    let value;
+    if (EX_STACK[id]) {
+      // pino IGUAL OU ABAIXO do alvo (nunca arredonda pra cima no deload)
+      const stack = STACKS[EX_STACK[id]];
+      const below = stack.filter(v => v <= target);
+      value = below.length ? Math.max.apply(null, below) : Math.min.apply(null, stack);
+    } else if (EX_SMITH[id]) {
+      value = Math.max(22, 22 + Math.round((target - 22) / 6) * 6);
+    } else if (EX_BARCALC[id] && EX_BARCALC[id].bar === 9) {
+      value = Math.max(9, 9 + Math.round((target - 9) / 10) * 10);
+    } else {
+      value = Math.round(target / 2.5) * 2.5;
+    }
+    return { field: 'w', value, suffix: 'kg', label, rpe: null, base: pr };
+  }
+
   // sugere próximo alvo pela dupla progressão + RPE da última sessão
 
   function suggestNext(id) {
+    const wk = WEEKS[currentWeekIdx()];
+    const isDeload = /deload/i.test(wk.phase);
+
+    // DELOAD: carga ~65% do recorde (exceto ombro/saúde preventiva, que segue normal)
+    if (isDeload && !DELOAD_SKIP[id]) return deloadSuggest(id);
+
     const ls = lastSession(id);
     if (!ls) return null;
     const ts = topSet(ls);
     const rpe = ts.rpe;
     if (!rpe) return null; // sem RPE não há base
 
-    // sugestão ciente da fase da semana (deload reduz; teto de RPE sobe no bloco)
-    const wk = WEEKS[currentWeekIdx()];
-    const isDeload = /deload/i.test(wk.phase);
+    // sugestão ciente da fase da semana (teto de RPE sobe na intensificação/realização)
     const rm = String(wk.rpe).match(/(\d+)(?:-(\d+))?/);
     const hi = rm ? (rm[2] ? +rm[2] : +rm[1]) : 8; // teto de RPE da semana
     let dir, label;
-    if (isDeload) { dir = -1; label = 'Deload — reduza (semana leve)'; }
-    else if (rpe < hi) { dir = 1; label = 'Subir (abaixo do alvo RPE ' + wk.rpe + ')'; }
+    if (rpe < hi) { dir = 1; label = 'Subir (abaixo do alvo RPE ' + wk.rpe + ')'; }
     else if (rpe > hi) { dir = -1; label = 'Recuar (acima do alvo RPE ' + wk.rpe + ')'; }
     else { dir = 0; label = 'Manter (no alvo RPE ' + wk.rpe + ')'; }
 
@@ -138,10 +189,12 @@
     const s = suggestNext(id);
     if (!s) { box.innerHTML = ''; return; }
     const arrow = s.value > s.base ? '↑' : (s.value < s.base ? '↓' : '→');
+    const baseTxt = s.rpe ? 'última ' + s.base + s.suffix + ' @RPE' + s.rpe
+                          : 'recorde ' + s.base + s.suffix;
     box.innerHTML =
       '<div class="suggest">' +
-        '<div class="suggest-txt">💡 <strong>' + s.label + '</strong> · última ' + s.base + s.suffix +
-          ' @RPE' + s.rpe + ' ' + arrow + ' <strong>' + s.value + s.suffix + '</strong></div>' +
+        '<div class="suggest-txt">💡 <strong>' + s.label + '</strong> · ' + baseTxt +
+          ' ' + arrow + ' <strong>' + s.value + s.suffix + '</strong></div>' +
         '<button class="suggest-btn" type="button" data-field="' + s.field + '" data-val="' + s.value + '">Usar</button>' +
       '</div>';
     box.querySelector('.suggest-btn').addEventListener('click', () => {
@@ -190,6 +243,8 @@
     document.getElementById('set-head-w').textContent = currentUnit === 'seg' ? 'Seg' : 'Carga';
     // exercício de tempo (prancha/dead hang): esconde coluna de reps
     document.getElementById('sheet').classList.toggle('unit-seg', currentUnit === 'seg');
+    // exercício de peso corporal (pull-up): esconde coluna de carga
+    document.getElementById('sheet').classList.toggle('unit-rep', currentUnit === 'rep');
 
     const ls = lastSession(id);
     document.getElementById('sheet-sub').textContent = ls
@@ -210,9 +265,15 @@
       ls.sets.forEach(s => addSetRow(s.w, s.r, s.rpe));
     } else {
       const plan = parseScheme(EX_SCHEME[id]);
-      const sugW = ls ? topSet(ls).w : '';                 // peso sugerido (última sessão)
+      const deloadEx = /deload/i.test(WEEKS[currentWeekIdx()].phase) && !DELOAD_SKIP[id];
+      // carga: no deload usa a sugestão de ~65%; senão, última sessão
+      const sg = deloadEx ? suggestNext(id) : null;
+      let sugW = (sg && sg.field === 'w') ? sg.value : (ls ? topSet(ls).w : '');
+      if (currentUnit === 'rep') sugW = '';                // peso corporal: sem carga
+      // séries: deload reduz ~65% (mín. 2)
+      const nSets = deloadEx ? Math.max(2, Math.ceil(plan.sets * 0.65)) : plan.sets;
       const tgtR = currentUnit === 'seg' ? '' : plan.reps; // reps-alvo (tempo não usa reps)
-      for (let i = 0; i < plan.sets; i++) addSetRow(sugW, tgtR, '');
+      for (let i = 0; i < nSets; i++) addSetRow(sugW, tgtR, '');
     }
 
     // calculadora de barra (Smith 22kg / Hexagonal 9kg)

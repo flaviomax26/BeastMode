@@ -81,13 +81,17 @@
     logged.forEach(it => {
       const id = slug(it.n);
       const unit = EX_UNIT[id];
-      const sfx = unit === 'seg' ? 's' : 'kg';
+      const isRep = unit === 'rep';
+      const sfx = unit === 'seg' ? 's' : (isRep ? '' : 'kg');
       const arr = LOGS[id];
       let pr = 0, prReps = 0;
-      arr.forEach(s => s.sets.forEach(set => { if (set.w > pr) { pr = set.w; prReps = set.r; } }));
+      arr.forEach(s => s.sets.forEach(set => {
+        const v = isRep ? set.r : set.w;
+        if (v > pr) { pr = v; prReps = isRep ? 0 : set.r; }
+      }));
       const last = arr[arr.length - 1];
       const lastTop = topSet(last);
-      const isPR = lastTop.w >= pr;
+      const isPR = (isRep ? lastTop.r : lastTop.w) >= pr;
       const b = exerciseBests(id);
       const e1txt = (unit !== 'seg' && b.e1 > 0) ? ' · e1RM ~' + Math.round(b.e1) + 'kg' : '';
       const canToggle = unit !== 'seg' && b.e1 > 0;
@@ -131,13 +135,13 @@
   function drawExerciseChart(cv) {
     const id = cv.dataset.id, arr = LOGS[id], unit = EX_UNIT[id];
     const mode = progMode[id] || 'carga';
-    const pts = arr.map(s => ({ date: s.date, v: mode === 'e1rm' ? sessionE1(s) : topSet(s).w }));
+    const pts = arr.map(s => ({ date: s.date, v: mode === 'e1rm' ? sessionE1(s) : (unit === 'rep' ? topSet(s).r : topSet(s).w) }));
     drawChart(cv, pts, unit);
   }
 
   function drawChart(cv, pts, unit, opts) {
     opts = opts || {};
-    const sfx = unit === 'seg' ? 's' : (unit || 'kg');
+    const sfx = unit === 'seg' ? 's' : (unit === 'rep' ? '' : (unit || 'kg'));
     const dpr = window.devicePixelRatio || 1;
     const cssW = cv.clientWidth, cssH = cv.clientHeight;
     cv.width = cssW * dpr; cv.height = cssH * dpr;

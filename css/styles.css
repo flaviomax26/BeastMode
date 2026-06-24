@@ -670,6 +670,10 @@
   .sheet.unit-seg .set-row { grid-template-columns: 28px 1fr 1fr 32px; }
   .sheet.unit-seg .set-r,
   .sheet.unit-seg .set-head-reps { display: none; }
+  /* exercício de peso corporal: sem coluna de carga */
+  .sheet.unit-rep .set-row { grid-template-columns: 28px 1fr 1fr 32px; }
+  .sheet.unit-rep .set-w,
+  .sheet.unit-rep #set-head-w { display: none; }
   .set-row .set-n {
     font-size: 13px;
     color: var(--label-secondary);

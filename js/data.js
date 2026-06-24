@@ -69,7 +69,7 @@
       info: { cls: 'warn', html: '⚠ <strong>Dia LEVE.</strong> Preserva pegada e dorsal pro BJJ à noite. Não vai à falha.' },
       sections: [
         { title: 'Pull-up Fase 1', dot: 'orange', items: [
-          { n: 'Negativa Pull-up', icon: '🎯', color: 'orange', scheme: '4 séries × 3 reps (descer em 5s)', log: true }
+          { n: 'Negativa Pull-up', icon: '🎯', color: 'orange', scheme: '4 séries × 3 reps (descer em 5s)', log: true, unit: 'rep' }
         ]},
         { title: 'Principal', dot: 'blue', items: [
           { n: 'Remada baixa cabo', icon: '💪', color: 'blue', scheme: '3 séries × 10-12 reps', log: true },
@@ -138,7 +138,7 @@
       meta: ['🏋️ ~70 min', '🎯 RPE 8-9', '😴 Sem BJJ'],
       sections: [
         { title: 'Pull-up Fase 1', dot: 'orange', items: [
-          { n: 'Pull-up AMRAP', icon: '🎯', color: 'orange', scheme: '2 séries até falhar (3 min descanso)', log: true }
+          { n: 'Pull-up AMRAP', icon: '🎯', color: 'orange', scheme: '2 séries até falhar (3 min descanso)', log: true, unit: 'rep' }
         ]},
         { title: 'Principal', dot: 'blue', items: [
           { n: 'Remada barra hex', icon: '💪', color: 'blue', scheme: '4 séries × 6-8 reps (pesado)', log: true },
