@@ -273,7 +273,9 @@
     const get = k => { const v = parseFloat(document.getElementById('meas-' + k).value.replace(',', '.')); return isNaN(v) ? null : v; };
     const dateEl = document.getElementById('meas-date');
     const date = (dateEl && dateEl.value) ? dateEl.value : todayISO();
+    const fonte = document.getElementById('meas-fonte').value;
     const m = { date: date };
+    if (fonte) m.fonte = fonte;
     let any = false;
     MEAS_METRICS.forEach(x => { const v = get(x.key); if (v != null) { m[x.key] = v; any = true; } });
     if (!any) { alert('Preencha pelo menos um campo.'); return; }
@@ -292,6 +294,10 @@
     let h = '<div class="meas-form">' +
       '<div class="meas-field meas-date-field"><label>Data</label>' +
         '<input class="fld" id="meas-date" type="date" value="' + todayISO() + '"></div>' +
+      '<div class="meas-field meas-date-field"><label>Método</label>' +
+        '<select class="fld" id="meas-fonte">' +
+          '<option value="">—</option><option>InBody</option><option>DEXA</option><option>Pollock</option><option>Outro</option>' +
+        '</select></div>' +
       MEAS_METRICS.map(x => '<div class="meas-field"><label>' + x.label + ' (' + x.unit + ')</label>' +
         '<input class="fld" id="meas-' + x.key + '" inputmode="decimal" placeholder="—"></div>').join('') +
       '<button class="btn btn-primary" id="meas-save">Salvar medida</button></div>';
@@ -309,8 +315,10 @@
       });
       h += '<details class="hist"><summary>Histórico (' + arr.length + ')</summary>' +
         arr.slice().reverse().map(m => '<div class="hist-row"><span class="hist-date">' + fmtDate(m.date) + '</span><span class="hist-sets">' +
-          MEAS_METRICS.filter(x => m[x.key] != null).map(x => m[x.key] + x.unit).join(' · ') + '</span></div>').join('') +
+          MEAS_METRICS.filter(x => m[x.key] != null).map(x => m[x.key] + x.unit).join(' · ') +
+          (m.fonte ? ' <span class="meas-tag">' + esc(m.fonte) + '</span>' : '') + '</span></div>').join('') +
         '</details>';
+      h += '<div class="empty" style="padding:8px 0 0;font-size:11px;text-align:left">Métodos diferentes não são 1:1 (DEXA padrão ouro, Pollock subestima, InBody boa). Pulo no gráfico pode ser troca de método.</div>';
     } else {
       h += '<div class="empty">Registre sua 1ª medida (InBody) pra ver a evolução real.</div>';
     }
