@@ -271,7 +271,9 @@
   ];
   function addMeasure() {
     const get = k => { const v = parseFloat(document.getElementById('meas-' + k).value.replace(',', '.')); return isNaN(v) ? null : v; };
-    const m = { date: todayISO() };
+    const dateEl = document.getElementById('meas-date');
+    const date = (dateEl && dateEl.value) ? dateEl.value : todayISO();
+    const m = { date: date };
     let any = false;
     MEAS_METRICS.forEach(x => { const v = get(x.key); if (v != null) { m[x.key] = v; any = true; } });
     if (!any) { alert('Preencha pelo menos um campo.'); return; }
@@ -288,9 +290,11 @@
     if (!box) return;
     const arr = MEAS.slice().sort((a, b) => a.date.localeCompare(b.date));
     let h = '<div class="meas-form">' +
+      '<div class="meas-field meas-date-field"><label>Data</label>' +
+        '<input class="fld" id="meas-date" type="date" value="' + todayISO() + '"></div>' +
       MEAS_METRICS.map(x => '<div class="meas-field"><label>' + x.label + ' (' + x.unit + ')</label>' +
         '<input class="fld" id="meas-' + x.key + '" inputmode="decimal" placeholder="—"></div>').join('') +
-      '<button class="btn btn-primary" id="meas-save">Salvar medida de hoje</button></div>';
+      '<button class="btn btn-primary" id="meas-save">Salvar medida</button></div>';
     if (arr.length) {
       MEAS_METRICS.forEach(x => {
         const pts = arr.filter(m => m[x.key] != null).map(m => ({ date: m.date, v: m[x.key] }));
