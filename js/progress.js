@@ -279,7 +279,7 @@
     let any = false;
     MEAS_METRICS.forEach(x => { const v = get(x.key); if (v != null) { m[x.key] = v; any = true; } });
     if (!any) { alert('Preencha pelo menos um campo.'); return; }
-    const i = MEAS.findIndex(x => x.date === m.date);
+    const i = MEAS.findIndex(x => measKey(x) === measKey(m));
     if (i >= 0) MEAS[i] = m; else MEAS.push(m);
     MEAS.sort((a, b) => a.date.localeCompare(b.date));
     saveMeas();

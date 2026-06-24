@@ -169,12 +169,14 @@
   function loadMeas() { try { return JSON.parse(localStorage.getItem(MEAS_KEY)) || []; } catch (e) { return []; } }
   let MEAS = loadMeas();
   function saveMeas() { localStorage.setItem(MEAS_KEY, JSON.stringify(MEAS)); }
-  // merge por data (importado/remoto vence em conflito)
+  // chave = data + método (permite métodos diferentes no mesmo dia)
+  function measKey(m) { return m.date + '|' + (m.fonte || ''); }
+  // merge por data+método (importado/remoto vence em conflito)
   function mergeMeas(arr) {
     let a = 0;
     (arr || []).forEach(m => {
       if (!m || !m.date) return;
-      const i = MEAS.findIndex(x => x.date === m.date);
+      const i = MEAS.findIndex(x => measKey(x) === measKey(m));
       if (i >= 0) MEAS[i] = m; else { MEAS.push(m); a++; }
     });
     MEAS.sort((x, y) => x.date.localeCompare(y.date));
