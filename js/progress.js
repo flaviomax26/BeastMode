@@ -445,6 +445,10 @@
     addSetRow(w, r, '');
   });
   document.getElementById('save-log').addEventListener('click', saveLog);
+  document.getElementById('rest-start').addEventListener('click', toggleRest);
+  document.getElementById('rest-minus').addEventListener('click', () => adjustRest(-30));
+  document.getElementById('rest-plus').addEventListener('click', () => adjustRest(30));
+  document.getElementById('rest-skip').addEventListener('click', () => resetRest(sheetId));
   document.getElementById('cancel-log').addEventListener('click', () => closeLog());
   document.getElementById('sheet-close').addEventListener('click', () => closeLog());
   document.getElementById('sheet-overlay').addEventListener('click', () => closeLog());

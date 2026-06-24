@@ -822,6 +822,31 @@
     cursor: pointer;
   }
   .stack-chip:active { background: var(--blue); color: #fff; }
+
+  .rest {
+    background: var(--bg-tertiary);
+    border-radius: 12px;
+    padding: 12px;
+    margin-bottom: 6px;
+    text-align: center;
+  }
+  .rest-display {
+    font-size: 34px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    font-variant-numeric: tabular-nums;
+    margin-bottom: 8px;
+  }
+  .rest-display.done { color: var(--green); animation: restFlash 0.5s ease 3; }
+  @keyframes restFlash { 50% { opacity: 0.3; } }
+  .rest-actions { display: flex; gap: 6px; }
+  .rest-btn {
+    flex: 1; border: none; border-radius: 9px; padding: 10px 0;
+    font-size: 13px; font-weight: 600; font-family: inherit; cursor: pointer;
+    background: var(--bg-secondary); color: var(--label);
+  }
+  .rest-btn.rest-go { flex: 1.6; background: var(--blue); color: #fff; }
+  .rest-btn:active { opacity: 0.7; }
   .suggest-btn {
     flex-shrink: 0;
     background: var(--green);

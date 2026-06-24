@@ -225,6 +225,7 @@
     document.getElementById('calc-bar').value = barCfg ? barCfg.bar : '22';
     updateCalc();
 
+    resetRest(id); // timer de descanso com default do exercício
     sheetDirty = false; // recém-aberto: pré-preenchidos não contam como alteração
     document.getElementById('sheet-overlay').classList.add('open');
     document.getElementById('sheet').classList.add('open');
@@ -233,6 +234,7 @@
   function closeLog(force) {
     // alerta se há dados digitados e não salvos
     if (!force && sheetDirty && !window.confirm('Você digitou dados que ainda não foram salvos. Descartar?')) return;
+    stopRest();
     sheetDirty = false;
     document.getElementById('sheet-overlay').classList.remove('open');
     document.getElementById('sheet').classList.remove('open');
@@ -275,6 +277,55 @@
     pop.addEventListener('click', close);
     setTimeout(close, 3000);
   }
+
+  // ====== TIMER DE DESCANSO ======
+  let restRemaining = 90, restRunning = false, restInterval = null, restAudio = null;
+  const REST_HEAVY = { 'deadlift-barra-hex': 1, 'agacho-smith': 1, 'supino-reto-smith': 1, 'remada-barra-hex': 1, 'pulldown-supinado': 1, 'pull-up-amrap': 1, 'negativa-pull-up': 1, 'dead-hang': 1, 'kb-swing': 1, 'leg-press': 1, 'stiff': 1 };
+  const REST_ISO = { 'Bíceps': 1, 'Tríceps': 1, 'Panturrilha': 1, 'Antebraço': 1, 'Core': 1, 'Ombro': 1, 'Adutor': 1, 'Abdutor': 1, 'Glúteo': 1 };
+  function restDefault(id) {
+    if (REST_HEAVY[id]) return 180;
+    if (REST_ISO[EX_GROUP[id]]) return 60;
+    return 90; // composto de hipertrofia
+  }
+  function fmtClock(s) { const m = Math.floor(s / 60); return m + ':' + String(s % 60).padStart(2, '0'); }
+  function renderRest() {
+    const d = document.getElementById('rest-display');
+    if (d) { d.textContent = fmtClock(Math.max(0, restRemaining)); d.classList.toggle('done', restRemaining <= 0); }
+    const b = document.getElementById('rest-start');
+    if (b) b.textContent = restRunning ? '⏸ Pausar' : '▶ Iniciar';
+  }
+  function beep() {
+    try {
+      const C = window.AudioContext || window.webkitAudioContext; if (!C) return;
+      if (!restAudio) restAudio = new C();
+      [0, 0.18, 0.36].forEach(t => {
+        const o = restAudio.createOscillator(), g = restAudio.createGain();
+        o.frequency.value = 880; o.connect(g); g.connect(restAudio.destination);
+        g.gain.setValueAtTime(0.001, restAudio.currentTime + t);
+        g.gain.exponentialRampToValueAtTime(0.3, restAudio.currentTime + t + 0.02);
+        g.gain.exponentialRampToValueAtTime(0.001, restAudio.currentTime + t + 0.15);
+        o.start(restAudio.currentTime + t); o.stop(restAudio.currentTime + t + 0.16);
+      });
+    } catch (e) {}
+  }
+  function stopRest() { clearInterval(restInterval); restInterval = null; restRunning = false; }
+  function toggleRest() {
+    if (restRunning) { stopRest(); renderRest(); return; }
+    if (restRemaining <= 0) restRemaining = restDefault(sheetId);
+    restRunning = true;
+    if (restAudio && restAudio.resume) restAudio.resume(); // destrava áudio no gesto
+    renderRest();
+    restInterval = setInterval(() => {
+      restRemaining--;
+      if (restRemaining <= 0) { stopRest(); renderRest(); beep(); }
+      else renderRest();
+    }, 1000);
+  }
+  function adjustRest(delta) {
+    restRemaining = Math.max(0, Math.min(600, restRemaining + delta));
+    renderRest();
+  }
+  function resetRest(id) { stopRest(); restRemaining = restDefault(id); renderRest(); }
 
   function addSetRow(w, r, rpe) {
     const list = document.getElementById('set-list');
