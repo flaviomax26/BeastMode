@@ -65,6 +65,33 @@
     }, { passive: true });
   })();
 
+  // arrastar o tracinho do topo pra baixo fecha o sheet de log
+  (function () {
+    const sheet = document.getElementById('sheet');
+    const grip = sheet.querySelector('.sheet-top');
+    let startY = null, dy = 0;
+    grip.addEventListener('touchstart', e => {
+      startY = e.touches[0].clientY; dy = 0;
+      sheet.classList.add('dragging');
+    }, { passive: true });
+    grip.addEventListener('touchmove', e => {
+      if (startY === null) return;
+      dy = Math.max(0, e.touches[0].clientY - startY); // só pra baixo
+      sheet.style.transform = 'translateY(' + dy + 'px)';
+    }, { passive: true });
+    grip.addEventListener('touchend', () => {
+      if (startY === null) return;
+      startY = null;
+      sheet.classList.remove('dragging');
+      if (dy > 90) {
+        closeLog(); // pode abrir confirm de descarte
+        if (sheet.classList.contains('open')) sheet.style.transform = ''; // cancelou → volta
+      } else {
+        sheet.style.transform = ''; // não passou do limiar → snap de volta
+      }
+    }, { passive: true });
+  })();
+
   // atualiza ao voltar pro foco (vira o dia/meia-noite sem precisar recarregar)
 
   function refreshOnFocus() {

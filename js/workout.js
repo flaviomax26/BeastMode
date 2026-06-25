@@ -92,7 +92,7 @@
 
   // ombro/saúde preventiva: mantêm carga e volume normais mesmo no deload
   const DELOAD_SKIP = {
-    'rotacao-externa-banda': 1, 'face-pull-crossover': 1,
+    'rotacao-externa-cross-45': 1, 'face-pull-crossover': 1,
     'elev-lateral-kb-halter': 1, 'elev-lateral-kb': 1, 'elev-frontal-halter': 1
   };
 
@@ -288,8 +288,11 @@
 
     resetRest(id); // timer de descanso com default do exercício
     sheetDirty = false; // recém-aberto: pré-preenchidos não contam como alteração
+    const sheet = document.getElementById('sheet');
+    sheet.style.transform = ''; // limpa arraste anterior
     document.getElementById('sheet-overlay').classList.add('open');
-    document.getElementById('sheet').classList.add('open');
+    sheet.classList.add('open');
+    document.body.classList.add('sheet-open'); // trava scroll do fundo
   }
 
   function closeLog(force) {
@@ -298,7 +301,10 @@
     stopRest();
     sheetDirty = false;
     document.getElementById('sheet-overlay').classList.remove('open');
-    document.getElementById('sheet').classList.remove('open');
+    const sheet = document.getElementById('sheet');
+    sheet.classList.remove('open', 'dragging');
+    sheet.style.transform = '';
+    document.body.classList.remove('sheet-open');
     sheetId = null;
   }
 

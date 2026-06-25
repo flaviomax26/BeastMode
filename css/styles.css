@@ -560,8 +560,12 @@
     transition: transform 0.25s ease;
     padding: 0 16px calc(20px + var(--safe-bottom));
     -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain; /* não propaga scroll pro fundo */
   }
   .sheet.open { transform: translateY(0); }
+  .sheet.dragging { transition: none; } /* segue o dedo sem lag */
+  /* trava o fundo enquanto o sheet está aberto */
+  body.sheet-open { overflow: hidden; }
   .sheet-top {
     position: sticky;
     top: 0;
@@ -577,6 +581,7 @@
     background: var(--label-tertiary);
     margin: 0 auto;
   }
+  .sheet-top { touch-action: none; } /* handle controla o arraste, não rola */
   .sheet-close {
     position: absolute;
     top: 6px;

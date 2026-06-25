@@ -101,7 +101,7 @@
           { n: 'Elev. frontal halter', icon: '⭐', color: 'yellow', tag: { cls: 'ombro', txt: 'OMBRO' }, scheme: '3 séries × 12-15 reps', log: true },
           { n: 'Crossover alto/baixo', icon: '💪', color: 'red', scheme: '3 séries × 12-15 reps (drop)', log: true },
           { n: 'Tríceps testa halter', icon: '💪', color: 'red', scheme: '3 séries × 10-12 reps', log: true },
-          { n: 'Rotação externa banda', icon: '🛡️', color: 'indigo', tag: { cls: 'saude', txt: 'SAÚDE' }, scheme: '3 séries × 15-20 reps cada', log: true }
+          { n: 'Rotação externa Cross 45', icon: '🛡️', color: 'indigo', tag: { cls: 'saude', txt: 'SAÚDE' }, scheme: '3 séries × 15-20 reps cada', log: true }
         ]},
         { title: 'Abdômen', dot: 'teal', items: [
           { n: 'Abdominal cabo Cross45', icon: '🧘', color: 'teal', scheme: '3 séries × 12-15 reps', log: true }
@@ -265,7 +265,8 @@
     'elev-frontal-halter': ['Front_Dumbbell_Raise__0.jpg', 'Front_Dumbbell_Raise__1.jpg'],
     'crossover-alto-baixo': ['Cable_Crossover__0.jpg', 'Cable_Crossover__1.jpg'],
     'triceps-testa-halter': ['Lying_Dumbbell_Tricep_Extension__0.jpg', 'Lying_Dumbbell_Tricep_Extension__1.jpg'],
-    'rotacao-externa-banda': ['External_Rotation_with_Band__0.jpg', 'External_Rotation_with_Band__1.jpg'],
+    'rotacao-externa-cross-45': ['External_Rotation_with_Band__0.jpg', 'External_Rotation_with_Band__1.jpg'],
+    'elev-lateral-kb': ['Side_Lateral_Raise__0.jpg', 'Side_Lateral_Raise__1.jpg'],
     'cadeira-extensora': ['Leg_Extensions__0.jpg', 'Leg_Extensions__1.jpg'],
     'goblet-squat-kb': ['Goblet_Squat__0.jpg', 'Goblet_Squat__1.jpg'],
     'adutor-abdutor': ['Thigh_Adductor__0.jpg', 'Thigh_Adductor__1.jpg'],
@@ -316,7 +317,7 @@
     'pullover-crossover': 'Costas', 'face-pull-crossover': 'Ombro', 'rosca-alternada-halter': 'Bíceps',
     'dead-hang': 'Costas', 'supino-inclinado-smith': 'Peito', 'maquina-supino': 'Peito',
     'desenv-halter-sentado': 'Ombro', 'elev-frontal-halter': 'Ombro', 'crossover-alto-baixo': 'Peito',
-    'triceps-testa-halter': 'Tríceps', 'rotacao-externa-banda': 'Ombro', 'cadeira-extensora': 'Quadríceps',
+    'triceps-testa-halter': 'Tríceps', 'rotacao-externa-cross-45': 'Ombro', 'elev-lateral-kb': 'Ombro', 'cadeira-extensora': 'Quadríceps',
     'goblet-squat-kb': 'Quadríceps', 'adutor-abdutor': 'Adutor', 'panturrilha-leg-press': 'Panturrilha',
     'pull-up-amrap': 'Costas', 'remada-barra-hex': 'Costas', 'pulldown-supinado': 'Costas',
     'remada-maquina': 'Costas', 'rosca-scott': 'Bíceps', 'rosca-corda': 'Bíceps',
@@ -354,7 +355,8 @@
     'leg-press': 'legpress', 'panturrilha-leg-press': 'legpress',
     'crossover-alto': 'cross45', 'crossover-alto-baixo': 'cross45', 'pullover-crossover': 'cross45',
     'face-pull-crossover': 'cross45', 'triceps-corda': 'cross45', 'triceps-unilateral': 'cross45',
-    'abdominal-cabo-cross45': 'cross45', 'rosca-corda': 'cross45'
+    'abdominal-cabo-cross45': 'cross45', 'rosca-corda': 'cross45',
+    'rotacao-externa-cross-45': 'cross45'
   };
 
   // pegador recomendado por exercício de cabo (Cross 45 / puxada)
@@ -369,7 +371,8 @@
     'crossover-alto-baixo': '2 estribos',
     'pullover-crossover': 'barra reta',
     'remada-baixa-cabo': 'triângulo',
-    'pulldown-supinado': 'barra (supinada)'
+    'pulldown-supinado': 'barra (supinada)',
+    'rotacao-externa-cross-45': 'estribo'
   };
 
   // calculadora de barra: slug -> { peso da barra, rótulo }
