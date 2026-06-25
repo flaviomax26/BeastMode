@@ -373,10 +373,12 @@
       const prog = (DAYS[dk] && DAYS[dk].title) ? ' <span class="meas-tag">' + esc(DAYS[dk].title) + '</span>' : '';
       h += '<div class="act-day"><div class="act-date">' + fmtDate(dt) + prog + '</div>';
       byDate[dt].forEach(a => {
-        const icon = ACT_ICON[a.type] || '🏃';
+        const isDay = a.type === 'Dia';
+        const icon = isDay ? '🔥' : (ACT_ICON[a.type] || '🏃');
+        const label = isDay ? 'Energia ativa' : (a.type || 'Treino');
         const hr = a.hrMax ? ' · FC ' + (a.hrAvg ? a.hrAvg + '/' : '') + a.hrMax : '';
         h += '<div class="act-row"><span class="act-ico">' + icon + '</span>' +
-          '<span class="act-type">' + esc(a.type || 'Treino') + '</span>' +
+          '<span class="act-type">' + esc(label) + '</span>' +
           '<span class="act-meta">' + (a.dur ? Math.round(a.dur) + 'min' : '') +
           (a.kcal ? ' · ' + Math.round(a.kcal) + 'kcal' : '') + hr + '</span></div>';
       });
