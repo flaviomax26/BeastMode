@@ -337,9 +337,15 @@
 
   // ====== ATIVIDADE (treinos do Apple Health via Atalho) ======
   const ACT_ICON = {
+    // PT-BR
     'Musculação': '🏋️', 'Funcional': '🏋️', 'Treino de Força Funcional': '🏋️', 'Treino de Força Tradicional': '🏋️',
     'Futebol': '⚽', 'Artes Marciais': '🥋', 'Kickboxing': '🥋', 'Corrida': '🏃', 'Caminhada': '🚶',
-    'Pedalada': '🚴', 'Ciclismo': '🚴', 'Natação': '🏊', 'HIIT': '🔥', 'Elíptico': '🏃'
+    'Pedalada': '🚴', 'Ciclismo': '🚴', 'Natação': '🏊', 'HIIT': '🔥', 'Elíptico': '🏃', 'Treino Funcional': '🏋️',
+    // EN (Health Auto Export costuma mandar o nome do HealthKit em inglês)
+    'Traditional Strength Training': '🏋️', 'Functional Strength Training': '🏋️', 'Strength Training': '🏋️',
+    'Soccer': '⚽', 'Football': '⚽', 'Martial Arts': '🥋', 'Boxing': '🥊',
+    'Running': '🏃', 'Walking': '🚶', 'Cycling': '🚴', 'Swimming': '🏊',
+    'High Intensity Interval Training': '🔥', 'Elliptical': '🏃', 'Core Training': '🧘', 'Cooldown': '🧘'
   };
   function actDayKey(iso) {
     const a = iso.split('-');
