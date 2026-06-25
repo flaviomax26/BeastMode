@@ -664,6 +664,27 @@
   input.fld:focus, textarea.fld:focus { outline: none; border-color: var(--blue); }
   input.fld.field-missing { border-color: var(--orange); background: rgba(255,159,10,0.08); }
 
+  /* Atividade (Apple Health) */
+  .act-day { margin-bottom: 14px; }
+  .act-date {
+    font-size: 12px;
+    color: var(--label-secondary);
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
+  .act-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px;
+    background: var(--bg-secondary);
+    border-radius: 10px;
+    margin-bottom: 6px;
+  }
+  .act-ico { font-size: 18px; }
+  .act-type { font-size: 14px; font-weight: 500; }
+  .act-meta { font-size: 12px; color: var(--label-secondary); margin-left: auto; text-align: right; }
+
   .set-row {
     display: grid;
     grid-template-columns: 28px 1fr 1fr 1fr 32px;

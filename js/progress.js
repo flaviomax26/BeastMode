@@ -335,6 +335,56 @@
     });
   }
 
+  // ====== ATIVIDADE (treinos do Apple Health via Atalho) ======
+  const ACT_ICON = {
+    'Musculação': '🏋️', 'Funcional': '🏋️', 'Treino de Força Funcional': '🏋️', 'Treino de Força Tradicional': '🏋️',
+    'Futebol': '⚽', 'Artes Marciais': '🥋', 'Kickboxing': '🥋', 'Corrida': '🏃', 'Caminhada': '🚶',
+    'Pedalada': '🚴', 'Ciclismo': '🚴', 'Natação': '🏊', 'HIIT': '🔥', 'Elíptico': '🏃'
+  };
+  function actDayKey(iso) {
+    const a = iso.split('-');
+    const d = new Date(+a[0], +a[1] - 1, +a[2]);
+    return ['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sab'][d.getDay()];
+  }
+  function renderActivity() {
+    const box = document.getElementById('activity-box');
+    if (!box) return;
+    const arr = (ACT || []).filter(a => a && a.date).slice().sort((a, b) => b.date.localeCompare(a.date));
+    if (!arr.length) {
+      box.innerHTML = '<div class="empty">Sem treinos sincronizados ainda. O Atalho do iPhone envia os treinos do Apple Health (Watch + Polar) toda noite.</div>';
+      return;
+    }
+    // resumo dos últimos 7 dias
+    const since = new Date(); since.setDate(since.getDate() - 7);
+    const sinceISO = since.toISOString().slice(0, 10);
+    const wk = arr.filter(a => a.date >= sinceISO);
+    const sum = (k) => wk.reduce((t, a) => t + (+a[k] || 0), 0);
+    const kcal7 = Math.round(sum('kcal')), min7 = Math.round(sum('dur'));
+    let h = '<div class="chart-card"><div class="prog-head">' +
+      '<div class="prog-name">Últimos 7 dias</div>' +
+      '<div class="prog-meta">' + wk.length + ' treino(s) · ' + kcal7 + ' kcal · ' + min7 + ' min</div>' +
+      '</div></div>';
+    // agrupa por data
+    const byDate = {};
+    arr.forEach(a => { (byDate[a.date] = byDate[a.date] || []).push(a); });
+    const dates = Object.keys(byDate).sort((a, b) => b.localeCompare(a)).slice(0, 30);
+    dates.forEach(dt => {
+      const dk = actDayKey(dt);
+      const prog = (DAYS[dk] && DAYS[dk].title) ? ' <span class="meas-tag">' + esc(DAYS[dk].title) + '</span>' : '';
+      h += '<div class="act-day"><div class="act-date">' + fmtDate(dt) + prog + '</div>';
+      byDate[dt].forEach(a => {
+        const icon = ACT_ICON[a.type] || '🏃';
+        const hr = a.hrMax ? ' · FC ' + (a.hrAvg ? a.hrAvg + '/' : '') + a.hrMax : '';
+        h += '<div class="act-row"><span class="act-ico">' + icon + '</span>' +
+          '<span class="act-type">' + esc(a.type || 'Treino') + '</span>' +
+          '<span class="act-meta">' + (a.dur ? Math.round(a.dur) + 'min' : '') +
+          (a.kcal ? ' · ' + Math.round(a.kcal) + 'kcal' : '') + hr + '</span></div>';
+      });
+      h += '</div>';
+    });
+    box.innerHTML = h;
+  }
+
   function defaultProgressGroup() {
     const k = getDayKey();
     return PROGRESS_GROUPS.includes(k) ? k : 'seg';

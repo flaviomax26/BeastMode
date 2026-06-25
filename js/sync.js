@@ -32,7 +32,7 @@
     if (!sb || !sbUser) return;
     setSyncStatus('sincronizando…');
     try {
-      const { data, error } = await sb.from('app_state').select('logs,done,health,program,mobility,measures').eq('user_id', sbUser.id).maybeSingle();
+      const { data, error } = await sb.from('app_state').select('logs,done,health,program,mobility,measures,activity').eq('user_id', sbUser.id).maybeSingle();
       if (error) throw error;
       if (data) {
         mergeLogs(data.logs || {});
@@ -40,10 +40,11 @@
         mergeMob(data.mobility || []);
         mergeMeas(data.measures || []);
         if (data.health) healthData = data.health;
+        if (Array.isArray(data.activity)) { ACT = data.activity; saveAct(); } // só leitura (Atalho grava)
         saveLogs(LOGS); saveDone(); saveMob(); saveMeas();
         applyProgram(data.program || DEFAULT_PROGRAM); // programa da conta (ou padrão)
         rerenderAll();
-        if (document.getElementById('view-health').classList.contains('active')) { renderHealth(); renderMeasures(); }
+        if (document.getElementById('view-health').classList.contains('active')) { renderHealth(); renderMeasures(); renderActivity(); }
         if (document.getElementById('view-bjj').classList.contains('active')) renderMobility();
       }
       await pushState();
@@ -169,6 +170,12 @@
   function loadMeas() { try { return JSON.parse(localStorage.getItem(MEAS_KEY)) || []; } catch (e) { return []; } }
   let MEAS = loadMeas();
   function saveMeas() { localStorage.setItem(MEAS_KEY, JSON.stringify(MEAS)); }
+
+  // atividade (treinos do Apple Health, gravados pelo Atalho) — o app só LÊ
+  const ACT_KEY = 'beastmode.activity.v1';
+  function loadAct() { try { return JSON.parse(localStorage.getItem(ACT_KEY)) || []; } catch (e) { return []; } }
+  let ACT = loadAct();
+  function saveAct() { localStorage.setItem(ACT_KEY, JSON.stringify(ACT)); }
   // chave = data + método (permite métodos diferentes no mesmo dia)
   function measKey(m) { return m.date + '|' + (m.fonte || ''); }
   // merge por data+método (importado/remoto vence em conflito)
