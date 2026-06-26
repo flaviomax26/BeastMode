@@ -907,6 +907,8 @@
     color: var(--blue);
   }
   .meas-add > summary::-webkit-details-marker { display: none; }
+  .meas-add > summary::before { content: '+ '; font-weight: 700; }
+  .meas-add[open] > summary::before { content: '− '; }
   .meas-add[open] > summary { border-radius: 12px 12px 0 0; }
   .meas-form {
     background: var(--bg-secondary);

@@ -295,7 +295,7 @@
     const box = document.getElementById('measures-box');
     if (!box) return;
     const arr = MEAS.slice().sort((a, b) => a.date.localeCompare(b.date));
-    let h = '<details class="meas-add"><summary>+ Registrar medida</summary>' +
+    let h = '<details class="meas-add"><summary>Registrar medida</summary>' +
       '<div class="meas-form">' +
       '<div class="meas-field meas-date-field"><label>Data</label>' +
         '<input class="fld" id="meas-date" type="date" value="' + todayISO() + '"></div>' +
