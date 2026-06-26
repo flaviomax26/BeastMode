@@ -653,6 +653,7 @@
 
   input.fld, textarea.fld {
     width: 100%;
+    box-sizing: border-box; /* padding não estoura a largura do container */
     background: var(--bg);
     border: 0.5px solid var(--separator);
     border-radius: 10px;
@@ -661,6 +662,7 @@
     padding: 10px 12px;
     font-family: inherit;
   }
+  input.fld[type=date] { -webkit-appearance: none; appearance: none; text-align: left; min-width: 0; }
   input.fld:focus, textarea.fld:focus { outline: none; border-color: var(--blue); }
   input.fld.field-missing { border-color: var(--orange); background: rgba(255,159,10,0.08); }
 

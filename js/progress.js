@@ -347,6 +347,13 @@
     'Running': '🏃', 'Walking': '🚶', 'Cycling': '🚴', 'Swimming': '🏊',
     'High Intensity Interval Training': '🔥', 'Elliptical': '🏃', 'Core Training': '🧘', 'Cooldown': '🧘'
   };
+  // duração legível: <60 → "52min", senão "1h39m" (ou "2h" exato)
+  function fmtDur(min) {
+    const m = Math.round(+min || 0);
+    if (m < 60) return m + 'min';
+    const h = Math.floor(m / 60), r = m % 60;
+    return h + 'h' + (r ? String(r).padStart(2, '0') + 'm' : '');
+  }
   function actDayKey(iso) {
     const a = iso.split('-');
     const d = new Date(+a[0], +a[1] - 1, +a[2]);
@@ -368,7 +375,7 @@
     const kcal7 = Math.round(sum('kcal')), min7 = Math.round(sum('dur'));
     let h = '<div class="chart-card"><div class="prog-head">' +
       '<div class="prog-name">Últimos 7 dias</div>' +
-      '<div class="prog-meta">' + wk.length + ' treino(s) · ' + kcal7 + ' kcal · ' + min7 + ' min</div>' +
+      '<div class="prog-meta">' + wk.length + ' treino(s) · ' + kcal7 + ' kcal · ' + fmtDur(min7) + '</div>' +
       '</div></div>';
     // agrupa por data
     const byDate = {};
@@ -385,7 +392,7 @@
         const hr = a.hrMax ? ' · FC ' + (a.hrAvg ? a.hrAvg + '/' : '') + a.hrMax : '';
         h += '<div class="act-row"><span class="act-ico">' + icon + '</span>' +
           '<span class="act-type">' + esc(label) + '</span>' +
-          '<span class="act-meta">' + (a.dur ? Math.round(a.dur) + 'min' : '') +
+          '<span class="act-meta">' + (a.dur ? fmtDur(a.dur) : '') +
           (a.kcal ? ' · ' + Math.round(a.kcal) + 'kcal' : '') + hr + '</span></div>';
       });
       h += '</div>';
