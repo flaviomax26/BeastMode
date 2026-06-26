@@ -295,7 +295,8 @@
     const box = document.getElementById('measures-box');
     if (!box) return;
     const arr = MEAS.slice().sort((a, b) => a.date.localeCompare(b.date));
-    let h = '<div class="meas-form">' +
+    let h = '<details class="meas-add"><summary>+ Registrar medida</summary>' +
+      '<div class="meas-form">' +
       '<div class="meas-field meas-date-field"><label>Data</label>' +
         '<input class="fld" id="meas-date" type="date" value="' + todayISO() + '"></div>' +
       '<div class="meas-field meas-date-field"><label>Método</label>' +
@@ -304,7 +305,7 @@
         '</select></div>' +
       MEAS_METRICS.map(x => '<div class="meas-field"><label>' + x.label + ' (' + x.unit + ')</label>' +
         '<input class="fld" id="meas-' + x.key + '" inputmode="decimal" placeholder="—"></div>').join('') +
-      '<button class="btn btn-primary" id="meas-save">Salvar medida</button></div>';
+      '<button class="btn btn-primary" id="meas-save">Salvar medida</button></div></details>';
     if (arr.length) {
       MEAS_METRICS.forEach(x => {
         const pts = arr.filter(m => m[x.key] != null).map(m => ({ date: m.date, v: m[x.key] }));
@@ -359,12 +360,23 @@
     const d = new Date(+a[0], +a[1] - 1, +a[2]);
     return ['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sab'][d.getDay()];
   }
+  // rótulo de exibição: limpa nomes tortos do HAE (Polar importa BJJ como "Outro")
+  const ACT_LABEL = {
+    'Outro': 'Jiu-Jitsu', 'Other': 'Jiu-Jitsu',
+    'Dia': 'Energia ativa',
+    'Treinamento de Força Tradicional': 'Musculação', 'Treino Tradicional de Força': 'Musculação',
+    'Traditional Strength Training': 'Musculação', 'Functional Strength Training': 'Funcional',
+    'Interno Ciclismo': 'Ciclismo (indoor)', 'Indoor Cycling': 'Ciclismo (indoor)',
+    'Outdoor Correr': 'Corrida', 'Interno Correr': 'Corrida (indoor)',
+    'Outdoor Running': 'Corrida', 'Indoor Running': 'Corrida (indoor)'
+  };
+  function actLabel(type) { return ACT_LABEL[type] || type || 'Treino'; }
   // ícone do treino: nome exato → senão por palavra-chave (HAE manda nomes variados)
   function actIcon(type) {
     if (type === 'Dia') return '🔥';
     if (ACT_ICON[type]) return ACT_ICON[type];
     const t = (type || '').toLowerCase();
-    if (/marc|jiu|jiti|grappl/.test(t)) return '🥋';
+    if (/marc|jiu|jiti|grappl|outro|\bother\b/.test(t)) return '🥋'; // Polar/BJJ vem como "Outro"
     if (/box|kick/.test(t)) return '🥊';
     if (/fute|socc|footb/.test(t)) return '⚽';
     if (/cicl|bike|cycl|spin|pedal/.test(t)) return '🚴';
@@ -415,7 +427,7 @@
         const prog = (DAYS[dk] && DAYS[dk].title) ? ' <span class="meas-tag">' + esc(DAYS[dk].title) + '</span>' : '';
         h += '<div class="act-day"><div class="act-date">' + fmtDate(dt) + prog + '</div>';
         byDate[dt].forEach(a => {
-          const label = a.type === 'Dia' ? 'Energia ativa' : (a.type || 'Treino');
+          const label = actLabel(a.type);
           const hr = a.hrMax ? ' · FC ' + (a.hrAvg ? a.hrAvg + '/' : '') + a.hrMax : '';
           h += '<div class="act-row"><span class="act-ico">' + actIcon(a.type) + '</span>' +
             '<span class="act-type">' + esc(label) + '</span>' +

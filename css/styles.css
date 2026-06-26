@@ -390,6 +390,8 @@
   }
   .view.active {
     display: block;
+    min-height: 100vh;
+    min-height: 100dvh; /* views curtas preenchem a tela → tab-bar não flutua sobre o conteúdo */
   }
   .view .container::after {
     content: '';
@@ -892,11 +894,25 @@
   .rest-btn.rest-go { flex: 1.6; background: var(--blue); color: #fff; }
   .rest-btn:active { opacity: 0.7; }
 
+  .meas-add { margin-bottom: 12px; }
+  .meas-add > summary {
+    list-style: none;
+    cursor: pointer;
+    background: var(--bg-secondary);
+    border: 0.5px solid var(--separator);
+    border-radius: 12px;
+    padding: 12px 14px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--blue);
+  }
+  .meas-add > summary::-webkit-details-marker { display: none; }
+  .meas-add[open] > summary { border-radius: 12px 12px 0 0; }
   .meas-form {
     background: var(--bg-secondary);
-    border-radius: 14px;
+    border-radius: 0 0 12px 12px;
     padding: 12px;
-    margin-bottom: 12px;
+    margin-bottom: 0;
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 8px;
