@@ -380,6 +380,11 @@
     <div class="section">
       <div class="section-header"><p class="section-title">Mais</p></div>
       <div class="card">
+        <div class="row row-clickable" data-goto="view-activity">
+          <div class="row-icon orange">🔥</div>
+          <div class="row-content"><div class="row-title">Atividade</div><div class="row-subtitle">Treinos do Apple Health</div></div>
+          <div class="row-chevron">›</div>
+        </div>
         <div class="row row-clickable" data-goto="view-health">
           <div class="row-icon indigo">🩺</div>
           <div class="row-content"><div class="row-title">Saúde</div><div class="row-subtitle">Exames, DEXA, metas</div></div>
@@ -406,17 +411,19 @@
   </div>
 </div>
 
+<!-- VIEW: ATIVIDADE -->
+<div class="view" id="view-activity">
+  <div class="container">
+    <div id="activity-box"></div>
+  </div>
+</div>
+
 <!-- VIEW: SAÚDE -->
 <div class="view" id="view-health">
   <div class="container">
 
     <div class="info-box">
       🔒 <strong>Dados privados.</strong> Carregados da sua conta (não ficam no app público). Entre pela aba Menu.
-    </div>
-
-    <div class="section">
-      <div class="section-header"><p class="section-title">Atividade (Apple Health)</p></div>
-      <div id="activity-box"></div>
     </div>
 
     <div class="section">

@@ -667,6 +667,18 @@
   input.fld.field-missing { border-color: var(--orange); background: rgba(255,159,10,0.08); }
 
   /* Atividade (Apple Health) */
+  .act-chips { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+  .act-chip {
+    background: var(--bg-secondary);
+    color: var(--label-secondary);
+    border: 0.5px solid var(--separator);
+    border-radius: 16px;
+    padding: 7px 14px;
+    font-size: 13px;
+    font-weight: 500;
+    font-family: inherit;
+  }
+  .act-chip.on { background: var(--blue); color: #fff; border-color: var(--blue); }
   .act-day { margin-bottom: 14px; }
   .act-date {
     font-size: 12px;

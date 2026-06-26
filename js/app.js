@@ -20,7 +20,7 @@
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
     document.getElementById(viewId).classList.add('active');
     // Saúde e BJJ ficam "dentro" do Menu — destaca a aba Menu nesses casos
-    const tabFor = { 'view-health': 'view-menu', 'view-bjj': 'view-menu' };
+    const tabFor = { 'view-health': 'view-menu', 'view-bjj': 'view-menu', 'view-activity': 'view-menu' };
     const tabSel = '.tab[data-view="' + (tabFor[viewId] || viewId) + '"]';
     const tab = document.querySelector(tabSel);
     if (tab) tab.classList.add('active');
@@ -31,6 +31,7 @@
       'view-progress': { title: 'Progresso', sub: 'Evolução de cargas registradas' },
       'view-menu': { title: 'Menu', sub: 'Conta · Backup · Mais' },
       'view-health': { title: 'Saúde', sub: 'Exames · DEXA · Metas' },
+      'view-activity': { title: 'Atividade', sub: 'Treinos · Apple Health' },
       'view-technique': { title: 'Técnica', sub: 'RPE · Execução de exercícios' },
       'view-bjj': { title: 'BJJ', sub: 'Mobilidade + Guardas' }
     };
@@ -38,7 +39,8 @@
     document.getElementById('header-title').textContent = t.title;
     document.getElementById('header-sub').textContent = t.sub;
     if (viewId === 'view-progress') openProgress();
-    if (viewId === 'view-health') { renderHealth(); renderMeasures(); renderActivity(); }
+    if (viewId === 'view-health') { renderHealth(); renderMeasures(); }
+    if (viewId === 'view-activity') renderActivity();
     if (viewId === 'view-bjj') renderMobility();
     if (viewId === 'view-program') markCurrentWeek();
     window.scrollTo({ top: 0, behavior: 'smooth' });

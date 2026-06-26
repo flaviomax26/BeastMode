@@ -359,45 +359,76 @@
     const d = new Date(+a[0], +a[1] - 1, +a[2]);
     return ['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sab'][d.getDay()];
   }
+  // ícone do treino: nome exato → senão por palavra-chave (HAE manda nomes variados)
+  function actIcon(type) {
+    if (type === 'Dia') return '🔥';
+    if (ACT_ICON[type]) return ACT_ICON[type];
+    const t = (type || '').toLowerCase();
+    if (/marc|jiu|jiti|grappl/.test(t)) return '🥋';
+    if (/box|kick/.test(t)) return '🥊';
+    if (/fute|socc|footb/.test(t)) return '⚽';
+    if (/cicl|bike|cycl|spin|pedal/.test(t)) return '🚴';
+    if (/corr|\brun|trote/.test(t)) return '🏃';
+    if (/caminh|walk/.test(t)) return '🚶';
+    if (/nata|swim/.test(t)) return '🏊';
+    if (/for[çc]a|strength|muscul|funcional|funct/.test(t)) return '🏋️';
+    if (/hiit|interval|intensidade/.test(t)) return '🔥';
+    if (/el[íi]p|ellip/.test(t)) return '🏃';
+    if (/core|yoga|along|mobil|cooldown|aqueci/.test(t)) return '🧘';
+    return '🏃';
+  }
+  // data local (YYYY-MM-DD) de hoje menos n dias
+  function isoMinusDays(n) {
+    const d = new Date(); d.setHours(0, 0, 0, 0); d.setDate(d.getDate() - n);
+    const z = x => String(x).padStart(2, '0');
+    return d.getFullYear() + '-' + z(d.getMonth() + 1) + '-' + z(d.getDate());
+  }
+  let actPeriod = 3; // dias (0 = tudo) — default 3
+  const ACT_PERIODS = [{ d: 3, t: '3 dias' }, { d: 7, t: '7 dias' }, { d: 30, t: '30 dias' }, { d: 0, t: 'Tudo' }];
   function renderActivity() {
     const box = document.getElementById('activity-box');
     if (!box) return;
-    const arr = (ACT || []).filter(a => a && a.date).slice().sort((a, b) => b.date.localeCompare(a.date));
-    if (!arr.length) {
+    const all = (ACT || []).filter(a => a && a.date).slice().sort((a, b) => b.date.localeCompare(a.date));
+    if (!all.length) {
       box.innerHTML = '<div class="empty">Sem treinos sincronizados ainda. O Atalho do iPhone envia os treinos do Apple Health (Watch + Polar) toda noite.</div>';
       return;
     }
-    // resumo dos últimos 7 dias
-    const since = new Date(); since.setDate(since.getDate() - 7);
-    const sinceISO = since.toISOString().slice(0, 10);
-    const wk = arr.filter(a => a.date >= sinceISO);
-    const sum = (k) => wk.reduce((t, a) => t + (+a[k] || 0), 0);
-    const kcal7 = Math.round(sum('kcal')), min7 = Math.round(sum('dur'));
-    let h = '<div class="chart-card"><div class="prog-head">' +
-      '<div class="prog-name">Últimos 7 dias</div>' +
-      '<div class="prog-meta">' + wk.length + ' treino(s) · ' + kcal7 + ' kcal · ' + fmtDur(min7) + '</div>' +
+    // filtro por período
+    const arr = actPeriod > 0 ? all.filter(a => a.date >= isoMinusDays(actPeriod - 1)) : all;
+    // chips de período
+    let h = '<div class="act-chips">' + ACT_PERIODS.map(p =>
+      '<button type="button" class="act-chip' + (p.d === actPeriod ? ' on' : '') + '" data-d="' + p.d + '">' + p.t + '</button>').join('') + '</div>';
+    // resumo do período
+    const sum = (k) => arr.reduce((t, a) => t + (+a[k] || 0), 0);
+    const periodLabel = actPeriod > 0 ? 'Últimos ' + actPeriod + ' dias' : 'Tudo';
+    h += '<div class="chart-card"><div class="prog-head">' +
+      '<div class="prog-name">' + periodLabel + '</div>' +
+      '<div class="prog-meta">' + arr.length + ' treino(s) · ' + Math.round(sum('kcal')) + ' kcal · ' + fmtDur(Math.round(sum('dur'))) + '</div>' +
       '</div></div>';
-    // agrupa por data
-    const byDate = {};
-    arr.forEach(a => { (byDate[a.date] = byDate[a.date] || []).push(a); });
-    const dates = Object.keys(byDate).sort((a, b) => b.localeCompare(a)).slice(0, 30);
-    dates.forEach(dt => {
-      const dk = actDayKey(dt);
-      const prog = (DAYS[dk] && DAYS[dk].title) ? ' <span class="meas-tag">' + esc(DAYS[dk].title) + '</span>' : '';
-      h += '<div class="act-day"><div class="act-date">' + fmtDate(dt) + prog + '</div>';
-      byDate[dt].forEach(a => {
-        const isDay = a.type === 'Dia';
-        const icon = isDay ? '🔥' : (ACT_ICON[a.type] || '🏃');
-        const label = isDay ? 'Energia ativa' : (a.type || 'Treino');
-        const hr = a.hrMax ? ' · FC ' + (a.hrAvg ? a.hrAvg + '/' : '') + a.hrMax : '';
-        h += '<div class="act-row"><span class="act-ico">' + icon + '</span>' +
-          '<span class="act-type">' + esc(label) + '</span>' +
-          '<span class="act-meta">' + (a.dur ? fmtDur(a.dur) : '') +
-          (a.kcal ? ' · ' + Math.round(a.kcal) + 'kcal' : '') + hr + '</span></div>';
+    if (!arr.length) {
+      h += '<div class="empty">Nenhum treino neste período.</div>';
+    } else {
+      const byDate = {};
+      arr.forEach(a => { (byDate[a.date] = byDate[a.date] || []).push(a); });
+      Object.keys(byDate).sort((a, b) => b.localeCompare(a)).forEach(dt => {
+        const dk = actDayKey(dt);
+        const prog = (DAYS[dk] && DAYS[dk].title) ? ' <span class="meas-tag">' + esc(DAYS[dk].title) + '</span>' : '';
+        h += '<div class="act-day"><div class="act-date">' + fmtDate(dt) + prog + '</div>';
+        byDate[dt].forEach(a => {
+          const label = a.type === 'Dia' ? 'Energia ativa' : (a.type || 'Treino');
+          const hr = a.hrMax ? ' · FC ' + (a.hrAvg ? a.hrAvg + '/' : '') + a.hrMax : '';
+          h += '<div class="act-row"><span class="act-ico">' + actIcon(a.type) + '</span>' +
+            '<span class="act-type">' + esc(label) + '</span>' +
+            '<span class="act-meta">' + (a.dur ? fmtDur(a.dur) : '') +
+            (a.kcal ? ' · ' + Math.round(a.kcal) + 'kcal' : '') + hr + '</span></div>';
+        });
+        h += '</div>';
       });
-      h += '</div>';
-    });
+    }
     box.innerHTML = h;
+    box.querySelectorAll('.act-chip').forEach(c => c.addEventListener('click', () => {
+      actPeriod = +c.dataset.d; renderActivity();
+    }));
   }
 
   function defaultProgressGroup() {

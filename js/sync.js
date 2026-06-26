@@ -44,7 +44,8 @@
         saveLogs(LOGS); saveDone(); saveMob(); saveMeas();
         applyProgram(data.program || DEFAULT_PROGRAM); // programa da conta (ou padrão)
         rerenderAll();
-        if (document.getElementById('view-health').classList.contains('active')) { renderHealth(); renderMeasures(); renderActivity(); }
+        if (document.getElementById('view-health').classList.contains('active')) { renderHealth(); renderMeasures(); }
+        if (document.getElementById('view-activity').classList.contains('active')) renderActivity();
         if (document.getElementById('view-bjj').classList.contains('active')) renderMobility();
       }
       await pushState();
