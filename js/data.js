@@ -121,7 +121,8 @@
           { n: 'Cadeira extensora', icon: '🏋️', color: 'green', scheme: '4 séries × 12-15 reps', log: true },
           { n: 'Cadeira flexora', icon: '🏋️', color: 'green', scheme: '4 séries × 12-15 reps', log: true },
           { n: 'Goblet squat KB', icon: '🏋️', color: 'green', scheme: '3 séries × 10-12 reps', log: true },
-          { n: 'Adutor + Abdutor', icon: '🏋️', color: 'green', scheme: '3 séries × 12-15 reps cada', log: true },
+          { n: 'Cadeira adutora', icon: '🏋️', color: 'green', scheme: '3 séries × 12-15 reps', log: true },
+          { n: 'Cadeira abdutora', icon: '🏋️', color: 'green', scheme: '3 séries × 12-15 reps', log: true },
           { n: 'Panturrilha leg press', icon: '🏋️', color: 'green', scheme: '4 séries × 15-20 reps', log: true }
         ]},
         { title: 'Pegada', dot: 'orange', items: [
