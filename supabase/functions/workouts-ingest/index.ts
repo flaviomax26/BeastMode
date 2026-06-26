@@ -36,6 +36,22 @@ function num(v: unknown): number | null {
   return isFinite(n) ? Math.round(n * 10) / 10 : null;
 }
 
+// energia em kcal, convertendo kJ→kcal quando o HAE exporta em kJ (units: "kJ")
+function kcalOf(v: unknown): number | null {
+  if (v == null) return null;
+  let qty: number, units = '';
+  if (typeof v === 'object' && 'qty' in (v as Record<string, unknown>)) {
+    const o = v as Record<string, unknown>;
+    qty = Number(o.qty);
+    units = String(o.units || '').toLowerCase();
+  } else {
+    qty = typeof v === 'string' ? parseFloat((v as string).replace(',', '.')) : Number(v);
+  }
+  if (!isFinite(qty)) return null;
+  if (units === 'kj') qty = qty / 4.184; // kJ → kcal
+  return Math.round(qty);
+}
+
 // chave de dedupe: id do HAE quando existir, senão início + tipo
 function key(w: Record<string, unknown>): string {
   if (w.id) return 'id:' + String(w.id);
@@ -54,8 +70,9 @@ function normalize(w: Record<string, unknown>) {
     dur = raw != null && raw > 180 ? Math.round(raw / 60) : raw; // >180 = segundos
   }
 
-  // kcal: simples (kcal) ou HAE (activeEnergyBurned / totalEnergyBurned / activeEnergy)
-  const kcal = num(w.kcal) ?? num(w.activeEnergyBurned) ?? num(w.activeEnergy) ?? num(w.totalEnergyBurned);
+  // kcal: simples (kcal) ou HAE (activeEnergyBurned / activeEnergy / totalEnergyBurned),
+  // convertendo kJ→kcal pela unidade
+  const kcal = kcalOf(w.kcal) ?? kcalOf(w.activeEnergyBurned) ?? kcalOf(w.activeEnergy) ?? kcalOf(w.totalEnergyBurned);
 
   // FC: simples (hrAvg/hrMax) ou HAE (heartRate.avg.qty / heartRate.max.qty)
   const hr = (w.heartRate || {}) as Record<string, unknown>;
