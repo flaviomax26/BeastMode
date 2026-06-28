@@ -149,7 +149,7 @@
           { n: 'Rosca corda', icon: '💪', color: 'blue', scheme: '3 séries × 12-15 reps', log: true }
         ]},
         { title: 'Abdômen', dot: 'teal', items: [
-          { n: 'Roda abdominal (joelhos)', icon: '🧘', color: 'teal', scheme: '3 séries × 8-12 reps', log: true }
+          { n: 'Roda abdominal (joelhos)', icon: '🧘', color: 'teal', scheme: '3 séries × 8-12 reps', log: true, unit: 'rep' }
         ]},
         { title: 'Finisher', dot: 'red', items: [
           { n: 'KB swing', icon: '🔥', color: 'red', scheme: '5 séries × 15 reps (90s rest)', log: true }
