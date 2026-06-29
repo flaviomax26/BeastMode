@@ -1,5 +1,7 @@
 'use strict';
-  const BUILD = '20260629c'; // bump a cada deploy; aparece no Menu pra confirmar build no aparelho
+  // Versão semver — fonte única. Bump via ./bump.sh (atualiza ?v= e CHANGELOG juntos).
+  // PATCH=fix · MINOR=feature · MAJOR=redesign/quebra
+  const APP_VERSION = '1.0.0';
   function getDayKey() {
     const days = ['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sab'];
     return days[new Date().getDay()];
@@ -30,7 +32,7 @@
       'view-week': { title: 'Treino', sub: 'Programa Completo · Início 22/06' },
       'view-program': { title: 'Programa', sub: 'Cronograma 8 Semanas' },
       'view-progress': { title: 'Progresso', sub: 'Evolução de cargas registradas' },
-      'view-menu': { title: 'Menu', sub: 'Conta · Backup · build ' + BUILD },
+      'view-menu': { title: 'Menu', sub: 'Conta · Backup · v' + APP_VERSION },
       'view-health': { title: 'Saúde', sub: 'Exames · DEXA · Metas' },
       'view-activity': { title: 'Atividade', sub: 'Treinos · Apple Health' },
       'view-technique': { title: 'Técnica', sub: 'RPE · Execução de exercícios' },
@@ -112,3 +114,14 @@
   applyProgram(DEFAULT_PROGRAM); // monta pills, índices, cronograma, dia atual
   // sync inicia após o cliente Supabase (defer) carregar
   window.addEventListener('load', initSync);
+
+  // avisa quando a versão mudou desde a última vez (confirma que atualizou, não é cache)
+  (function () {
+    const VKEY = 'beastmode.version';
+    let seen = null;
+    try { seen = localStorage.getItem(VKEY); } catch (e) {}
+    if (seen && seen !== APP_VERSION) {
+      window.addEventListener('load', () => setTimeout(() => toast('✓ Atualizado para v' + APP_VERSION), 600));
+    }
+    try { localStorage.setItem(VKEY, APP_VERSION); } catch (e) {}
+  })();
