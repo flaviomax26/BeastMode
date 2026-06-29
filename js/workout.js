@@ -399,11 +399,14 @@
     const idx = list.children.length + 1;
     const div = document.createElement('div');
     div.className = 'set-row';
+    // RPE fixo 6–10 via select (impossível digitar inválido; no iOS vira roda nativa)
+    const rpeOpts = [6, 7, 8, 9, 10].map(v =>
+      '<option value="' + v + '"' + (String(rpe) === String(v) ? ' selected' : '') + '>' + v + '</option>').join('');
     div.innerHTML =
       '<div class="set-n">' + idx + '</div>' +
       '<input class="fld set-w" inputmode="decimal" placeholder="' + (currentUnit === 'seg' ? 'seg' : 'kg') + '" value="' + (w !== '' && w != null ? w : '') + '">' +
       '<input class="fld set-r" inputmode="numeric" placeholder="reps" value="' + (r !== '' && r != null ? r : '') + '">' +
-      '<input class="fld set-rpe" inputmode="decimal" placeholder="rpe" value="' + (rpe !== '' && rpe != null ? rpe : '') + '">' +
+      '<select class="fld set-rpe" required><option value="" disabled' + (rpe !== '' && rpe != null ? '' : ' selected') + '>rpe</option>' + rpeOpts + '</select>' +
       '<button class="set-del" type="button">×</button>';
     div.querySelector('.set-del').addEventListener('click', () => {
       div.remove();

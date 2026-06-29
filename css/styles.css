@@ -667,6 +667,18 @@
   input.fld[type=date] { -webkit-appearance: none; appearance: none; text-align: left; min-width: 0; }
   input.fld:focus, textarea.fld:focus { outline: none; border-color: var(--blue); }
   input.fld.field-missing { border-color: var(--orange); background: rgba(255,159,10,0.08); }
+  /* RPE como select 6–10: alinha visual com os inputs da linha */
+  select.fld.set-rpe {
+    box-sizing: border-box;
+    background: var(--bg);
+    border-radius: 10px;
+    padding: 10px 12px;
+    text-align: center;
+    text-align-last: center;
+  }
+  select.fld.set-rpe:focus { outline: none; border-color: var(--blue); }
+  select.fld.set-rpe.field-missing { border-color: var(--orange); background: rgba(255,159,10,0.08); }
+  select.fld.set-rpe:invalid { color: var(--secondary-label); } /* placeholder "rpe" apagado */
 
   /* Atividade (Apple Health) */
   .act-chips { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }

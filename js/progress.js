@@ -636,6 +636,19 @@
   // marca "não salvo" ao digitar nas séries/nota + marca a linha como tocada
   document.getElementById('set-list').addEventListener('input', (e) => {
     sheetDirty = true;
+    const t = e.target;
+    // bloqueia zero em carga/reps: tira zeros à esquerda e não deixa ficar "0"
+    if (t.classList && (t.classList.contains('set-w') || t.classList.contains('set-r'))) {
+      let v = t.value.replace(/^0+(?=\d)/, '');   // "05" → "5", "00" → "0"
+      if (v === '0') v = '';                       // "0" sozinho → vazio (carga 0,x continua valendo)
+      if (v !== t.value) t.value = v;
+    }
+    const row = t.closest && t.closest('.set-row');
+    if (row) row.dataset.touched = '1';
+  });
+  // select de RPE dispara 'change' no iOS — também marca tocado/não salvo
+  document.getElementById('set-list').addEventListener('change', (e) => {
+    sheetDirty = true;
     const row = e.target.closest && e.target.closest('.set-row');
     if (row) row.dataset.touched = '1';
   });

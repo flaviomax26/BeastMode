@@ -1,5 +1,5 @@
 'use strict';
-  const BUILD = '20260629b'; // bump a cada deploy; aparece no Menu pra confirmar build no aparelho
+  const BUILD = '20260629c'; // bump a cada deploy; aparece no Menu pra confirmar build no aparelho
   function getDayKey() {
     const days = ['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sab'];
     return days[new Date().getDay()];
