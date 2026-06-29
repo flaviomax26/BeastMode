@@ -445,11 +445,18 @@
       const hasW = !isNaN(w) && w > 0;
       const hasR = !isNaN(r) && r > 0;
       const hasRpe = !isNaN(rpe) && rpe > 0;
-      // conta como série feita só se: carga válida OU o usuário mexeu na linha
-      // (ignora reps pré-preenchidas de linhas não usadas → sem série fantasma)
+      // linha não usada (sem carga válida e intocada) → ignora silenciosamente
+      // (ex.: reps pré-preenchidas de série que não foi feita → sem série fantasma)
       if (!(hasW || touched)) return;
-      // linha contada mas toda zerada → não vira série (sinalizado abaixo via algumConteudo)
-      if (!hasW && !hasR && !hasRpe) return;
+      // linha que o usuário mexeu/adicionou mas deixou tudo zerado → AVISA (não vira série)
+      // ex.: "+ série" com 0/0/0 — antes sumia sem sinal
+      if (!hasW && !hasR && !hasRpe) {
+        if (!isRep) wEl.classList.add('field-missing');
+        if (!isTime) rEl.classList.add('field-missing');
+        rpeEl.classList.add('field-missing');
+        incompletas.push(i + 1);
+        return;
+      }
       // série feita: valida campos obrigatórios por tipo de exercício
       let falta = false;
       if (!isRep && !hasW) { wEl.classList.add('field-missing'); falta = true; }  // carga/tempo
@@ -463,7 +470,7 @@
       if (algumConteudo) { toast('⚠ Preencha carga/reps/RPE com valores > 0'); return; }
       closeLog(true); return;  // folha realmente em branco → fecha sem ruído
     }
-    if (incompletas.length && !window.confirm('Série(s) ' + incompletas.join(', ') + ' com campo faltando (carga/reps/RPE) — isso atrapalha a análise depois. Salvar assim mesmo?')) return;
+    if (incompletas.length && !window.confirm('Série(s) ' + incompletas.join(', ') + ' com campo faltando (carga/reps/RPE) — séries sem nenhum valor válido serão ignoradas. Salvar assim mesmo?')) return;
 
     const note = document.getElementById('log-note').value.trim();
     const today = todayISO();
