@@ -429,8 +429,10 @@
   function saveLog() {
     if (!sheetId) return;
     const isTime = currentUnit === 'seg';
+    const isRep = currentUnit === 'rep';
     const sets = [];
     const incompletas = [];
+    let vaziasTocadas = 0; // linhas que o usuário mexeu mas deixou tudo 0/vazio
     document.querySelectorAll('#set-list .set-row').forEach((row, i) => {
       const wEl = row.querySelector('.set-w'), rEl = row.querySelector('.set-r'), rpeEl = row.querySelector('.set-rpe');
       [wEl, rEl, rpeEl].forEach(e => e && e.classList.remove('field-missing'));
@@ -438,19 +440,29 @@
       const r = parseInt(rEl.value, 10);
       const rpe = parseFloat(rpeEl.value);
       const touched = row.dataset.touched === '1';
-      const any = !isNaN(w) || !isNaN(r) || !isNaN(rpe);
-      // conta como série feita só se: tem peso/tempo OU o usuário mexeu na linha
+      // 0/vazio/negativo não conta como valor — só preenchido de verdade
+      const hasW = !isNaN(w) && w > 0;
+      const hasR = !isNaN(r) && r > 0;
+      const hasRpe = !isNaN(rpe) && rpe > 0;
+      // conta como série feita só se: carga válida OU o usuário mexeu na linha
       // (ignora reps pré-preenchidas de linhas não usadas → sem série fantasma)
-      if (!any || !(!isNaN(w) || touched)) return;
-      // série feita mas faltando reps (não-tempo) ou RPE → marca incompleta
+      if (!(hasW || touched)) return;
+      // linha tocada mas totalmente zerada → não é série, mas sinaliza no fim
+      if (!hasW && !hasR && !hasRpe) { vaziasTocadas++; return; }
+      // série feita: valida campos obrigatórios por tipo de exercício
       let falta = false;
-      if (!isTime && isNaN(r)) { rEl.classList.add('field-missing'); falta = true; }
-      if (isNaN(rpe)) { rpeEl.classList.add('field-missing'); falta = true; }
+      if (!isRep && !hasW) { wEl.classList.add('field-missing'); falta = true; }  // carga/tempo
+      if (!isTime && !hasR) { rEl.classList.add('field-missing'); falta = true; }  // reps
+      if (!hasRpe) { rpeEl.classList.add('field-missing'); falta = true; }
       if (falta) incompletas.push(i + 1);
-      sets.push({ w: isNaN(w) ? 0 : w, r: isNaN(r) ? 0 : r, rpe: isNaN(rpe) ? 0 : rpe });
+      sets.push({ w: hasW ? w : 0, r: hasR ? r : 0, rpe: hasRpe ? rpe : 0 });
     });
-    if (!sets.length) { closeLog(true); return; }
-    if (incompletas.length && !window.confirm('Série(s) ' + incompletas.join(', ') + ' sem reps/RPE — isso atrapalha a análise depois. Salvar assim mesmo?')) return;
+    if (!sets.length) {
+      // tocou em linha(s) mas não preencheu nada válido → avisa em vez de fechar mudo
+      if (vaziasTocadas) { toast('⚠ Preencha carga/reps/RPE pra salvar'); return; }
+      closeLog(true); return;
+    }
+    if (incompletas.length && !window.confirm('Série(s) ' + incompletas.join(', ') + ' com campo faltando (carga/reps/RPE) — isso atrapalha a análise depois. Salvar assim mesmo?')) return;
 
     const note = document.getElementById('log-note').value.trim();
     const today = todayISO();
