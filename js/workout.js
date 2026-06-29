@@ -432,10 +432,11 @@
     const isRep = currentUnit === 'rep';
     const sets = [];
     const incompletas = [];
-    let vaziasTocadas = 0; // linhas que o usuário mexeu mas deixou tudo 0/vazio
+    let algumConteudo = false;  // qualquer campo com algo digitado/pré-preenchido (inclui "0")
     document.querySelectorAll('#set-list .set-row').forEach((row, i) => {
       const wEl = row.querySelector('.set-w'), rEl = row.querySelector('.set-r'), rpeEl = row.querySelector('.set-rpe');
       [wEl, rEl, rpeEl].forEach(e => e && e.classList.remove('field-missing'));
+      if (wEl.value.trim() || rEl.value.trim() || rpeEl.value.trim()) algumConteudo = true;
       const w = parseFloat(wEl.value);
       const r = parseInt(rEl.value, 10);
       const rpe = parseFloat(rpeEl.value);
@@ -447,8 +448,8 @@
       // conta como série feita só se: carga válida OU o usuário mexeu na linha
       // (ignora reps pré-preenchidas de linhas não usadas → sem série fantasma)
       if (!(hasW || touched)) return;
-      // linha tocada mas totalmente zerada → não é série, mas sinaliza no fim
-      if (!hasW && !hasR && !hasRpe) { vaziasTocadas++; return; }
+      // linha contada mas toda zerada → não vira série (sinalizado abaixo via algumConteudo)
+      if (!hasW && !hasR && !hasRpe) return;
       // série feita: valida campos obrigatórios por tipo de exercício
       let falta = false;
       if (!isRep && !hasW) { wEl.classList.add('field-missing'); falta = true; }  // carga/tempo
@@ -458,9 +459,9 @@
       sets.push({ w: hasW ? w : 0, r: hasR ? r : 0, rpe: hasRpe ? rpe : 0 });
     });
     if (!sets.length) {
-      // tocou em linha(s) mas não preencheu nada válido → avisa em vez de fechar mudo
-      if (vaziasTocadas) { toast('⚠ Preencha carga/reps/RPE pra salvar'); return; }
-      closeLog(true); return;
+      // tem conteúdo na tela (ex.: tudo 0) mas nada válido → avisa em vez de fechar mudo
+      if (algumConteudo) { toast('⚠ Preencha carga/reps/RPE com valores > 0'); return; }
+      closeLog(true); return;  // folha realmente em branco → fecha sem ruído
     }
     if (incompletas.length && !window.confirm('Série(s) ' + incompletas.join(', ') + ' com campo faltando (carga/reps/RPE) — isso atrapalha a análise depois. Salvar assim mesmo?')) return;
 
