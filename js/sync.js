@@ -11,6 +11,25 @@
     if (el) el.textContent = s;
   }
 
+  // última sincronização (instante real; exibido no fuso do aparelho = SP)
+  const LASTSYNC_KEY = 'beastmode.lastSync';
+  function loadLastSync() { try { return localStorage.getItem(LASTSYNC_KEY) || ''; } catch (e) { return ''; } }
+  let lastSyncAt = loadLastSync();
+  function markSynced() {
+    lastSyncAt = new Date().toISOString();
+    try { localStorage.setItem(LASTSYNC_KEY, lastSyncAt); } catch (e) {}
+    renderLastSync();
+  }
+  function fmtLastSync() {
+    if (!lastSyncAt) return '';
+    try { return new Date(lastSyncAt).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' }); }
+    catch (e) { return ''; }
+  }
+  function renderLastSync() {
+    const el = document.getElementById('sync-last');
+    if (el) el.textContent = lastSyncAt ? 'Última sincronização: ' + fmtLastSync() : '';
+  }
+
   async function initSync() {
     if (!window.supabase) { renderSyncBox(); return; } // offline/CDN bloqueado
     sb = window.supabase.createClient(SB_URL, SB_KEY);
@@ -51,6 +70,7 @@
       await pushState();
       await syncCheckins(); // separado e protegido (coluna opcional)
       if (document.getElementById('view-checkin') && document.getElementById('view-checkin').classList.contains('active')) renderCheckin();
+      markSynced();
       setSyncStatus('✓ Sincronizado');
     } catch (e) { setSyncStatus('erro: ' + (e.message || e)); }
   }
@@ -70,7 +90,7 @@
     setSyncStatus('pendente…');
     clearTimeout(pushTimer);
     pushTimer = setTimeout(async () => {
-      try { await pushState(); setSyncStatus('✓ Sincronizado'); }
+      try { await pushState(); markSynced(); setSyncStatus('✓ Sincronizado'); }
       catch (e) { setSyncStatus('pendente (sem rede)'); }
     }, 1500);
   }
@@ -111,7 +131,8 @@
     }
     if (sbUser) {
       box.innerHTML =
-        '<div class="info-box success" style="font-size:13px">✓ Conectado: <strong>' + esc(sbUser.email) + '</strong><br><span id="sync-status">' + (sbStatus || '✓ Sincronizado') + '</span></div>' +
+        '<div class="info-box success" style="font-size:13px">✓ Conectado: <strong>' + esc(sbUser.email) + '</strong><br><span id="sync-status">' + (sbStatus || '✓ Sincronizado') + '</span>' +
+          '<br><span id="sync-last" style="opacity:.7">' + (lastSyncAt ? 'Última sincronização: ' + fmtLastSync() : '') + '</span></div>' +
         '<button class="btn btn-ghost" id="sync-now">Sincronizar agora</button>' +
         '<button class="btn btn-ghost" id="sync-out">Sair</button>';
       box.querySelector('#sync-now').addEventListener('click', fullSync);
