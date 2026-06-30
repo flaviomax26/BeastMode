@@ -85,6 +85,7 @@
   // ====== SHEET DE LOG ======
 
   let sheetId = null;
+  let sheetDate = null; // data alvo do log aberto (hoje por padrão; data passada ao editar histórico)
 
   let currentUnit = 'kg';
 
@@ -235,10 +236,12 @@
     }));
   }
 
-  function openLog(id, name) {
+  function openLog(id, name, editDate) {
     sheetId = id;
+    sheetDate = editDate || todayISO();             // alvo do save: hoje, ou data do histórico
+    const editingPast = !!editDate && editDate !== todayISO();
     currentUnit = EX_UNIT[id] || 'kg';
-    document.getElementById('sheet-title').textContent = name;
+    document.getElementById('sheet-title').textContent = name + (editingPast ? ' · ' + fmtDate(editDate) : '');
     document.getElementById('sheet-plan').textContent = '🎯 Programa: ' + (EX_SCHEME[id] || '');
     document.getElementById('set-head-w').textContent = currentUnit === 'seg' ? 'Seg' : 'Carga';
     // exercício de tempo (prancha/dead hang): esconde coluna de reps
@@ -256,13 +259,13 @@
     renderDemo(id, name);
     renderStack(id);
 
-    // editar treino de HOJE: carrega tudo (carga+reps+rpe).
+    // editar sessão existente (de hoje OU de uma data do histórico): carrega tudo.
     // treino novo: nº de séries + reps-alvo do programa; carga = sugestão da última (se houver).
     const setList = document.getElementById('set-list');
     setList.innerHTML = '';
-    const editToday = ls && ls.date === todayISO();
-    if (editToday) {
-      ls.sets.forEach(s => addSetRow(s.w, s.r, s.rpe));
+    const existing = (LOGS[id] || []).find(s => s.date === sheetDate);
+    if (existing) {
+      existing.sets.forEach(s => addSetRow(s.w, s.r, s.rpe));
     } else {
       const plan = parseScheme(EX_SCHEME[id]);
       const deloadEx = /deload/i.test(WEEKS[currentWeekIdx()].phase) && !DELOAD_SKIP[id];
@@ -281,7 +284,7 @@
     document.getElementById('calc-wrap').style.display = barCfg ? 'block' : 'none';
     if (barCfg) document.getElementById('calc-label').textContent = barCfg.label;
 
-    document.getElementById('log-note').value = '';
+    document.getElementById('log-note').value = existing && existing.note ? existing.note : '';
     document.getElementById('calc-side').value = '';
     document.getElementById('calc-bar').value = barCfg ? barCfg.bar : '22';
     updateCalc();
@@ -476,16 +479,16 @@
     if (incompletas.length && !window.confirm('Série(s) ' + incompletas.join(', ') + ' com campo faltando (carga/reps/RPE) — séries sem nenhum valor válido serão ignoradas. Salvar assim mesmo?')) return;
 
     const note = document.getElementById('log-note').value.trim();
-    const today = todayISO();
-    // recordes anteriores (exclui hoje, que está sendo salvo) → detecta PR
-    const prior = exerciseBests(sheetId, today);
+    const target = sheetDate || todayISO();
+    // recordes anteriores (exclui a data sendo salva) → detecta PR
+    const prior = exerciseBests(sheetId, target);
     const prHits = detectPR(sets, prior, currentUnit);
 
     if (!LOGS[sheetId]) LOGS[sheetId] = [];
-    // se já houver registro de hoje, substitui (re-edição do dia)
+    // se já houver registro nessa data, substitui (re-edição)
     const arr = LOGS[sheetId];
-    const existingIdx = arr.findIndex(s => s.date === today);
-    const entry = { date: today, sets: sets, note: note };
+    const existingIdx = arr.findIndex(s => s.date === target);
+    const entry = { date: target, sets: sets, note: note };
     if (existingIdx >= 0) arr[existingIdx] = entry; else arr.push(entry);
     arr.sort((a, b) => a.date.localeCompare(b.date));
 

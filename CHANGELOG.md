@@ -3,6 +3,9 @@
 Versionamento [semver](https://semver.org): `MAJOR.MINOR.PATCH`.
 PATCH = fix · MINOR = feature · MAJOR = redesign/quebra. Bump via `./bump.sh`.
 
+## v1.5.0 — 2026-06-30
+- grafico segue cores do tema (claro/escuro) + editar treino de qualquer data via historico do Progresso (botao lapis)
+
 ## v1.4.0 — 2026-06-30
 - Menu mostra ultima sincronizacao no fuso do aparelho (SP); updated_at segue UTC no banco
 

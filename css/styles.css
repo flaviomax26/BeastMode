@@ -1156,6 +1156,12 @@
   .hist-row:last-child { border-bottom: none; }
   .hist-date { color: var(--label-secondary); min-width: 42px; font-weight: 600; }
   .hist-sets { flex: 1; min-width: 0; }
+  .hist-edit {
+    border: none; background: transparent; cursor: pointer;
+    font-size: 15px; line-height: 1; padding: 0 2px;
+    opacity: 0.65;
+  }
+  .hist-edit:active { opacity: 0.3; }
   .hist-note {
     width: 100%;
     font-size: 12px;

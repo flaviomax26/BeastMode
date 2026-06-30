@@ -115,6 +115,7 @@
           arr.slice().reverse().map(s =>
             '<div class="hist-row"><span class="hist-date">' + fmtDate(s.date) + '</span>' +
             '<span class="hist-sets">' + s.sets.map(x => fmtSet(x, unit)).join(' · ') + '</span>' +
+            '<button class="hist-edit" type="button" data-id="' + id + '" data-name="' + it.n.replace(/"/g, '&quot;') + '" data-date="' + s.date + '">✏️</button>' +
             (s.note ? '<div class="hist-note">' + esc(s.note) + '</div>' : '') + '</div>'
           ).join('') +
         '</details>' +
@@ -124,6 +125,9 @@
     body.innerHTML = h;
 
     body.querySelectorAll('.prog-canvas').forEach(cv => drawExerciseChart(cv));
+    // editar sessão do histórico (qualquer data) → abre o sheet pré-carregado
+    body.querySelectorAll('.hist-edit').forEach(btn => btn.addEventListener('click', () =>
+      openLog(btn.dataset.id, btn.dataset.name, btn.dataset.date)));
     // toggle Carga / e1RM
     body.querySelectorAll('.pt-btn').forEach(btn => btn.addEventListener('click', () => {
       progMode[btn.dataset.id] = btn.dataset.mode;
@@ -154,6 +158,13 @@
     ctx.clearRect(0, 0, cssW, cssH);
     if (!pts.length) return;
 
+    // cores do tema atual (claro/escuro) — lidas das CSS vars
+    const cs = getComputedStyle(document.documentElement);
+    const cvar = (n, fb) => (cs.getPropertyValue(n).trim() || fb);
+    const cLabel = cvar('--label-secondary', 'rgba(235,235,245,0.6)');
+    const cBlue = cvar('--blue', '#0A84FF');
+    const cGreen = cvar('--green', '#30D158');
+
     const pad = 34;
     const vals = pts.map(p => p.v);
     let min = Math.min.apply(null, vals);
@@ -165,21 +176,21 @@
     const y = v => (cssH - pad) - (v - min) / span * (cssH - 2 * pad);
 
     // grid min/max labels
-    ctx.fillStyle = 'rgba(235,235,245,0.35)';
+    ctx.fillStyle = cLabel;
     ctx.font = '11px -apple-system, sans-serif';
     ctx.fillText(max + sfx, 4, y(max) + 4);
     ctx.fillText(min + sfx, 4, y(min) + 4);
 
     // rótulos do eixo X (opcional)
     if (opts.xlabels) {
-      ctx.fillStyle = 'rgba(235,235,245,0.45)';
+      ctx.fillStyle = cLabel;
       ctx.textAlign = 'center';
       opts.xlabels.forEach((lb, i) => ctx.fillText(lb, x(i), cssH - 6));
       ctx.textAlign = 'start';
     }
 
     // linha
-    ctx.strokeStyle = '#0A84FF';
+    ctx.strokeStyle = cBlue;
     ctx.lineWidth = 2;
     ctx.beginPath();
     pts.forEach((p, i) => { i ? ctx.lineTo(x(i), y(p.v)) : ctx.moveTo(x(i), y(p.v)); });
@@ -188,7 +199,7 @@
     // pontos (verde = melhor valor; bestLow => menor é melhor)
     const best = opts.bestLow ? min : max;
     pts.forEach((p, i) => {
-      ctx.fillStyle = (p.v === best) ? '#30D158' : '#0A84FF';
+      ctx.fillStyle = (p.v === best) ? cGreen : cBlue;
       ctx.beginPath();
       ctx.arc(x(i), y(p.v), 4, 0, 2 * Math.PI);
       ctx.fill();
