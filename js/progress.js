@@ -424,6 +424,7 @@
     const sun = new Date(mon); sun.setDate(mon.getDate() + 6);
     return fmtDate(wid) + ' – ' + fmtDate(isoLocal(sun));
   }
+  let chkWeek = null; // semana sendo editada (null = semana atual)
   function currentCheckin() { const wid = weekId(); return (CHK || []).find(c => c.week === wid) || null; }
   function chkLabel(k, v) { const q = CHK_Q.find(q => q.k === k); const o = q && q.opts.find(o => o[0] === v); return o ? o[1] : v; }
   function chkSummary(c) { return CHK_Q.map(q => c[q.k] ? chkLabel(q.k, c[q.k]) : '—').join(' · '); }
@@ -433,8 +434,12 @@
   }
   function renderCheckin() {
     const box = document.getElementById('checkin-box'); if (!box) return;
-    const wid = weekId(); const ex = currentCheckin();
-    let h = '<div class="section"><div class="section-header"><p class="section-title">Semana ' + weekRangeTxt(wid) + '</p></div><div class="card chk-form">';
+    const wid = chkWeek || weekId();
+    const editingPast = wid !== weekId();
+    const ex = (CHK || []).find(c => c.week === wid) || null;
+    let h = '<div class="section"><div class="section-header"><p class="section-title">Semana ' + weekRangeTxt(wid) + (editingPast ? ' · editando' : '') + '</p></div>';
+    if (editingPast) h += '<div class="info-box" style="font-size:12px;margin-bottom:8px">Editando uma semana passada. <a href="#" id="chk-current" style="color:var(--blue)">Voltar pra semana atual</a></div>';
+    h += '<div class="card chk-form">';
     CHK_Q.forEach(q => {
       h += '<div class="chk-q"><div class="chk-q-label">' + q.label + '</div><div class="chk-opts" data-k="' + q.k + '">';
       q.opts.forEach(o => { const on = ex && ex[q.k] === o[0] ? ' on' : ''; h += '<button type="button" class="chk-opt' + on + '" data-v="' + o[0] + '">' + o[1] + '</button>'; });
@@ -446,17 +451,27 @@
     const past = (CHK || []).slice().reverse();
     if (past.length) {
       h += '<div class="section"><div class="section-header"><p class="section-title">Histórico (' + past.length + ')</p></div><div class="card">';
-      past.forEach(c => { h += '<div class="chk-hist"><div class="chk-hist-wk">' + weekRangeTxt(c.week) + '</div><div class="chk-hist-meta">' + chkSummary(c) + '</div>' + (c.nota ? '<div class="hist-note">' + esc(c.nota) + '</div>' : '') + '</div>'; });
+      past.forEach(c => {
+        h += '<div class="chk-hist"><div class="chk-hist-wk">' + weekRangeTxt(c.week) +
+          '<button class="hist-edit" type="button" data-week="' + c.week + '">✏️</button></div>' +
+          '<div class="chk-hist-meta">' + chkSummary(c) + '</div>' +
+          (c.nota ? '<div class="hist-note">' + esc(c.nota) + '</div>' : '') + '</div>';
+      });
       h += '</div></div>';
     }
     box.innerHTML = h;
     box.querySelectorAll('.chk-opts').forEach(grp => grp.querySelectorAll('.chk-opt').forEach(b =>
       b.addEventListener('click', () => { grp.querySelectorAll('.chk-opt').forEach(x => x.classList.remove('on')); b.classList.add('on'); })));
     box.querySelector('#chk-save').addEventListener('click', saveCheckin);
+    const back = document.getElementById('chk-current');
+    if (back) back.addEventListener('click', e => { e.preventDefault(); chkWeek = null; renderCheckin(); });
+    box.querySelectorAll('.chk-hist .hist-edit').forEach(btn => btn.addEventListener('click', () => {
+      chkWeek = btn.dataset.week; renderCheckin(); window.scrollTo({ top: 0, behavior: 'smooth' });
+    }));
   }
   function saveCheckin() {
     const box = document.getElementById('checkin-box');
-    const data = { week: weekId(), date: todayISO() };
+    const data = { week: chkWeek || weekId(), date: todayISO() };
     let missing = false;
     CHK_Q.forEach(q => { const sel = box.querySelector('.chk-opts[data-k="' + q.k + '"] .chk-opt.on'); if (sel) data[q.k] = sel.dataset.v; else missing = true; });
     if (missing) { toast('Responde as 4 opções'); return; }
@@ -465,6 +480,7 @@
     if (typeof pushCheckins === 'function') pushCheckins();
     updateCheckinMenu();
     toast('✓ Check-in salvo');
+    chkWeek = null; // volta pra semana atual após salvar
     renderCheckin();
   }
   // no domingo, se ainda não respondeu, lembra (sem forçar navegação)

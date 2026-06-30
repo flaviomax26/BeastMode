@@ -3,6 +3,9 @@
 Versionamento [semver](https://semver.org): `MAJOR.MINOR.PATCH`.
 PATCH = fix · MINOR = feature · MAJOR = redesign/quebra. Bump via `./bump.sh`.
 
+## v1.6.0 — 2026-06-30
+- check-in de qualquer semana editavel pelo historico (botao lapis + banner + voltar)
+
 ## v1.5.1 — 2026-06-30
 - meta no-cache no index pra forcar revalidacao e evitar index.html preso em cache no iOS
 
