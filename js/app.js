@@ -1,7 +1,7 @@
 'use strict';
   // Versão semver — fonte única. Bump via ./bump.sh (atualiza ?v= e CHANGELOG juntos).
   // PATCH=fix · MINOR=feature · MAJOR=redesign/quebra
-  const APP_VERSION = '1.3.0';
+  const APP_VERSION = '1.3.1';
   function getDayKey() {
     const days = ['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sab'];
     return days[new Date().getDay()];
@@ -134,22 +134,28 @@
     try { localStorage.setItem(THEME_KEY, p); } catch (e) {}
     applyTheme(p); renderThemeSeg();
   }
-  document.querySelectorAll('#theme-seg .theme-opt').forEach(b =>
-    b.addEventListener('click', () => setTheme(b.dataset.themePref)));
-  renderThemeSeg();
-  // segue o sistema quando em 'auto'
-  if (window.matchMedia) {
-    window.matchMedia('(prefers-color-scheme: light)').addEventListener('change', () => {
-      if (themePref() === 'auto') applyTheme('auto');
-    });
-  }
+  // todo o setup de tema é não-fatal: erro aqui não pode impedir o init (sync etc) abaixo
+  try {
+    document.querySelectorAll('#theme-seg .theme-opt').forEach(b =>
+      b.addEventListener('click', () => setTheme(b.dataset.themePref)));
+    renderThemeSeg();
+    // segue o sistema quando em 'auto' — Safari iOS antigo só tem addListener (sem addEventListener)
+    if (window.matchMedia) {
+      const mq = window.matchMedia('(prefers-color-scheme: light)');
+      const onChange = () => { if (themePref() === 'auto') applyTheme('auto'); };
+      if (mq.addEventListener) mq.addEventListener('change', onChange);
+      else if (mq.addListener) mq.addListener(onChange);
+    }
+  } catch (e) { /* não bloqueia o resto do init */ }
 
   // ====== INIT ======
   applyProgram(DEFAULT_PROGRAM); // monta pills, índices, cronograma, dia atual
-  updateCheckinMenu();           // sub do Menu reflete se a semana já foi respondida
-  maybeWeeklyCheckin();          // domingo sem check-in → lembra
-  // sync inicia após o cliente Supabase (defer) carregar
+  // sync inicia após o cliente Supabase (defer) carregar — registra ANTES de qualquer coisa opcional
   window.addEventListener('load', initSync);
+  try {
+    updateCheckinMenu();         // sub do Menu reflete se a semana já foi respondida
+    maybeWeeklyCheckin();        // domingo sem check-in → lembra
+  } catch (e) { /* não-fatal */ }
 
   // avisa quando a versão mudou desde a última vez (confirma que atualizou, não é cache)
   (function () {
