@@ -49,7 +49,8 @@ echo "✓ $cur → $new"
 echo "  js/app.js, index.html (?v=), CHANGELOG.md atualizados"
 
 if [ "$tagflag" = "--tag" ]; then
-  git add js/app.js index.html CHANGELOG.md
+  git add -u                         # todos os arquivos versionados modificados (não só a versão)
+  git add index.html CHANGELOG.md    # garante novos/renomeados também
   git commit -q -m "chore: release v$new${msg:+ — $msg}"
   git tag "v$new"
   echo "  commit + tag v$new criados (git push --tags pra enviar)"

@@ -49,6 +49,8 @@
         if (document.getElementById('view-bjj').classList.contains('active')) renderMobility();
       }
       await pushState();
+      await syncCheckins(); // separado e protegido (coluna opcional)
+      if (document.getElementById('view-checkin') && document.getElementById('view-checkin').classList.contains('active')) renderCheckin();
       setSyncStatus('✓ Sincronizado');
     } catch (e) { setSyncStatus('erro: ' + (e.message || e)); }
   }
@@ -177,6 +179,37 @@
   function loadAct() { try { return JSON.parse(localStorage.getItem(ACT_KEY)) || []; } catch (e) { return []; } }
   let ACT = loadAct();
   function saveAct() { localStorage.setItem(ACT_KEY, JSON.stringify(ACT)); }
+
+  // check-in semanal — local sempre; sincroniza se a coluna 'checkins' existir no Supabase
+  const CHK_KEY = 'beastmode.checkins.v1';
+  function loadChk() { try { return JSON.parse(localStorage.getItem(CHK_KEY)) || []; } catch (e) { return []; } }
+  let CHK = loadChk();
+  function saveChk() { localStorage.setItem(CHK_KEY, JSON.stringify(CHK)); }
+  // chave = semana (segunda ISO). Reenviar a mesma semana substitui.
+  function mergeChk(arr) {
+    let a = 0;
+    (arr || []).forEach(c => {
+      if (!c || !c.week) return;
+      const i = CHK.findIndex(x => x.week === c.week);
+      if (i >= 0) CHK[i] = c; else { CHK.push(c); a++; }
+    });
+    CHK.sort((x, y) => x.week.localeCompare(y.week));
+    return a;
+  }
+  // lê/grava em chamadas separadas e protegidas → coluna ausente não quebra o sync principal
+  async function syncCheckins() {
+    if (!sb || !sbUser) return;
+    try {
+      const { data, error } = await sb.from('app_state').select('checkins').eq('user_id', sbUser.id).maybeSingle();
+      if (!error && data && Array.isArray(data.checkins)) { mergeChk(data.checkins); saveChk(); }
+    } catch (e) { /* coluna não existe ainda — segue local */ }
+    await pushCheckins();
+  }
+  async function pushCheckins() {
+    if (!sb || !sbUser) return;
+    try { await sb.from('app_state').upsert({ user_id: sbUser.id, checkins: CHK, updated_at: new Date().toISOString() }); }
+    catch (e) { /* coluna ausente → ignora, fica local */ }
+  }
   // chave = data + método (permite métodos diferentes no mesmo dia)
   function measKey(m) { return m.date + '|' + (m.fonte || ''); }
   // merge por data+método (importado/remoto vence em conflito)

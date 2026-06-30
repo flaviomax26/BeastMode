@@ -3,6 +3,9 @@
 Versionamento [semver](https://semver.org): `MAJOR.MINOR.PATCH`.
 PATCH = fix · MINOR = feature · MAJOR = redesign/quebra. Bump via `./bump.sh`.
 
+## v1.3.2 — 2026-06-30
+- deploy real de tendencias/check-in/tema (bump.sh nao commitava progress.js/sync.js/data.js/css) + fix do git add no bump.sh
+
 ## v1.3.1 — 2026-06-30
 - init resiliente (tema/check-in nao abortam sync-box) + corrige renderCheckin no fullSync
 

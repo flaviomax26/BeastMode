@@ -21,6 +21,28 @@
     --safe-bottom: env(safe-area-inset-bottom);
   }
 
+  /* Modo claro — JS resolve 'auto' do sistema e seta data-theme explícito */
+  html[data-theme="light"] {
+    --bg: #F2F2F7;
+    --bg-secondary: #FFFFFF;
+    --bg-tertiary: #E5E5EA;
+    --bg-grouped: #FFFFFF;
+    --separator: rgba(60, 60, 67, 0.29);
+    --label: #000000;
+    --label-secondary: rgba(60, 60, 67, 0.6);
+    --label-tertiary: rgba(60, 60, 67, 0.3);
+    --blue: #007AFF;
+    --green: #34C759;
+    --red: #FF3B30;
+    --orange: #FF9500;
+    --yellow: #FFCC00;
+    --purple: #AF52DE;
+    --pink: #FF2D55;
+    --teal: #32ADE6;
+    --indigo: #5856D6;
+    --gray: #8E8E93;
+  }
+
   * {
     box-sizing: border-box;
     -webkit-tap-highlight-color: transparent;
@@ -678,7 +700,7 @@
   }
   select.fld.set-rpe:focus { outline: none; border-color: var(--blue); }
   select.fld.set-rpe.field-missing { border-color: var(--orange); background: rgba(255,159,10,0.08); }
-  select.fld.set-rpe:invalid { color: var(--secondary-label); } /* placeholder "rpe" apagado */
+  select.fld.set-rpe:invalid { color: var(--label-secondary); } /* placeholder "rpe" apagado */
 
   /* Atividade (Apple Health) */
   .act-chips { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
@@ -1055,6 +1077,48 @@
     color: var(--label-secondary);
     margin-top: 2px;
   }
+  .prog-trend {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 600;
+    margin-top: 6px;
+    padding: 2px 8px;
+    border-radius: 6px;
+  }
+  .prog-trend.dir-up    { color: var(--green);  background: rgba(48,209,88,0.12); }
+  .prog-trend.dir-flat  { color: var(--label-secondary); background: rgba(235,235,245,0.08); }
+  .prog-trend.dir-stale { color: var(--orange); background: rgba(255,159,10,0.12); }
+  .prog-trend.dir-down  { color: var(--red);    background: rgba(255,69,58,0.12); }
+  /* segmented de tema */
+  .theme-seg {
+    display: flex; gap: 6px;
+    background: var(--bg-secondary);
+    border-radius: 12px; padding: 6px;
+  }
+  .theme-opt {
+    flex: 1; border: none; border-radius: 8px;
+    padding: 10px; font-size: 14px; font-family: inherit;
+    background: transparent; color: var(--label);
+  }
+  .theme-opt.on { background: var(--blue); color: #fff; font-weight: 600; }
+
+  /* check-in semanal */
+  .chk-form { padding: 14px; }
+  .chk-q { margin-bottom: 16px; }
+  .chk-q-label { font-size: 13px; color: var(--label-secondary); margin-bottom: 8px; }
+  .chk-opts { display: flex; gap: 8px; flex-wrap: wrap; }
+  .chk-opt {
+    flex: 1; min-width: 80px;
+    border: 0.5px solid var(--separator);
+    background: var(--bg); color: var(--label);
+    border-radius: 10px; padding: 10px 8px;
+    font-size: 14px; font-family: inherit;
+  }
+  .chk-opt.on { background: var(--blue); border-color: var(--blue); color: #fff; font-weight: 600; }
+  .chk-hist { padding: 10px 0; border-bottom: 0.5px solid var(--separator); }
+  .chk-hist:last-child { border-bottom: none; }
+  .chk-hist-wk { font-size: 13px; font-weight: 600; color: var(--label); }
+  .chk-hist-meta { font-size: 12px; color: var(--label-secondary); margin-top: 2px; }
   .prog-toggle { display: flex; gap: 6px; margin: 6px 0 2px; }
   .pt-btn {
     border: none; border-radius: 8px; padding: 5px 12px;

@@ -101,10 +101,13 @@
           '<button type="button" class="pt-btn' + (mode === 'carga' ? ' on' : '') + '" data-id="' + id + '" data-mode="carga">Carga</button>' +
           '<button type="button" class="pt-btn' + (mode === 'e1rm' ? ' on' : '') + '" data-id="' + id + '" data-mode="e1rm">e1RM</button>' +
         '</div>' : '';
+      const trend = exerciseTrend(id);
+      const trendHtml = trend ? '<div class="prog-trend dir-' + trend.dir + '">' + trend.label + '</div>' : '';
       h += '<div class="chart-card">' +
         '<div class="prog-head">' +
           '<div class="prog-name">' + it.n + (isPR && arr.length > 1 ? '<span class="pr-flag">PR</span>' : '') + '</div>' +
           '<div class="prog-meta">PR ' + pr + sfx + (prReps ? '×' + prReps : '') + e1txt + ' · último ' + fmtSet(lastTop, unit) + ' · ' + agoText(last.date) + '</div>' +
+          trendHtml +
         '</div>' +
         toggle +
         '<canvas class="prog-canvas" data-id="' + id + '"></canvas>' +
@@ -397,6 +400,69 @@
   }
   let actPeriod = 3; // dias (0 = tudo) — default 3
   const ACT_PERIODS = [{ d: 3, t: '3 dias' }, { d: 7, t: '7 dias' }, { d: 30, t: '30 dias' }, { d: 0, t: 'Tudo' }];
+  // ====== CHECK-IN SEMANAL ======
+  const CHK_Q = [
+    { k: 'aderencia', label: 'Aderência ao treino', opts: [['todos', 'Fiz todos'], ['faltei1', 'Faltei 1'], ['faltei2', 'Faltei 2+']] },
+    { k: 'sono', label: 'Sono na semana', opts: [['ruim', 'Ruim'], ['medio', 'Médio'], ['bom', 'Bom']] },
+    { k: 'energia', label: 'Energia', opts: [['baixa', 'Baixa'], ['media', 'Média'], ['alta', 'Alta']] },
+    { k: 'dor', label: 'Dor / lesão', opts: [['nenhuma', 'Nenhuma'], ['leve', 'Leve'], ['atrapalhou', 'Atrapalhou']] }
+  ];
+  function weekId() { return isoLocal(mondayOf(new Date())); } // segunda ISO da semana atual
+  function weekRangeTxt(wid) {
+    const p = wid.split('-'); const mon = new Date(+p[0], +p[1] - 1, +p[2]);
+    const sun = new Date(mon); sun.setDate(mon.getDate() + 6);
+    return fmtDate(wid) + ' – ' + fmtDate(isoLocal(sun));
+  }
+  function currentCheckin() { const wid = weekId(); return (CHK || []).find(c => c.week === wid) || null; }
+  function chkLabel(k, v) { const q = CHK_Q.find(q => q.k === k); const o = q && q.opts.find(o => o[0] === v); return o ? o[1] : v; }
+  function chkSummary(c) { return CHK_Q.map(q => c[q.k] ? chkLabel(q.k, c[q.k]) : '—').join(' · '); }
+  function updateCheckinMenu() {
+    const sub = document.getElementById('menu-checkin-sub'); if (!sub) return;
+    sub.textContent = currentCheckin() ? '✓ Semana respondida' : 'Resumo da semana';
+  }
+  function renderCheckin() {
+    const box = document.getElementById('checkin-box'); if (!box) return;
+    const wid = weekId(); const ex = currentCheckin();
+    let h = '<div class="section"><div class="section-header"><p class="section-title">Semana ' + weekRangeTxt(wid) + '</p></div><div class="card chk-form">';
+    CHK_Q.forEach(q => {
+      h += '<div class="chk-q"><div class="chk-q-label">' + q.label + '</div><div class="chk-opts" data-k="' + q.k + '">';
+      q.opts.forEach(o => { const on = ex && ex[q.k] === o[0] ? ' on' : ''; h += '<button type="button" class="chk-opt' + on + '" data-v="' + o[0] + '">' + o[1] + '</button>'; });
+      h += '</div></div>';
+    });
+    h += '<div class="chk-q"><div class="chk-q-label">Observação (opcional)</div><textarea class="fld" id="chk-note" rows="2" placeholder="lesão, viagem, alimentação...">' + (ex ? esc(ex.nota || '') : '') + '</textarea></div>';
+    h += '<button class="btn btn-primary" id="chk-save">' + (ex ? 'Atualizar check-in' : 'Salvar check-in') + '</button>';
+    h += '</div></div>';
+    const past = (CHK || []).slice().reverse();
+    if (past.length) {
+      h += '<div class="section"><div class="section-header"><p class="section-title">Histórico (' + past.length + ')</p></div><div class="card">';
+      past.forEach(c => { h += '<div class="chk-hist"><div class="chk-hist-wk">' + weekRangeTxt(c.week) + '</div><div class="chk-hist-meta">' + chkSummary(c) + '</div>' + (c.nota ? '<div class="hist-note">' + esc(c.nota) + '</div>' : '') + '</div>'; });
+      h += '</div></div>';
+    }
+    box.innerHTML = h;
+    box.querySelectorAll('.chk-opts').forEach(grp => grp.querySelectorAll('.chk-opt').forEach(b =>
+      b.addEventListener('click', () => { grp.querySelectorAll('.chk-opt').forEach(x => x.classList.remove('on')); b.classList.add('on'); })));
+    box.querySelector('#chk-save').addEventListener('click', saveCheckin);
+  }
+  function saveCheckin() {
+    const box = document.getElementById('checkin-box');
+    const data = { week: weekId(), date: todayISO() };
+    let missing = false;
+    CHK_Q.forEach(q => { const sel = box.querySelector('.chk-opts[data-k="' + q.k + '"] .chk-opt.on'); if (sel) data[q.k] = sel.dataset.v; else missing = true; });
+    if (missing) { toast('Responde as 4 opções'); return; }
+    data.nota = box.querySelector('#chk-note').value.trim();
+    mergeChk([data]); saveChk();
+    if (typeof pushCheckins === 'function') pushCheckins();
+    updateCheckinMenu();
+    toast('✓ Check-in salvo');
+    renderCheckin();
+  }
+  // no domingo, se ainda não respondeu, lembra (sem forçar navegação)
+  function maybeWeeklyCheckin() {
+    if (new Date().getDay() !== 0) return; // só domingo
+    if (currentCheckin()) return;
+    setTimeout(() => toast('📝 Faça o check-in da semana (Menu)'), 1200);
+  }
+
   function renderActivity() {
     const box = document.getElementById('activity-box');
     if (!box) return;

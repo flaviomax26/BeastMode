@@ -49,10 +49,10 @@
         { title: 'Principal', dot: 'green', items: [
           { n: 'Deadlift Barra Hex', icon: '🏋️', color: 'green', scheme: '5 séries × 3-5 reps (pesado)', log: true },
           { n: 'Agacho Smith', icon: '🏋️', color: 'green', scheme: '4 séries × 6-8 reps', log: true, smith: true },
+          { n: 'Panturrilha Smith', icon: '🏋️', color: 'green', scheme: '4 séries × 10-12 reps', log: true, smith: true },
           { n: 'Leg press', icon: '🏋️', color: 'green', scheme: '3 séries × 8-10 reps', log: true },
           { n: 'Cadeira flexora', icon: '🏋️', color: 'green', scheme: '3 séries × 10-12 reps', log: true },
-          { n: 'Búlgaro halter', icon: '🏋️', color: 'green', scheme: '3 séries × 8 reps cada perna', log: true },
-          { n: 'Panturrilha Smith', icon: '🏋️', color: 'green', scheme: '4 séries × 10-12 reps', log: true, smith: true }
+          { n: 'Búlgaro halter', icon: '🏋️', color: 'green', scheme: '3 séries × 8 reps cada perna', log: true }
         ]},
         { title: 'Abdômen', dot: 'teal', items: [
           { n: 'Prancha frontal', icon: '🧘', color: 'teal', scheme: '3 séries × 45-60 segundos', log: true, unit: 'seg' }
@@ -478,6 +478,26 @@
   function sessionE1(s) {
     let e = 0; s.sets.forEach(set => { const v = e1rm(set.w, set.r); if (v > e) e = v; });
     return e > 0 ? Math.round(e) : topSet(s).w;
+  }
+
+  // tendência do exercício: subindo / estável / estagnado / caindo
+  // métrica por tipo — carga: e1RM (normaliza carga×reps) · tempo: seg · peso corporal: reps
+  // sinal principal = nº de sessões sem bater recorde (robusto a deload)
+  function exerciseTrend(id) {
+    const arr = LOGS[id] || [];
+    if (arr.length < 3) return null; // pouco dado pra julgar
+    const unit = EX_UNIT[id];
+    const metric = s => unit === 'seg' ? topSet(s).w : (unit === 'rep' ? topSet(s).r : sessionE1(s));
+    const v = arr.map(metric);
+    const n = v.length;
+    const lastV = v[n - 1], prev = v[n - 2];
+    const best = Math.max.apply(null, v);
+    const bestBefore = Math.max.apply(null, v.slice(0, n - 1));
+    const sinceBest = (n - 1) - v.lastIndexOf(best); // sessões após o recorde
+    if (lastV > bestBefore) return { dir: 'up', label: '📈 subindo' };
+    if (sinceBest >= 3) return { dir: 'stale', label: '⚠️ estagnado · ' + sinceBest + ' sessões sem recorde' };
+    if (lastV < prev) return { dir: 'down', label: '📉 abaixo da última' };
+    return { dir: 'flat', label: '➡️ estável' };
   }
 
   function mondayOf(date) {
