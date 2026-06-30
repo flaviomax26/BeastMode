@@ -17,6 +17,8 @@
     --teal: #64D2FF;
     --indigo: #5E5CE6;
     --gray: #8E8E93;
+    --header-bg: rgba(0, 0, 0, 0.85);
+    --tabbar-bg: rgba(28, 28, 30, 0.85);
     --safe-top: env(safe-area-inset-top);
     --safe-bottom: env(safe-area-inset-bottom);
   }
@@ -41,6 +43,8 @@
     --teal: #32ADE6;
     --indigo: #5856D6;
     --gray: #8E8E93;
+    --header-bg: rgba(242, 242, 247, 0.85);
+    --tabbar-bg: rgba(255, 255, 255, 0.85);
   }
 
   * {
@@ -68,7 +72,7 @@
   .header {
     position: sticky;
     top: 0;
-    background: rgba(0, 0, 0, 0.85);
+    background: var(--header-bg);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     padding: 12px 20px 8px;
@@ -375,7 +379,7 @@
     bottom: 0;
     left: 0;
     right: 0;
-    background: rgba(28, 28, 30, 0.85);
+    background: var(--tabbar-bg);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     border-top: 0.5px solid var(--separator);

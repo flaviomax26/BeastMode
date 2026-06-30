@@ -3,6 +3,9 @@
 Versionamento [semver](https://semver.org): `MAJOR.MINOR.PATCH`.
 PATCH = fix · MINOR = feature · MAJOR = redesign/quebra. Bump via `./bump.sh`.
 
+## v1.3.3 — 2026-06-30
+- modo claro: header e tab-bar usam vars de chrome (some a faixa cinza + rotulos das tabs visiveis no claro)
+
 ## v1.3.2 — 2026-06-30
 - deploy real de tendencias/check-in/tema (bump.sh nao commitava progress.js/sync.js/data.js/css) + fix do git add no bump.sh
 
