@@ -380,6 +380,11 @@
     <div class="section">
       <div class="section-header"><p class="section-title">Mais</p></div>
       <div class="card">
+        <div class="row row-clickable" data-goto="view-checkin" id="menu-checkin-row">
+          <div class="row-icon blue">📝</div>
+          <div class="row-content"><div class="row-title">Check-in semanal</div><div class="row-subtitle" id="menu-checkin-sub">Resumo da semana</div></div>
+          <div class="row-chevron">›</div>
+        </div>
         <div class="row row-clickable" data-goto="view-activity">
           <div class="row-icon orange">🔥</div>
           <div class="row-content"><div class="row-title">Atividade</div><div class="row-subtitle">Treinos do Apple Health</div></div>
@@ -408,6 +413,13 @@
       <button class="btn btn-ghost" id="import-btn">Importar de arquivo</button>
       <input type="file" id="import-file" accept="application/json,.json" style="display:none">
     </div>
+  </div>
+</div>
+
+<!-- VIEW: CHECK-IN SEMANAL -->
+<div class="view" id="view-checkin">
+  <div class="container">
+    <div id="checkin-box"></div>
   </div>
 </div>
 
@@ -671,11 +683,11 @@
 </nav>
 
 <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="js/data.js?v=1.1.0"></script>
-<script src="js/sync.js?v=1.1.0"></script>
-<script src="js/workout.js?v=1.1.0"></script>
-<script src="js/progress.js?v=1.1.0"></script>
-<script src="js/app.js?v=1.1.0"></script>
+<script src="js/data.js?v=1.2.0"></script>
+<script src="js/sync.js?v=1.2.0"></script>
+<script src="js/workout.js?v=1.2.0"></script>
+<script src="js/progress.js?v=1.2.0"></script>
+<script src="js/app.js?v=1.2.0"></script>
 
 </body>
 </html>

@@ -1,7 +1,7 @@
 'use strict';
   // Versão semver — fonte única. Bump via ./bump.sh (atualiza ?v= e CHANGELOG juntos).
   // PATCH=fix · MINOR=feature · MAJOR=redesign/quebra
-  const APP_VERSION = '1.1.0';
+  const APP_VERSION = '1.2.0';
   function getDayKey() {
     const days = ['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sab'];
     return days[new Date().getDay()];
@@ -23,7 +23,7 @@
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
     document.getElementById(viewId).classList.add('active');
     // Saúde e BJJ ficam "dentro" do Menu — destaca a aba Menu nesses casos
-    const tabFor = { 'view-health': 'view-menu', 'view-bjj': 'view-menu', 'view-activity': 'view-menu' };
+    const tabFor = { 'view-health': 'view-menu', 'view-bjj': 'view-menu', 'view-activity': 'view-menu', 'view-checkin': 'view-menu' };
     const tabSel = '.tab[data-view="' + (tabFor[viewId] || viewId) + '"]';
     const tab = document.querySelector(tabSel);
     if (tab) tab.classList.add('active');
@@ -35,6 +35,7 @@
       'view-menu': { title: 'Menu', sub: 'Conta · Backup · v' + APP_VERSION },
       'view-health': { title: 'Saúde', sub: 'Exames · DEXA · Metas' },
       'view-activity': { title: 'Atividade', sub: 'Treinos · Apple Health' },
+      'view-checkin': { title: 'Check-in', sub: 'Resumo semanal' },
       'view-technique': { title: 'Técnica', sub: 'RPE · Execução de exercícios' },
       'view-bjj': { title: 'BJJ', sub: 'Mobilidade + Guardas' }
     };
@@ -44,6 +45,7 @@
     if (viewId === 'view-progress') openProgress();
     if (viewId === 'view-health') { renderHealth(); renderMeasures(); }
     if (viewId === 'view-activity') renderActivity();
+    if (viewId === 'view-checkin') renderCheckin();
     if (viewId === 'view-bjj') renderMobility();
     if (viewId === 'view-program') markCurrentWeek();
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -112,6 +114,8 @@
 
   // ====== INIT ======
   applyProgram(DEFAULT_PROGRAM); // monta pills, índices, cronograma, dia atual
+  updateCheckinMenu();           // sub do Menu reflete se a semana já foi respondida
+  maybeWeeklyCheckin();          // domingo sem check-in → lembra
   // sync inicia após o cliente Supabase (defer) carregar
   window.addEventListener('load', initSync);
 

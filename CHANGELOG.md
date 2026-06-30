@@ -3,6 +3,9 @@
 Versionamento [semver](https://semver.org): `MAJOR.MINOR.PATCH`.
 PATCH = fix · MINOR = feature · MAJOR = redesign/quebra. Bump via `./bump.sh`.
 
+## v1.2.0 — 2026-06-30
+- check-in semanal (aderencia/sono/energia/dor + nota), lembrete domingo, historico
+
 ## v1.1.0 — 2026-06-30
 - panturrilha smith logo apos agacho (nao desmonta a smith) + tendencias por exercicio no progresso
 
