@@ -1,7 +1,7 @@
 'use strict';
   // Versão semver — fonte única. Bump via ./bump.sh (atualiza ?v= e CHANGELOG juntos).
   // PATCH=fix · MINOR=feature · MAJOR=redesign/quebra
-  const APP_VERSION = '1.2.0';
+  const APP_VERSION = '1.3.0';
   function getDayKey() {
     const days = ['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sab'];
     return days[new Date().getDay()];
@@ -111,6 +111,38 @@
   document.addEventListener('visibilitychange', refreshOnFocus);
   window.addEventListener('pageshow', refreshOnFocus);
   window.addEventListener('online', () => { if (sbUser) fullSync(); });
+
+  // ====== TEMA (claro/escuro/auto) ======
+  const THEME_KEY = 'beastmode.theme';
+  function themePref() { try { return localStorage.getItem(THEME_KEY) || 'auto'; } catch (e) { return 'auto'; } }
+  function resolveTheme(p) {
+    if (p === 'light' || p === 'dark') return p;
+    return (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) ? 'light' : 'dark';
+  }
+  function applyTheme(p) {
+    const r = resolveTheme(p);
+    document.documentElement.setAttribute('data-theme', r);
+    const m = document.querySelector('meta[name=theme-color]');
+    if (m) m.setAttribute('content', r === 'light' ? '#F2F2F7' : '#000000');
+  }
+  function renderThemeSeg() {
+    const cur = themePref();
+    document.querySelectorAll('#theme-seg .theme-opt').forEach(b =>
+      b.classList.toggle('on', b.dataset.themePref === cur));
+  }
+  function setTheme(p) {
+    try { localStorage.setItem(THEME_KEY, p); } catch (e) {}
+    applyTheme(p); renderThemeSeg();
+  }
+  document.querySelectorAll('#theme-seg .theme-opt').forEach(b =>
+    b.addEventListener('click', () => setTheme(b.dataset.themePref)));
+  renderThemeSeg();
+  // segue o sistema quando em 'auto'
+  if (window.matchMedia) {
+    window.matchMedia('(prefers-color-scheme: light)').addEventListener('change', () => {
+      if (themePref() === 'auto') applyTheme('auto');
+    });
+  }
 
   // ====== INIT ======
   applyProgram(DEFAULT_PROGRAM); // monta pills, índices, cronograma, dia atual

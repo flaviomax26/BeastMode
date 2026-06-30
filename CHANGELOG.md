@@ -3,6 +3,9 @@
 Versionamento [semver](https://semver.org): `MAJOR.MINOR.PATCH`.
 PATCH = fix · MINOR = feature · MAJOR = redesign/quebra. Bump via `./bump.sh`.
 
+## v1.3.0 — 2026-06-30
+- modo claro/escuro/auto (segue sistema) com toggle no Menu + CSS cache-busted
+
 ## v1.2.0 — 2026-06-30
 - check-in semanal (aderencia/sono/energia/dor + nota), lembrete domingo, historico
 
