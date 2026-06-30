@@ -1,7 +1,7 @@
 'use strict';
   // Versão semver — fonte única. Bump via ./bump.sh (atualiza ?v= e CHANGELOG juntos).
   // PATCH=fix · MINOR=feature · MAJOR=redesign/quebra
-  const APP_VERSION = '1.0.0';
+  const APP_VERSION = '1.1.0';
   function getDayKey() {
     const days = ['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sab'];
     return days[new Date().getDay()];

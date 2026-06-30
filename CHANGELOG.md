@@ -3,6 +3,9 @@
 Versionamento [semver](https://semver.org): `MAJOR.MINOR.PATCH`.
 PATCH = fix · MINOR = feature · MAJOR = redesign/quebra. Bump via `./bump.sh`.
 
+## v1.1.0 — 2026-06-30
+- panturrilha smith logo apos agacho (nao desmonta a smith) + tendencias por exercicio no progresso
+
 ## v1.0.0 — 2026-06-29
 - Baseline do versionamento semver (antes era build datado `20260629x`)
 - RPE como select fixo 6–10; bloqueio de zero em carga/reps
