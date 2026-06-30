@@ -3,6 +3,9 @@
 Versionamento [semver](https://semver.org): `MAJOR.MINOR.PATCH`.
 PATCH = fix · MINOR = feature · MAJOR = redesign/quebra. Bump via `./bump.sh`.
 
+## v1.5.1 — 2026-06-30
+- meta no-cache no index pra forcar revalidacao e evitar index.html preso em cache no iOS
+
 ## v1.5.0 — 2026-06-30
 - grafico segue cores do tema (claro/escuro) + editar treino de qualquer data via historico do Progresso (botao lapis)
 
