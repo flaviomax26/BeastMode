@@ -1093,6 +1093,29 @@
   .prog-trend.dir-flat  { color: var(--label-secondary); background: rgba(235,235,245,0.08); }
   .prog-trend.dir-stale { color: var(--orange); background: rgba(255,159,10,0.12); }
   .prog-trend.dir-down  { color: var(--red);    background: rgba(255,69,58,0.12); }
+  /* resumo da semana: barras de volume por grupo */
+  .wk-card { padding: 12px 14px; }
+  .wk-row {
+    display: grid;
+    grid-template-columns: 92px 1fr 46px;
+    align-items: center;
+    gap: 10px;
+    padding: 5px 0;
+  }
+  .wk-name { font-size: 12px; font-weight: 600; color: var(--label); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .wk-track { height: 8px; border-radius: 4px; background: var(--bg-tertiary); overflow: hidden; }
+  .wk-fill { height: 100%; border-radius: 4px; transition: width 0.3s; }
+  .wk-count { font-size: 12px; color: var(--label-secondary); text-align: right; font-variant-numeric: tabular-nums; }
+  .wk-hint { font-size: 11px; color: var(--label-tertiary); margin-top: 8px; }
+  .wk-prs {
+    margin-top: 10px;
+    font-size: 12px;
+    color: var(--green);
+    background: rgba(48,209,88,0.10);
+    border-radius: 10px;
+    padding: 8px 12px;
+  }
+
   /* segmented de tema */
   .theme-seg {
     display: flex; gap: 6px;

@@ -497,7 +497,7 @@
     closeLog(true);
     if (prHits.length) prCelebrate(prHits); else toast('✓ Treino salvo');
     renderDay(activeDay);
-    if (document.getElementById('view-progress').classList.contains('active')) renderProgressGroup(activeGroup);
+    if (document.getElementById('view-progress').classList.contains('active')) { renderProgressGroup(activeGroup); renderWeekSummary(); }
     queuePush();
   }
 

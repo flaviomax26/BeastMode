@@ -17,7 +17,7 @@
     document.documentElement.setAttribute('data-theme', light ? 'light' : 'dark');
   } catch (e) {}
 </script>
-<link rel="stylesheet" href="css/styles.css?v=1.6.2">
+<link rel="stylesheet" href="css/styles.css?v=1.7.0">
 </head>
 <body>
 
@@ -356,6 +356,16 @@
 <!-- VIEW: PROGRESSO -->
 <div class="view" id="view-progress">
   <div class="container">
+
+    <div class="section">
+      <div class="section-header"><p class="section-title">Resumo da Semana</p></div>
+      <div id="week-summary"></div>
+    </div>
+
+    <div class="section">
+      <div class="section-header"><p class="section-title">Volume por Grupo — semana</p></div>
+      <div id="week-volume"></div>
+    </div>
 
     <div class="section">
       <div class="section-header"><p class="section-title">Consistência</p></div>
@@ -702,11 +712,11 @@
 </nav>
 
 <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="js/data.js?v=1.6.2"></script>
-<script src="js/sync.js?v=1.6.2"></script>
-<script src="js/workout.js?v=1.6.2"></script>
-<script src="js/progress.js?v=1.6.2"></script>
-<script src="js/app.js?v=1.6.2"></script>
+<script src="js/data.js?v=1.7.0"></script>
+<script src="js/sync.js?v=1.7.0"></script>
+<script src="js/workout.js?v=1.7.0"></script>
+<script src="js/progress.js?v=1.7.0"></script>
+<script src="js/app.js?v=1.7.0"></script>
 
 </body>
 </html>

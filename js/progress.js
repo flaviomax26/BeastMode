@@ -541,9 +541,102 @@
     return PROGRESS_GROUPS.includes(k) ? k : 'seg';
   }
 
+  // ====== RESUMO DA SEMANA + VOLUME POR GRUPO ======
+  function weekDatesCur() {
+    const mon = mondayOf(new Date(todayISO() + 'T00:00:00'));
+    const ds = []; for (let i = 0; i < 7; i++) ds.push(isoLocal(new Date(mon.getTime() + i * 864e5)));
+    return ds;
+  }
+  // nome bonito a partir do slug (procura no programa)
+  function exName(id) {
+    let name = id;
+    Object.keys(DAYS).forEach(k => DAYS[k].sections.forEach(sec => sec.items.forEach(it => {
+      if (it.log && slug(it.n) === id) name = it.n;
+    })));
+    return name;
+  }
+  // valor comparável de uma sessão (mesma métrica do exerciseTrend)
+  function sessionMetric(s, unit) {
+    return unit === 'seg' ? topSet(s).w : (unit === 'rep' ? topSet(s).r : sessionE1(s));
+  }
+  // séries planejadas por grupo na semana (derivado do programa; deload reduz como no prefill)
+  function plannedWeekSets() {
+    const p = {};
+    const isDeload = /deload/i.test(WEEKS[currentWeekIdx()].phase);
+    Object.keys(DAYS).forEach(k => DAYS[k].sections.forEach(sec => sec.items.forEach(it => {
+      if (!it.log) return;
+      const id = slug(it.n);
+      const g = EX_GROUP[id];
+      if (!g) return;
+      let sets = parseScheme(it.scheme).sets;
+      if (isDeload && !DELOAD_SKIP[id]) sets = Math.max(2, Math.ceil(sets * 0.65));
+      p[g] = (p[g] || 0) + sets;
+    })));
+    return p;
+  }
+  function weekStats() {
+    const dates = weekDatesCur();
+    const doneSets = {}; // grupo -> séries feitas na semana
+    let ton = 0;
+    const prs = [];
+    Object.keys(LOGS).forEach(id => {
+      const unit = EX_UNIT[id];
+      const g = EX_GROUP[id];
+      let bestBefore = 0, bestWeek = 0, weekSets = 0;
+      (LOGS[id] || []).forEach(sess => {
+        const m = sessionMetric(sess, unit);
+        if (dates.indexOf(sess.date) >= 0) {
+          weekSets += sess.sets.length;
+          if (m > bestWeek) bestWeek = m;
+          if (!unit || unit === 'kg') sess.sets.forEach(st => { if (st.w > 0 && st.r > 0) ton += st.w * st.r; });
+        } else if (sess.date < dates[0] && m > bestBefore) {
+          bestBefore = m;
+        }
+      });
+      if (weekSets && g) doneSets[g] = (doneSets[g] || 0) + weekSets;
+      if (weekSets && bestBefore > 0 && bestWeek > bestBefore) prs.push(exName(id));
+    });
+    const trainedDays = dates.filter(d => DONE.indexOf(d) >= 0).length;
+    const plannedDays = Object.keys(DAYS).filter(k =>
+      DAYS[k].sections.some(sec => sec.items.some(it => it.log))).length;
+    return { dates, doneSets, ton, prs, trainedDays, plannedDays };
+  }
+  function fmtTon(kg) {
+    return kg >= 1000 ? (kg / 1000).toFixed(1).replace('.', ',') + ' t' : Math.round(kg) + ' kg';
+  }
+  function renderWeekSummary() {
+    const sum = document.getElementById('week-summary');
+    const vol = document.getElementById('week-volume');
+    if (!sum || !vol) return;
+    const s = weekStats();
+    sum.innerHTML =
+      '<div class="stats-grid">' +
+        '<div class="stat-box"><div class="stat-label">Dias</div><div class="stat-value">' + s.trainedDays + '/' + s.plannedDays + '</div><div class="stat-detail">treinos concluídos</div></div>' +
+        '<div class="stat-box"><div class="stat-label">Tonelagem</div><div class="stat-value">' + fmtTon(s.ton) + '</div><div class="stat-detail">carga × reps da semana</div></div>' +
+        '<div class="stat-box"><div class="stat-label">PRs</div><div class="stat-value">' + s.prs.length + '</div><div class="stat-detail">recordes na semana</div></div>' +
+      '</div>' +
+      (s.prs.length ? '<div class="wk-prs">🏆 ' + s.prs.map(esc).join(' · ') + '</div>' : '');
+    // barras: união de grupos planejados e executados, ordenado por alvo
+    const planned = plannedWeekSets();
+    const groups = Array.from(new Set(Object.keys(planned).concat(Object.keys(s.doneSets))));
+    groups.sort((a, b) => (planned[b] || 0) - (planned[a] || 0) || (s.doneSets[b] || 0) - (s.doneSets[a] || 0));
+    vol.innerHTML = '<div class="card wk-card">' + groups.map(g => {
+      const done = s.doneSets[g] || 0, plan = planned[g] || 0;
+      const pct = plan ? Math.min(100, Math.round(done / plan * 100)) : (done ? 100 : 0);
+      const full = plan && done >= plan;
+      return '<div class="wk-row">' +
+        '<div class="wk-name">' + esc(g) + (full ? ' ✓' : '') + '</div>' +
+        '<div class="wk-track"><div class="wk-fill" style="width:' + pct + '%;background:' + (GROUP_COLOR[g] || 'var(--blue)') + '"></div></div>' +
+        '<div class="wk-count">' + done + '/' + (plan || '—') + '</div>' +
+      '</div>';
+    }).join('') + '<div class="wk-hint">séries feitas / planejadas nesta semana' +
+      (/deload/i.test(WEEKS[currentWeekIdx()].phase) ? ' · alvo reduzido (deload)' : '') + '</div></div>';
+  }
+
   function openProgress() {
     // selectGroup re-marca a pill ativa (corrige perda do destaque após sync/foco)
     selectGroup(activeGroup && DAYS[activeGroup] ? activeGroup : defaultProgressGroup());
+    renderWeekSummary();
     renderConsistency();
     renderMuscleMatrix();
   }

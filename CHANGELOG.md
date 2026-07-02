@@ -3,6 +3,9 @@
 Versionamento [semver](https://semver.org): `MAJOR.MINOR.PATCH`.
 PATCH = fix · MINOR = feature · MAJOR = redesign/quebra. Bump via `./bump.sh`.
 
+## v1.7.0 — 2026-07-01
+- resumo da semana (dias/tonelagem/PRs) + volume por grupo muscular com barras vs alvo do programa
+
 ## v1.6.2 — 2026-07-01
 - hardening do code review: guard no switchView, esc() em nomes/titulos, clearTimeout no fullSync, redraw dos graficos ao girar, bump.sh inclui arquivos novos
 
