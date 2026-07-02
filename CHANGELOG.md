@@ -3,6 +3,9 @@
 Versionamento [semver](https://semver.org): `MAJOR.MINOR.PATCH`.
 PATCH = fix · MINOR = feature · MAJOR = redesign/quebra. Bump via `./bump.sh`.
 
+## v1.6.2 — 2026-07-01
+- hardening do code review: guard no switchView, esc() em nomes/titulos, clearTimeout no fullSync, redraw dos graficos ao girar, bump.sh inclui arquivos novos
+
 ## v1.6.1 — 2026-07-01
 - menu Mais em ordem alfabetica (Atividade, BJJ, Check-in, Saude)
 

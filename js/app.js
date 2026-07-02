@@ -1,7 +1,7 @@
 'use strict';
   // Versão semver — fonte única. Bump via ./bump.sh (atualiza ?v= e CHANGELOG juntos).
   // PATCH=fix · MINOR=feature · MAJOR=redesign/quebra
-  const APP_VERSION = '1.6.1';
+  const APP_VERSION = '1.6.2';
   function getDayKey() {
     const days = ['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sab'];
     return days[new Date().getDay()];
@@ -19,9 +19,11 @@
   }
 
   function switchView(viewId) {
+    const view = document.getElementById(viewId);
+    if (!view) return; // viewId desconhecido: não derruba a navegação
     document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-    document.getElementById(viewId).classList.add('active');
+    view.classList.add('active');
     // Saúde e BJJ ficam "dentro" do Menu — destaca a aba Menu nesses casos
     const tabFor = { 'view-health': 'view-menu', 'view-bjj': 'view-menu', 'view-activity': 'view-menu', 'view-checkin': 'view-menu' };
     const tabSel = '.tab[data-view="' + (tabFor[viewId] || viewId) + '"]';
@@ -40,6 +42,7 @@
       'view-bjj': { title: 'BJJ', sub: 'Mobilidade + Guardas' }
     };
     const t = titles[viewId];
+    if (!t) return; // view existe mas sem título mapeado: mantém header anterior
     document.getElementById('header-title').textContent = t.title;
     document.getElementById('header-sub').textContent = t.sub;
     if (viewId === 'view-progress') openProgress();

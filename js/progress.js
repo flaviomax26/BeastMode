@@ -48,7 +48,7 @@
       const short = DAYS[k].title.split(' — ')[0];
       return '<div class="day-pill" data-group="' + k + '">' +
         '<div class="day-pill-name">' + DAY_ABBR[k] + '</div>' +
-        '<div class="day-pill-type">' + short + '</div></div>';
+        '<div class="day-pill-type">' + esc(short) + '</div></div>';
     }).join('');
     wrap.querySelectorAll('.day-pill').forEach(p =>
       p.addEventListener('click', () => selectGroup(p.dataset.group)));
@@ -72,7 +72,7 @@
     const pending = items.length - logged.length;
 
     if (!logged.length) {
-      body.innerHTML = '<div class="empty">Nenhum exercício de <strong>' + DAYS[k].title.split(' — ')[0] +
+      body.innerHTML = '<div class="empty">Nenhum exercício de <strong>' + esc(DAYS[k].title.split(' — ')[0]) +
         '</strong> registrado ainda.<br>Registra tocando num exercício na aba Treino.</div>';
       return;
     }
@@ -105,7 +105,7 @@
       const trendHtml = trend ? '<div class="prog-trend dir-' + trend.dir + '">' + trend.label + '</div>' : '';
       h += '<div class="chart-card">' +
         '<div class="prog-head">' +
-          '<div class="prog-name">' + it.n + (isPR && arr.length > 1 ? '<span class="pr-flag">PR</span>' : '') + '</div>' +
+          '<div class="prog-name">' + esc(it.n) + (isPR && arr.length > 1 ? '<span class="pr-flag">PR</span>' : '') + '</div>' +
           '<div class="prog-meta">PR ' + pr + sfx + (prReps ? '×' + prReps : '') + e1txt + ' · último ' + fmtSet(lastTop, unit) + ' · ' + agoText(last.date) + '</div>' +
           trendHtml +
         '</div>' +
@@ -115,7 +115,7 @@
           arr.slice().reverse().map(s =>
             '<div class="hist-row"><span class="hist-date">' + fmtDate(s.date) + '</span>' +
             '<span class="hist-sets">' + s.sets.map(x => fmtSet(x, unit)).join(' · ') + '</span>' +
-            '<button class="hist-edit" type="button" data-id="' + id + '" data-name="' + it.n.replace(/"/g, '&quot;') + '" data-date="' + s.date + '">✏️</button>' +
+            '<button class="hist-edit" type="button" data-id="' + id + '" data-name="' + esc(it.n) + '" data-date="' + s.date + '">✏️</button>' +
             (s.note ? '<div class="hist-note">' + esc(s.note) + '</div>' : '') + '</div>'
           ).join('') +
         '</details>' +
@@ -762,6 +762,23 @@
   document.getElementById('import-file').addEventListener('change', e => {
     if (e.target.files && e.target.files[0]) importData(e.target.files[0]);
     e.target.value = '';
+  });
+
+  // redesenha gráficos visíveis ao girar o aparelho (canvas fica com escala errada)
+  let chartResizeTimer = null;
+  window.addEventListener('resize', () => {
+    clearTimeout(chartResizeTimer);
+    chartResizeTimer = setTimeout(() => {
+      document.querySelectorAll('.prog-canvas').forEach(cv => { if (cv.clientWidth) drawExerciseChart(cv); });
+      if (document.getElementById('chart-fat')) drawHealthCharts();
+      const meas = MEAS.slice().sort((a, b) => a.date.localeCompare(b.date));
+      document.querySelectorAll('.meas-canvas').forEach(cv => {
+        const x = MEAS_METRICS.find(m => m.key === cv.dataset.key);
+        if (!x || !cv.clientWidth) return;
+        const pts = meas.filter(m => m[x.key] != null).map(m => ({ date: m.date, v: m[x.key] }));
+        drawChart(cv, pts, x.unit, { bestLow: x.low });
+      });
+    }, 200);
   });
 
   // ====== SWIPE ENTRE DIAS (wrap) ======

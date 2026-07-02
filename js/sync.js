@@ -49,6 +49,7 @@
 
   async function fullSync() {
     if (!sb || !sbUser) return;
+    clearTimeout(pushTimer); // cancela push pendente: o merge + pushState abaixo já cobre
     setSyncStatus('sincronizando…');
     try {
       const { data, error } = await sb.from('app_state').select('logs,done,health,program,mobility,measures,activity').eq('user_id', sbUser.id).maybeSingle();
