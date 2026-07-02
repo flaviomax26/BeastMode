@@ -596,10 +596,7 @@
       if (weekSets && g) doneSets[g] = (doneSets[g] || 0) + weekSets;
       if (weekSets && bestBefore > 0 && bestWeek > bestBefore) prs.push(exName(id));
     });
-    const trainedDays = dates.filter(d => DONE.indexOf(d) >= 0).length;
-    const plannedDays = Object.keys(DAYS).filter(k =>
-      DAYS[k].sections.some(sec => sec.items.some(it => it.log))).length;
-    return { dates, doneSets, ton, prs, trainedDays, plannedDays };
+    return { dates, doneSets, ton, prs };
   }
   function fmtTon(kg) {
     return kg >= 1000 ? (kg / 1000).toFixed(1).replace('.', ',') + ' t' : Math.round(kg) + ' kg';
@@ -609,9 +606,9 @@
     const vol = document.getElementById('week-volume');
     if (!sum || !vol) return;
     const s = weekStats();
+    // dias treinados vivem na Consistência (fonte única); aqui só tonelagem + PRs
     sum.innerHTML =
       '<div class="stats-grid">' +
-        '<div class="stat-box"><div class="stat-label">Dias</div><div class="stat-value">' + s.trainedDays + '/' + s.plannedDays + '</div><div class="stat-detail">treinos concluídos</div></div>' +
         '<div class="stat-box"><div class="stat-label">Tonelagem</div><div class="stat-value">' + fmtTon(s.ton) + '</div><div class="stat-detail">carga × reps da semana</div></div>' +
         '<div class="stat-box"><div class="stat-label">PRs</div><div class="stat-value">' + s.prs.length + '</div><div class="stat-detail">recordes na semana</div></div>' +
       '</div>' +

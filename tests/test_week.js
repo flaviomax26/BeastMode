@@ -51,7 +51,6 @@ ok('Core sem volume na semana', !s.doneSets['Core']);
 ok('tonelagem = 80×8×8 = 5120', s.ton === 5120, s.ton);
 ok('2 PRs detectados', s.prs.length === 2, JSON.stringify(s.prs));
 ok('PR do supino por nome', s.prs.some(p => /Supino reto/i.test(p)), JSON.stringify(s.prs));
-ok('dias treinados 2/6', s.trainedDays === 2 && s.plannedDays === 6, s.trainedDays + '/' + s.plannedDays);
 
 // PR não dispara sem histórico anterior (primeira vez não é recorde)
 w.eval(`LOGS = { 'supino-reto-smith': [ { date: weekDatesCur()[0], sets: [{w:80,r:8,rpe:8}], note: '' } ] }; DONE = [];`);
@@ -66,7 +65,7 @@ ok('Quadríceps planejado > 0', planned['Quadríceps'] > 0);
 w.eval("LOGS = { 'supino-reto-smith': [ { date: weekDatesCur()[0], sets: [{w:80,r:8,rpe:8},{w:80,r:8,rpe:8}], note: '' } ] }; DONE=[weekDatesCur()[0]]; renderWeekSummary();");
 const sumHtml = w.document.getElementById('week-summary').innerHTML;
 const volHtml = w.document.getElementById('week-volume').innerHTML;
-ok('resumo mostra dias', /1\/6/.test(sumHtml), sumHtml.slice(0, 120));
+ok('resumo NÃO duplica dias (Consistência é a fonte)', !/treinos concluídos/.test(sumHtml), sumHtml.slice(0, 120));
 ok('resumo mostra tonelagem', /1,3 t|1280 kg/.test(sumHtml), sumHtml.match(/stat-value">[^<]*/g));
 ok('barra do Peito com 2/N', /Peito[\s\S]*?2\//.test(volHtml));
 ok('barras usam cor do grupo', /wk-fill/.test(volHtml) && /background:/.test(volHtml));
