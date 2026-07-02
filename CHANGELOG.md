@@ -3,6 +3,9 @@
 Versionamento [semver](https://semver.org): `MAJOR.MINOR.PATCH`.
 PATCH = fix · MINOR = feature · MAJOR = redesign/quebra. Bump via `./bump.sh`.
 
+## v1.6.1 — 2026-07-01
+- menu Mais em ordem alfabetica (Atividade, BJJ, Check-in, Saude)
+
 ## v1.6.0 — 2026-06-30
 - check-in de qualquer semana editavel pelo historico (botao lapis + banner + voltar)
 

@@ -17,7 +17,7 @@
     document.documentElement.setAttribute('data-theme', light ? 'light' : 'dark');
   } catch (e) {}
 </script>
-<link rel="stylesheet" href="css/styles.css?v=1.6.0">
+<link rel="stylesheet" href="css/styles.css?v=1.6.1">
 </head>
 <body>
 
@@ -389,24 +389,25 @@
     <div class="section">
       <div class="section-header"><p class="section-title">Mais</p></div>
       <div class="card">
-        <div class="row row-clickable" data-goto="view-checkin" id="menu-checkin-row">
-          <div class="row-icon blue">📝</div>
-          <div class="row-content"><div class="row-title">Check-in semanal</div><div class="row-subtitle" id="menu-checkin-sub">Resumo da semana</div></div>
-          <div class="row-chevron">›</div>
-        </div>
+        <!-- Menu "Mais" em ordem alfabética; novas entradas devem manter a ordem -->
         <div class="row row-clickable" data-goto="view-activity">
           <div class="row-icon orange">🔥</div>
           <div class="row-content"><div class="row-title">Atividade</div><div class="row-subtitle">Treinos do Apple Health</div></div>
           <div class="row-chevron">›</div>
         </div>
-        <div class="row row-clickable" data-goto="view-health">
-          <div class="row-icon indigo">🩺</div>
-          <div class="row-content"><div class="row-title">Saúde</div><div class="row-subtitle">Exames, DEXA, metas</div></div>
-          <div class="row-chevron">›</div>
-        </div>
         <div class="row row-clickable" data-goto="view-bjj" id="menu-bjj-row">
           <div class="row-icon purple">🥋</div>
           <div class="row-content"><div class="row-title">BJJ</div><div class="row-subtitle">Mobilidade + guardas</div></div>
+          <div class="row-chevron">›</div>
+        </div>
+        <div class="row row-clickable" data-goto="view-checkin" id="menu-checkin-row">
+          <div class="row-icon blue">📝</div>
+          <div class="row-content"><div class="row-title">Check-in semanal</div><div class="row-subtitle" id="menu-checkin-sub">Resumo da semana</div></div>
+          <div class="row-chevron">›</div>
+        </div>
+        <div class="row row-clickable" data-goto="view-health">
+          <div class="row-icon indigo">🩺</div>
+          <div class="row-content"><div class="row-title">Saúde</div><div class="row-subtitle">Exames, DEXA, metas</div></div>
           <div class="row-chevron">›</div>
         </div>
       </div>
@@ -701,11 +702,11 @@
 </nav>
 
 <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="js/data.js?v=1.6.0"></script>
-<script src="js/sync.js?v=1.6.0"></script>
-<script src="js/workout.js?v=1.6.0"></script>
-<script src="js/progress.js?v=1.6.0"></script>
-<script src="js/app.js?v=1.6.0"></script>
+<script src="js/data.js?v=1.6.1"></script>
+<script src="js/sync.js?v=1.6.1"></script>
+<script src="js/workout.js?v=1.6.1"></script>
+<script src="js/progress.js?v=1.6.1"></script>
+<script src="js/app.js?v=1.6.1"></script>
 
 </body>
 </html>
