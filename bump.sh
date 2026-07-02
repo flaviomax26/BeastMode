@@ -50,7 +50,7 @@ echo "  js/app.js, index.html (?v=), CHANGELOG.md atualizados"
 
 if [ "$tagflag" = "--tag" ]; then
   git add -u                                        # modificados/deletados já rastreados
-  git add -A -- js css index.html CHANGELOG.md bump.sh supabase 2>/dev/null || true  # inclui arquivos NOVOS do app (js/novo.js não fica de fora do release)
+  git add -A -- js css index.html CHANGELOG.md bump.sh supabase tests package.json package-lock.json .github 2>/dev/null || true  # inclui arquivos NOVOS do app (js/novo.js não fica de fora do release)
   git commit -q -m "chore: release v$new${msg:+ — $msg}"
   git tag "v$new"
   echo "  commit + tag v$new criados (git push --tags pra enviar)"
